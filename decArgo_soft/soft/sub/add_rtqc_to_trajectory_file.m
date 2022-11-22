@@ -50,6 +50,17 @@
 %   07/04/2016 - RNU - V 1.6: apply test #22 on data sampled during "near
 %                             surface" and "in air" phases (and stored with
 %                             MC=g_MC_InAirSingleMeas).
+%   09/15/2016 - RNU - V 1.7: - test #57 modified: PPOX_DOXY and PPOX_DOXY2
+%                             refer to the same SENSOR (OPTODE_DOXY) => the
+%                             first one to the Aanderaa, the second one to the
+%                             SBE
+%                             - when we link traj and prof data to retrieve prof
+%                             QC in traj data, the comparaison can be done
+%                             without PSAL (see "REPORT PROFILE QC IN TRAJECTORY
+%                             DATA" in add_rtqc_to_profile_file.
+%   10/05/2016 - RNU - V 1.8: when considering "in air" single measurements
+%                             (MC=g_MC_InAirSingleMeas), consider also "in air"
+%                             series of measurements (MC=g_MC_InAirSeriesOfMeas).
 % ------------------------------------------------------------------------------
 function add_rtqc_to_trajectory_file(a_floatNum, ...
    a_ncTrajInputFilePathName, a_ncTrajOutputFilePathName, ...
@@ -75,6 +86,7 @@ global g_decArgo_qcStrMissing;       % '9'
 
 % global measurement codes
 global g_MC_InAirSingleMeas;
+global g_MC_InAirSeriesOfMeas;
 
 % temporary trajectory data
 global g_rtqc_trajData;
@@ -84,7 +96,7 @@ global g_JULD_STATUS_9;
 
 % program version
 global g_decArgo_addRtqcToTrajVersion;
-g_decArgo_addRtqcToTrajVersion = '1.6';
+g_decArgo_addRtqcToTrajVersion = '1.8';
 
 % Argo data start date
 janFirst1997InJulD = gregorian_2_julian_dec_argo('1997/01/01 00:00:00');
@@ -155,6 +167,7 @@ expectedTestList = [ ...
    {'TEST006_GLOBAL_RANGE'} ...
    {'TEST007_REGIONAL_RANGE'} ...
    {'TEST015_GREY_LIST'} ...
+   {'TEST020_QUESTIONABLE_ARGOS_POSITION'} ...
    {'TEST021_NS_UNPUMPED_SALINITY'} ...
    {'TEST022_NS_MIXED_AIR_WATER'} ...
    {'TEST057_DOXY'} ...
@@ -1312,7 +1325,8 @@ if (testFlagList(21) == 1)
          paramFillValue = ncTrajParamXFillValueList{idPsal};
          idMeas = find( ...
             (data ~= paramFillValue) & ...
-            (measurementCode == g_MC_InAirSingleMeas));
+            ((measurementCode == g_MC_InAirSingleMeas) | ...
+            (measurementCode == g_MC_InAirSeriesOfMeas)));
          
          % apply the test
          dataQc(idMeas) = set_qc(dataQc(idMeas), g_decArgo_qcStrCorrectable);
@@ -1373,7 +1387,8 @@ if (testFlagList(22) == 1)
             paramFillValue = ncTrajParamXFillValueList{idTemp};
             idMeas = find( ...
                (data ~= paramFillValue) & ...
-               (measurementCode == g_MC_InAirSingleMeas));
+               ((measurementCode == g_MC_InAirSingleMeas) | ...
+               (measurementCode == g_MC_InAirSeriesOfMeas)));
             
             % apply the test
             dataQc(idMeas) = set_qc(dataQc(idMeas), g_decArgo_qcStrCorrectable);
@@ -1432,8 +1447,14 @@ if (testFlagList(57) == 1)
             if (~isempty(idF))
                paramSensor = parameterSensorMeta{idF};
                % retrieve the sensor model of this parameter
-               idF = find(strcmp(paramSensor, sensorMeta) == 1, 1);
+               idF = find(strcmp(paramSensor, sensorMeta) == 1);
                if (~isempty(idF))
+                  oriParamName = test57ParameterList{idP};
+                  if (oriParamName(end) == '2')
+                     idF = max(idF);
+                  else
+                     idF = min(idF);
+                  end
                   paramSensorModel = sensorModelMeta(idF);
                   if (strcmp(paramSensorModel, 'SBE63_OPTODE'))
                      
@@ -1442,7 +1463,8 @@ if (testFlagList(57) == 1)
                      paramFillValue = ncTrajParamXFillValueList{idParam};
                      idMeas = find( ...
                         (data ~= paramFillValue) & ...
-                        (measurementCode == g_MC_InAirSingleMeas));
+                        ((measurementCode == g_MC_InAirSingleMeas) | ...
+                        (measurementCode == g_MC_InAirSeriesOfMeas)));
                      
                      % apply the test
                      dataQc(idMeas) = set_qc(dataQc(idMeas), g_decArgo_qcStrBad);

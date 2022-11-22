@@ -119,7 +119,7 @@ global g_MC_Surface;
 global g_MC_LMT;
 global g_MC_TET;
 global g_MC_Grounded;
-global g_MC_InAirSingleMeas;
+global g_MC_InAirSeriesOfMeas;
 
 % global time status
 global g_JULD_STATUS_1;
@@ -523,10 +523,10 @@ if (a_deepCycle == 1)
             
             for idMeas = 1:length(inAirMeasDates)
                if (inAirMeasDates(idMeas) ~= dateFillValue)
-                  measStruct = create_one_meas_float_time(g_MC_InAirSingleMeas, inAirMeasDates(idMeas), g_JULD_STATUS_2, floatClockDrift);
+                  measStruct = create_one_meas_float_time(g_MC_InAirSeriesOfMeas, inAirMeasDates(idMeas), g_JULD_STATUS_2, floatClockDrift);
                else
                   measStruct = get_traj_one_meas_init_struct();
-                  measStruct.measCode = g_MC_InAirSingleMeas;
+                  measStruct.measCode = g_MC_InAirSeriesOfMeas;
                end
                measStruct.paramList = inAirMeasProfile.paramList;
                measStruct.paramData = inAirMeasProfile.data(idMeas, :);
@@ -756,7 +756,7 @@ if (a_deepCycle == 1)
          paramDoxy = get_netcdf_param_attributes('DOXY');
          measStruct.paramList = [paramPres paramTemp paramSal paramC1PhaseDoxy paramC2PhaseDoxy paramTempDoxy paramDoxy];
          
-         pres = sensor_2_value_for_pressure_202_210(tabTech2(10));
+         pres = sensor_2_value_for_pressure_202_210_211(tabTech2(10));
          temp = sensor_2_value_for_temperature_201_202_203(tabTech2(11));
          psal = sensor_2_value_for_salinity_201_202_203(tabTech2(12));
          c1PhaseDoxy = sensor_2_value_for_C1C2Phase_doxy_201_202_203_206_to_209(tabTech2(13));
@@ -772,7 +772,7 @@ if (a_deepCycle == 1)
          paramSal = get_netcdf_param_attributes('PSAL');
          measStruct.paramList = [paramPres paramTemp paramSal];
          
-         pres = sensor_2_value_for_pressure_202_210(tabTech2(10));
+         pres = sensor_2_value_for_pressure_202_210_211(tabTech2(10));
          temp = sensor_2_value_for_temperature_201_202_203(tabTech2(11));
          psal = sensor_2_value_for_salinity_201_202_203(tabTech2(12));
          measStruct.paramData = [pres temp psal];

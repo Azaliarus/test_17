@@ -106,6 +106,127 @@ switch (a_decoderId)
          a_profLength = depthTableLength;
       end
       o_nbArgosMsg = ceil(((a_profLength*nbBytesPerLevel)-firstDataMsgBytes)/otherDataMsgBytes) + firstDataMsgNum;
+      
+   case {1007} % 082213
+      firstDataMsgNum = 3;
+      firstDataMsgBytes = 20;
+      otherDataMsgBytes = 29;
+      nbBytesPerLevel = 6;
+      %       depthTableLength = 72; % in the MUT
+      depthTableLength = 120; % max profile length decoded for Coriolis floats of this family = 106
+      if (isempty(a_profLength))
+         a_profLength = depthTableLength;
+      end
+      o_nbArgosMsg = ceil(((a_profLength*nbBytesPerLevel)-firstDataMsgBytes)/otherDataMsgBytes) + firstDataMsgNum;
+      
+   case {1008} % 021208
+      firstDataMsgNum = 3;
+      firstDataMsgBytes = 15;
+      otherDataMsgBytes = 29;
+      nbBytesPerLevel = 9;
+      %       depthTableLength = 75; % in the MUT
+      depthTableLength = 80; % max profile length decoded for Coriolis floats of this family = 59
+      if (isempty(a_profLength))
+         a_profLength = depthTableLength;
+      end
+      o_nbArgosMsg = ceil(((a_profLength*nbBytesPerLevel)-firstDataMsgBytes)/otherDataMsgBytes) + firstDataMsgNum;
+      
+   case {1009} % 032213
+      firstDataMsgNum = 3;
+      firstDataMsgBytes = 9;
+      otherDataMsgBytes = 29;
+      nbBytesPerLevel = 10;
+      %       depthTableLength = 80; % in the MUT
+      depthTableLength = 80; % max profile length decoded for Coriolis floats of this family = 80
+      if (isempty(a_profLength))
+         a_profLength = depthTableLength;
+      end
+      o_nbArgosMsg = ceil(((a_profLength*nbBytesPerLevel)-firstDataMsgBytes)/otherDataMsgBytes) + firstDataMsgNum;
+      
+   case {1010} % 110613&090413&102015
+      firstDataMsgNum = 3;
+      firstDataMsgBytes = 19;
+      otherDataMsgBytes = 29;
+      nbBytesPerLevel = 6;
+      %       depthTableLength = 80; % in the MUT
+      depthTableLength = 110; % max profile length decoded for Coriolis floats of this family = 106
+      if (isempty(a_profLength))
+         a_profLength = depthTableLength;
+      end
+      o_nbArgosMsg = ceil(((a_profLength*nbBytesPerLevel)-firstDataMsgBytes)/otherDataMsgBytes) + firstDataMsgNum;
+      
+   case {1011} % 121512
+      firstDataMsgNum = 3;
+      firstDataMsgBytes = 14;
+      otherDataMsgBytes = 29;
+      nbBytesPerLevel = 6;
+      %       depthTableLength = 71 % in the MUT
+      depthTableLength = 80; % max profile length decoded for Coriolis floats of this family = 71
+      if (isempty(a_profLength))
+         a_profLength = depthTableLength;
+      end
+      o_nbArgosMsg = ceil(((a_profLength*nbBytesPerLevel)-firstDataMsgBytes)/otherDataMsgBytes) + firstDataMsgNum;
+      
+   case {1012} % 110813
+      firstDataMsgNum = 3;
+      firstDataMsgBytes = 13;
+      otherDataMsgBytes = 29;
+      nbBytesPerLevel = 6;
+      %       depthTableLength = 72; % in the MUT
+      depthTableLength = 80; % max profile length decoded for Coriolis floats of this family = 71
+      if (isempty(a_profLength))
+         a_profLength = depthTableLength;
+      end
+      o_nbArgosMsg = ceil(((a_profLength*nbBytesPerLevel)-firstDataMsgBytes)/otherDataMsgBytes) + firstDataMsgNum;
+      
+   case {1013} % 071807
+      firstDataMsgNum = 2;
+      firstDataMsgBytes = 14;
+      otherDataMsgBytes = 29;
+      nbBytesPerLevel = 8;
+      %       depthTableLength = 72; % in the MUT
+      depthTableLength = 80; % max profile length decoded for Coriolis floats of this family = 70
+      if (isempty(a_profLength))
+         a_profLength = depthTableLength;
+      end
+      o_nbArgosMsg = ceil(((a_profLength*nbBytesPerLevel)-firstDataMsgBytes)/otherDataMsgBytes) + firstDataMsgNum;
+      
+   case {1014} % 082807
+      firstDataMsgNum = 4;
+      firstDataMsgBytes = 29;
+      otherDataMsgBytes = 29;
+      nbBytesPerLevel = 15;
+      %       depthTableLength = 60; % in the MUT
+      depthTableLength = 70; % max profile length decoded for Coriolis floats of this family = 40
+      if (isempty(a_profLength))
+         a_profLength = depthTableLength;
+      end
+      o_nbArgosMsg = ceil(((a_profLength*nbBytesPerLevel)-firstDataMsgBytes)/otherDataMsgBytes) + firstDataMsgNum;
+      
+   case {1015} % 010210
+      firstDataMsgNum = 2;
+      firstDataMsgBytes = 1;
+      otherDataMsgBytes = 29;
+      nbBytesPerLevel = 12;
+      %       depthTableLength = 72; % in the MUT
+      depthTableLength = 80; % max profile length decoded for Coriolis floats of this family = 55
+      if (isempty(a_profLength))
+         a_profLength = depthTableLength;
+      end
+      o_nbArgosMsg = ceil(((a_profLength*nbBytesPerLevel)-firstDataMsgBytes)/otherDataMsgBytes) + firstDataMsgNum;
+      
+   case {1016} % 090810
+      firstDataMsgNum = 3;
+      firstDataMsgBytes = 14;
+      otherDataMsgBytes = 29;
+      nbBytesPerLevel = 9;
+      %       depthTableLength = 75; % in the MUT
+      depthTableLength = 80; % max profile length decoded for Coriolis floats of this family = 75
+      if (isempty(a_profLength))
+         a_profLength = depthTableLength;
+      end
+      o_nbArgosMsg = ceil(((a_profLength*nbBytesPerLevel)-firstDataMsgBytes)/otherDataMsgBytes) + firstDataMsgNum;
+      
    otherwise
       fprintf('WARNING: Float #%d Cycle #%d: Nothing done yet in compute_number_of_apx_argos_msg for decoderId #%d\n', ...
          g_decArgo_floatNum, ...

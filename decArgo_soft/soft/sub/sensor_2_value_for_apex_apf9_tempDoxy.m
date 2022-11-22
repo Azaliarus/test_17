@@ -9,7 +9,7 @@
 %   a_tempDoxyDef : DOXY temperature default value
 %
 % OUTPUT PARAMETERS :
-%   o_value : DOXY temperature value
+%   o_value : DOXY temperature values
 %
 % EXAMPLES :
 %
@@ -23,7 +23,7 @@ function [o_value] = sensor_2_value_for_apex_apf9_tempDoxy(a_sensorValue, a_temp
 
 o_value = a_tempDoxyDef;
 
-if ~((a_sensorValue == hex2dec('FFD')) || (a_sensorValue == hex2dec('FFE')) || (a_sensorValue == hex2dec('000')))
+if ~((a_sensorValue == hex2dec('FFE')) || (a_sensorValue == hex2dec('FFD')) || (a_sensorValue == hex2dec('000')))
    o_value = (a_sensorValue/100) - 3;
 end
 
