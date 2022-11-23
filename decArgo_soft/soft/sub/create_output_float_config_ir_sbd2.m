@@ -2,8 +2,7 @@
 % Create the final configuration that will be used in the meta.nc file.
 %
 % SYNTAX :
-%  [o_ncConfig] = create_output_float_config_ir_sbd2( ...
-%    a_decArgoConfParamNames, a_ncConfParamNames, a_decoderId)
+%  [o_ncConfig] = create_output_float_config_ir_sbd2(a_decArgoConfParamNames, a_ncConfParamNames, a_decoderId)
 %
 % INPUT PARAMETERS :
 %   a_decArgoConfParamNames : internal configuration parameter names
@@ -21,8 +20,7 @@
 % RELEASES :
 %   12/01/2014 - RNU - creation
 % ------------------------------------------------------------------------------
-function [o_ncConfig] = create_output_float_config_ir_sbd2( ...
-   a_decArgoConfParamNames, a_ncConfParamNames, a_ncConfParamIds, a_decoderId)
+function [o_ncConfig] = create_output_float_config_ir_sbd2(a_decArgoConfParamNames, a_ncConfParamNames, a_decoderId)
 
 % output parameters initialization
 o_ncConfig = [];
@@ -65,7 +63,7 @@ for idC = 1:length(inputUsedCy)
       (inputUsedProf(idC) == finalProfNum));
    if (inputUsedCyOut(idC) ~= -1)
       if (inputUsedCyOut(idC) ~= idF)
-         fprintf('ERROR: Float #%d: Inconsistency (output cycle number already set (to %d)) - set to %d\n', ...
+         fprintf('ERROR: Float #%d: Inconsistency (output cycle number already set (to %d)) => set to %d\n', ...
             g_decArgo_floatNum, ...
             inputUsedCyOut(idC), ...
             idF);
@@ -75,7 +73,7 @@ for idC = 1:length(inputUsedCy)
 end
 g_decArgo_floatConfig.USE.CYCLE_OUT = inputUsedCyOut;
 
-% create_csv_to_print_config_ir_rudics_sbd2('create_output_', 1, g_decArgo_floatConfig);
+% print_config_in_csv_file_ir_rudics_sbd2('create_output_', 1, g_decArgo_floatConfig);
 
 % final configuration
 finalConfigNum = inputConfigNum;
@@ -267,68 +265,37 @@ finalConfigValue(idDel, :) = [];
 staticConfigName = g_decArgo_floatConfig.STATIC.NAMES;
 staticConfigValue = g_decArgo_floatConfig.STATIC.VALUES;
 
+staticConfigNameBefore = staticConfigName;
+finalConfigNameBefore = finalConfigName;
 % convert decoder names into NetCDF ones
-staticConfigId = [];
-finalConfigId = [];
-if (isempty(a_ncConfParamIds))
-   if (~isempty(a_decArgoConfParamNames))
-      for idConfParam = 1:length(staticConfigName)
-         idF = find(strcmp(staticConfigName{idConfParam}, a_decArgoConfParamNames) == 1);
-         if (~isempty(idF))
-            staticConfigName{idConfParam} = a_ncConfParamNames{idF};
-         else
-            fprintf('ERROR: Float #%d: Cannot convert configuration param name :''%s'' into NetCDF one\n', ...
-               g_decArgo_floatNum, ...
-               staticConfigName{idConfParam});
-         end
-      end
-      for idConfParam = 1:length(finalConfigName)
-         idF = find(strcmp(finalConfigName{idConfParam}, a_decArgoConfParamNames) == 1);
-         if (~isempty(idF))
-            finalConfigName{idConfParam} = a_ncConfParamNames{idF};
-         else
-            fprintf('ERROR: Float #%d: Cannot convert configuration param name :''%s'' into NetCDF one\n', ...
-               g_decArgo_floatNum, ...
-               finalConfigName{idConfParam});
-         end
+if (~isempty(a_decArgoConfParamNames))
+   for idConfParam = 1:length(staticConfigName)
+      idF = find(strcmp(staticConfigName{idConfParam}, a_decArgoConfParamNames) == 1);
+      if (~isempty(idF))
+         staticConfigName{idConfParam} = a_ncConfParamNames{idF};
+      else
+         fprintf('ERROR: Float #%d: Cannot convert configuration param name :''%s'' into NetCDF one\n', ...
+            g_decArgo_floatNum, ...
+            staticConfigName{idConfParam});
       end
    end
-else
-   staticConfigId = ones(size(staticConfigName))*-1;
-   finalConfigId = ones(size(finalConfigName))*-1;
-   if (~isempty(a_decArgoConfParamNames))
-      for idConfParam = 1:length(staticConfigName)
-         idF = find(strcmp(staticConfigName{idConfParam}, a_decArgoConfParamNames) == 1);
-         if (~isempty(idF))
-            staticConfigName{idConfParam} = a_ncConfParamNames{idF};
-            staticConfigId(idConfParam) = a_ncConfParamIds(idF);
-         else
-            fprintf('ERROR: Float #%d: Cannot convert configuration param name :''%s'' into NetCDF one\n', ...
-               g_decArgo_floatNum, ...
-               staticConfigName{idConfParam});
-         end
-      end
-      for idConfParam = 1:length(finalConfigName)
-         idF = find(strcmp(finalConfigName{idConfParam}, a_decArgoConfParamNames) == 1);
-         if (~isempty(idF))
-            finalConfigName{idConfParam} = a_ncConfParamNames{idF};
-            finalConfigId(idConfParam) = a_ncConfParamIds(idF);
-         else
-            fprintf('ERROR: Float #%d: Cannot convert configuration param name :''%s'' into NetCDF one\n', ...
-               g_decArgo_floatNum, ...
-               finalConfigName{idConfParam});
-         end
+   for idConfParam = 1:length(finalConfigName)
+      idF = find(strcmp(finalConfigName{idConfParam}, a_decArgoConfParamNames) == 1);
+      if (~isempty(idF))
+         finalConfigName{idConfParam} = a_ncConfParamNames{idF};
+      else
+         fprintf('ERROR: Float #%d: Cannot convert configuration param name :''%s'' into NetCDF one\n', ...
+            g_decArgo_floatNum, ...
+            finalConfigName{idConfParam});
       end
    end
 end
 
 % output data
 o_ncConfig.STATIC_NC.NAMES = staticConfigName;
-o_ncConfig.STATIC_NC.IDS = staticConfigId;
 o_ncConfig.STATIC_NC.VALUES = staticConfigValue;
 o_ncConfig.DYNAMIC_NC.NUMBER = finalConfigNum;
 o_ncConfig.DYNAMIC_NC.NAMES = finalConfigName;
-o_ncConfig.DYNAMIC_NC.IDS = finalConfigId;
 o_ncConfig.DYNAMIC_NC.VALUES = finalConfigValue;
 
 % tmp = [];
@@ -339,6 +306,6 @@ o_ncConfig.DYNAMIC_NC.VALUES = finalConfigValue;
 % tmp.DYNAMIC_NC.NAMES_DEC = finalConfigNameBefore;
 % tmp.DYNAMIC_NC.NAMES = finalConfigName;
 % tmp.DYNAMIC_NC.VALUES = finalConfigValue;
-% create_csv_to_print_config_ir_rudics_sbd2('', 2, tmp);
+% print_config_in_csv_file_ir_rudics_sbd2('', 2, tmp);
 
-return
+return;

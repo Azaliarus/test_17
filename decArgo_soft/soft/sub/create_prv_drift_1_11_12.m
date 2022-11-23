@@ -71,7 +71,7 @@ global g_decArgo_generateNcTech;
 
 % no drift message received
 if (isempty(a_tabDrifCTD))
-   return
+   return;
 end
 
 % add and offset of 3 minutes to technical dates (given in tenths of an
@@ -201,7 +201,7 @@ if (isempty(parkDateHour))
             fprintf('WARNING: Float #%d Cycle #%d: new value for ''Day of first descent'' = %s (instead of %s)\n', ...
                g_decArgo_floatNum, g_decArgo_cycleNum, newRefDate(1:10), oldRefDate(1:10));
             msgDates = msgDates + nbDayCor;
-            break
+            break;
          end
       end
    end
@@ -233,7 +233,7 @@ if (isempty(parkDateHour))
                fprintf('WARNING: Float #%d Cycle #%d: new value for ''Day of first descent'' = %s (instead of %s)\n', ...
                   g_decArgo_floatNum, g_decArgo_cycleNum, newRefDate(1:10), oldRefDate(1:10));
                msgDates = msgDates + nbDayCor;
-               break
+               break;
             end
          end
       end
@@ -251,7 +251,7 @@ if (a_nbDriftMeas ~= length(parkDateHour))
       fprintf('DEC_INFO: Float #%d Cycle #%d: number of drift measurements: done (%d) < theoretical (%d)\n', ...
          g_decArgo_floatNum, g_decArgo_cycleNum, a_nbDriftMeas, length(parkDateHour));
    else
-      fprintf('DEC_ERROR: Float #%d Cycle #%d: number of drift measurements: done (%d) > theoretical (%d) - unable to date %d drift measurements\n', ...
+      fprintf('DEC_ERROR: Float #%d Cycle #%d: number of drift measurements: done (%d) > theoretical (%d) => unable to date %d drift measurements\n', ...
          g_decArgo_floatNum, g_decArgo_cycleNum, a_nbDriftMeas, length(parkDateHour), a_nbDriftMeas-length(parkDateHour));
    end
 end
@@ -274,7 +274,7 @@ o_parkTemp = ones(length(parkDateHour), 1)*g_decArgo_tempCountsDef;
 o_parkSal = ones(length(parkDateHour), 1)*g_decArgo_salCountsDef;
 
 % fill drift measurement arrays
-[~, idSort] = sort(msgDates);
+[unused, idSort] = sort(msgDates);
 for id = 1:size(a_tabDrifCTD, 1)
    idMsg = idSort(id);
    msgOcc = a_tabDrifCTD(idMsg, 1);
@@ -293,7 +293,7 @@ for id = 1:size(a_tabDrifCTD, 1)
             if (idCurMes == -1)
                fprintf('DEC_ERROR: Float #%d Cycle #%d: this should never happen!\n', ...
                   g_decArgo_floatNum, g_decArgo_cycleNum);
-               return
+               return;
             end
 
             o_parkOcc(idCurMes) = msgOcc;
@@ -320,11 +320,11 @@ for id = 1:size(a_tabDrifCTD, 1)
          end
       end
    else
-      fprintf('DEC_ERROR: Float #%d Cycle #%d: unable to determine drift measurements dates - unable to define drift measurements order\n', ...
+      fprintf('DEC_ERROR: Float #%d Cycle #%d: unable to determine drift measurements dates => unable to define drift measurements order\n', ...
          g_decArgo_floatNum, g_decArgo_cycleNum);
-      return
+      return;
    end
 end
 o_parkDate = parkDateHour/24;
 
-return
+return;

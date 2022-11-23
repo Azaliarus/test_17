@@ -38,7 +38,7 @@ mkdir(DIR_TMP_FILE);
 % make a copy of the file in the temp directory
 trajFileName = [DIR_TMP_FILE '/' fileName fileExtension];
 tmpTrajFileName = [DIR_TMP_FILE '/' fileName '_tmp' fileExtension];
-copy_file(a_trajFileName, tmpTrajFileName);
+copyfile(a_trajFileName, tmpTrajFileName);
 
 % retrieve the file schema
 outputFileSchema = ncinfo(tmpTrajFileName);
@@ -63,14 +63,14 @@ for idVar = 1:length(outputFileSchema.Variables)
 end
 
 % update input file
-move_file(trajFileName, a_trajFileName);
+movefile(trajFileName, a_trajFileName);
 
 % delete the temp directory
 remove_directory(DIR_TMP_FILE);
 
 o_ok = 1;
 
-return
+return;
 
 % ------------------------------------------------------------------------------
 % Modify the value of a dimension in a NetCDF schema.
@@ -120,4 +120,4 @@ end
 
 o_outputSchema = a_inputSchema;
 
-return
+return;

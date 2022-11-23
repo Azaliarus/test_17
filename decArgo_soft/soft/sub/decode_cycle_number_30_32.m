@@ -25,6 +25,7 @@ o_cycleNumber = [];
 
 
 % decode the Argos data messages
+deepCycle = 1;
 for idMes = 1:size(a_tabSensors, 1)
    % message type
    msgType = a_tabSensors(idMes, 1);
@@ -62,8 +63,6 @@ for idMes = 1:size(a_tabSensors, 1)
          deepInfo = unique(o_tabTech1([6:13 19:32]));
          if ((length(deepInfo) == 1) && (deepInfo == 0))
             deepCycle = 0;
-         else
-            deepCycle = 1;
          end
          
          % check cycle number consistency
@@ -97,8 +96,6 @@ for idMes = 1:size(a_tabSensors, 1)
          deepInfo = unique(o_tabTech2([3:5 6:8 11 14 15 19 20]));
          if ((length(deepInfo) == 1) && (deepInfo == 0))
             deepCycle = 0;
-         else
-            deepCycle = 1;
          end
          
          % check cycle number consistency
@@ -107,4 +104,4 @@ for idMes = 1:size(a_tabSensors, 1)
    end
 end
 
-return
+return;

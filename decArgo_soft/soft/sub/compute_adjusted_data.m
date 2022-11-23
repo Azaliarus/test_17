@@ -37,29 +37,24 @@ global g_decArgo_rtOffsetInfo;
 
                   
 for idF = 1:length(g_decArgo_rtOffsetInfo.param)
-   if (strcmp(g_decArgo_rtOffsetInfo.param{idF}, 'DOXY')) % DOXY RT adjustment is performed in compute_rt_adjusted_param
-      continue
-   end
    if (strcmp(g_decArgo_rtOffsetInfo.param{idF}, a_param.name) == 1)
-      tabSlope = g_decArgo_rtOffsetInfo.slope{idF};
       tabValue = g_decArgo_rtOffsetInfo.value{idF};
       tabDate = g_decArgo_rtOffsetInfo.date{idF};
       if (a_profile.date ~= g_decArgo_dateDef)
-         idD = find((a_profile.date + g_decArgo_nbHourForProfDateCompInRtOffsetAdj/24) >= tabDate);
+         idD = find((a_profile.date - g_decArgo_nbHourForProfDateCompInRtOffsetAdj/24) >= tabDate);
          if (~isempty(idD))
-            slopeValue = tabSlope(idD(end));
             offsetValue = tabValue(idD(end));
             
             o_adjData = a_data;
             idNoDef = find(o_adjData ~= a_param.fillValue);
-            o_adjData(idNoDef) = o_adjData(idNoDef)*slopeValue + offsetValue;
+            o_adjData(idNoDef) = o_adjData(idNoDef) + offsetValue;
          end
       else
-         fprintf('RTADJ_WARNING: Float #%d Cycle #%d Profile #%d: profile not dated - RT offset cannot be applied\n', ...
+         fprintf('RTADJ_WARNING: Float #%d Cycle #%d Profile #%d: profile not dated => RT offset cannot be applied\n', ...
             g_decArgo_floatNum, a_profile.cycleNumber, a_profile.profileNumber);
       end
-      break
+      break;
    end
 end
 
-return
+return;

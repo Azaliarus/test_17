@@ -6,13 +6,13 @@
 %  [o_launchDate, o_preludeDuration, o_profilePressure, ...
 %    o_cycleDuration, o_dpfFloatFlag] = ...
 %    get_apx_meta_data_for_cycle_number_determination( ...
-%    a_floatNum, a_floatLaunchDate, a_floatCycleTime, a_decoderId)
+%    a_floatNum, a_floatDecId, a_floatLaunchDate, a_floatCycleTime)
 %
 % INPUT PARAMETERS :
 %   a_floatNum        : float WMO number
+%   a_floatDecId      : float decoder Id
 %   a_floatLaunchDate : float launch date
 %   a_floatCycleTime  : cycle duration
-%   a_decoderId       : float decoder Id
 %
 % OUTPUT PARAMETERS :
 %   o_launchDate      : float launch date
@@ -32,7 +32,7 @@
 function [o_launchDate, o_preludeDuration, o_profilePressure, ...
    o_cycleDuration, o_dpfFloatFlag] = ...
    get_apx_meta_data_for_cycle_number_determination( ...
-   a_floatNum, a_floatLaunchDate, a_floatCycleTime, a_decoderId)
+   a_floatNum, a_floatDecId, a_floatLaunchDate, a_floatCycleTime)
 
 % output parameters initialization
 o_launchDate = [];
@@ -46,9 +46,6 @@ global g_decArgo_dateDef;
 global g_decArgo_presDef;
 global g_decArgo_durationDef;
 global g_decArgo_janFirst1950InMatlab;
-
-% lists of managed decoders
-global g_decArgo_decoderIdListApexApf11Argos;
 
 
 % meta-data used for cycle number estimation
@@ -85,14 +82,14 @@ if (~isempty(idVal))
    fieldNames = fieldnames(configStruct);
    
    for id = 1:length(fieldNames)
-      valueStr = configStruct.(fieldNames{id});
-      if (strfind(valueStr, 'CONFIG_PRE_'))
+      valueStr = getfield(configStruct, fieldNames{id});
+      if (strfind(getfield(configStruct, fieldNames{id}), 'CONFIG_PRE_'))
          preludeDurationPos = id;
-      elseif (strfind(valueStr, 'CONFIG_TP_'))
+      elseif (strfind(getfield(configStruct, fieldNames{id}), 'CONFIG_TP_'))
          profilePressurePos = id;
-      elseif (strfind(valueStr, 'CONFIG_CT_'))
+      elseif (strfind(getfield(configStruct, fieldNames{id}), 'CONFIG_CT_'))
          cycleDurationPos = id;
-      elseif (strfind(valueStr, 'CONFIG_DPF_'))
+      elseif (strfind(getfield(configStruct, fieldNames{id}), 'CONFIG_DPF_'))
          dpfFloatFlagPos = id;
       end
    end
@@ -191,12 +188,6 @@ if (~isempty(idVal))
    end
 end
 
-if (ismember(a_decoderId, g_decArgo_decoderIdListApexApf11Argos))
-   if (preludeDuration ~= g_decArgo_durationDef)
-      preludeDuration = preludeDuration/60; % PRELUDE duration is in minutes in the APF11 float configuration
-   end
-end
-
 if (preludeDuration == g_decArgo_durationDef)
    preludeDuration = 6;
 end
@@ -211,4 +202,4 @@ o_profilePressure = profilePressure;
 o_cycleDuration = cycleDuration;
 o_dpfFloatFlag = dpfFloatFlag;
 
-return
+return;

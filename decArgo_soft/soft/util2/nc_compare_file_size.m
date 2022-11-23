@@ -20,20 +20,17 @@
 function nc_compare_file_size(varargin)
 
 % top directory of the first set of NetCDF files
-DIR_INPUT_NC_FILES1 = 'C:\Users\jprannou\_DATA\OUT\TEST_M-PROF_classic\';
-% DIR_INPUT_NC_FILES1 = 'H:\archive_201801\coriolis\';
+DIR_INPUT_NC_FILES1 = 'C:\Users\jprannou\_DATA\OUT\nc_output_decPrv1\';
 
 % top directory of the second set of NetCDF files
-DIR_INPUT_NC_FILES2 = 'C:\Users\jprannou\_DATA\OUT\TEST_M-PROF_netcdf4_classic\';
-% DIR_INPUT_NC_FILES2 = 'C:\Users\jprannou\_DATA\OUT\TEST_M-PROF_classic\';
+DIR_INPUT_NC_FILES2 = 'C:\Users\jprannou\_DATA\OUT\nc_output_decPrv2\';
 
 
 % default list of floats to convert
 FLOAT_LIST_FILE_NAME = 'C:\Users\jprannou\_RNU\DecArgo_soft\lists\_nke_ir_rudics_rem_dm.txt';
-FLOAT_LIST_FILE_NAME = 'C:\Users\jprannou\_RNU\DecArgo_soft\lists\tmp.txt';
 
 % directory to store the log and the csv files
-DIR_LOG_FILE = 'C:\Users\jprannou\_RNU\DecArgo_soft\work\log\';
+DIR_LOG_FILE = 'C:\Users\jprannou\_RNU\DecArgo_soft\work\';
 
 % default values initialization
 init_default_values;
@@ -45,7 +42,7 @@ if (nargin == 0)
    % floats to process come from floatListFileName
    if ~(exist(floatListFileName, 'file') == 2)
       fprintf('ERROR: File not found: %s\n', floatListFileName);
-      return
+      return;
    end
    
    fprintf('Floats from list: %s\n', floatListFileName);
@@ -71,7 +68,7 @@ tic;
 outputFileName = [DIR_LOG_FILE '/' 'nc_compare_file_size' name '_' datestr(now, 'yyyymmddTHHMMSS') '.csv'];
 fidOut = fopen(outputFileName, 'wt');
 if (fidOut == -1)
-   return
+   return;
 end
 header = ['File; Type; Size1; Size2'];
 fprintf(fidOut, '%s\n', header);
@@ -79,7 +76,7 @@ fprintf(fidOut, '%s\n', header);
 % process the floats
 nbFloats = length(floatList);
 for idFloat = 1:nbFloats
-
+   
    floatNum = floatList(idFloat);
    floatNumStr = num2str(floatNum);
    fprintf('%03d/%03d %s\n', idFloat, nbFloats, floatNumStr);
@@ -119,4 +116,4 @@ fprintf('done (Elapsed time is %.1f seconds)\n', ellapsedTime);
 
 diary off;
 
-return
+return;

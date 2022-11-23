@@ -20,11 +20,10 @@
 % ------------------------------------------------------------------------------
 function select_argos_files_remocean(varargin)
 
-DIR_INPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\IN\RSYNC\CTS4_V1.xx_V2.xx\rsync_data\';
-% DIR_INPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\IN\RSYNC\CTS4_V1.xx_V2.xx\rsync_data\';
+DIR_INPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\IN\collecte_20151006\rsync_rudics_20151005\';
 
 % directory to store the log file
-DIR_LOG_FILE = 'C:\Users\jprannou\_RNU\DecArgo_soft\work\log\';
+DIR_LOG_FILE = 'C:\Users\jprannou\_RNU\DecArgo_soft\work\';
 
 % mode processing flags
 global g_decArgo_realtimeFlag;
@@ -50,7 +49,7 @@ if (nargin == 0)
    % floats to process come from floatListFileName
    if ~(exist(floatListFileName, 'file') == 2)
       fprintf('File not found: %s\n', floatListFileName);
-      return
+      return;
    end
    
    fprintf('Floats from list: %s\n', floatListFileName);
@@ -76,7 +75,7 @@ tic;
 selectDirName = [DIR_INPUT_ARGOS_FILES '/select/'];
 if (exist(selectDirName, 'dir') == 7)
    fprintf('The ''select'' directory (%s) already exist => exit\n', selectDirName);
-   return
+   return;
 else
    mkdir(selectDirName);
 end
@@ -100,14 +99,14 @@ for idFloat = 1:nbFloats
    if (isempty(idF))
       fprintf('ERROR: No information on float #%d\n', floatNum);
       fprintf('(nothing done)\n');
-      continue
+      continue;
    end
    floatArgosId = listArgosId{idF};
    
    % select the Argos files or directories associated with the floats
-   dirIn = [DIR_INPUT_ARGOS_FILES '/' floatArgosId '_' floatNumStr];
+   dirIn = [DIR_INPUT_ARGOS_FILES '/' floatArgosId];
    if (exist(dirIn, 'dir') == 7)
-      move_file(dirIn, selectDirName);
+      movefile(dirIn, selectDirName);
       fprintf('ok\n');
    else
       fprintf('WARNING : dir not found : %s\n', floatArgosId);
@@ -119,4 +118,4 @@ fprintf('done (Elapsed time is %.1f seconds)\n', ellapsedTime);
 
 diary off;
 
-return
+return;

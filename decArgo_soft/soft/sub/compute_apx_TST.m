@@ -35,25 +35,6 @@ o_tst1 = g_decArgo_dateDef;
 o_tst2 = g_decArgo_dateDef;
 
 
-% get the number of the data message which store the BLK (Message Block Id)
-% information
-switch (a_decoderId)
-   
-   case {1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008, 1009, 1010, 1011, 1012, ...
-         1013, 1014, 1015, 1016}
-      % 071412, 062608, 061609, 021009, 061810, 093008, 082213, 021208, 032213,
-      % 110613&090413, 121512, 110813, 071807, 082807, 020110, 090810
-      msgNumOfBlockNum = 1;
-            
-   case {1021, 1022} % 2.8.0.A, 2.10.4.A
-      msgNumOfBlockNum = 10;
-      
-   otherwise
-      fprintf('WARNING: Float #%d Cycle #%d: Nothing done yet in compute_apx_TST for decoderId #%d\n', ...
-         a_decoderId);
-      return
-end
-
 % collect information
 tabDates = [];
 tabMsgNum = [];
@@ -65,7 +46,7 @@ for idL = 1:length(a_argosDataUsed)
       msgNum = sensor(2);
       tabDates = [tabDates a_argosDataDate(idList(idMsg))];
       tabMsgNum = [tabMsgNum msgNum];
-      if (msgNum == msgNumOfBlockNum)
+      if (msgNum == 1)
          tabMsgBlockNum = [tabMsgBlockNum sensor(3)];
       else
          tabMsgBlockNum = [tabMsgBlockNum -1];
@@ -97,7 +78,7 @@ end
 % compute TST
 [o_tst1, o_tst2] = compute_TST(tabDates, tabMsgBlockNum, a_timeDataConfig, a_decoderId);
 
-return
+return;
 
 % ------------------------------------------------------------------------------
 % Compute APEX TST using 2 methods: the TWR one and the 'improved' one.
@@ -167,7 +148,7 @@ profileLength = a_timeDataConfig.profileLength;
 if (~isempty(transRepPeriod) && ~isempty(profileLength))
    
    tabTsd1 = [];
-   [~, nbMsg] = compute_last_apx_argos_msg_number(profileLength, a_decoderId);
+   nbMsg = compute_number_of_apx_argos_msg(profileLength, a_decoderId);
    if (~isempty(nbMsg))
       for id = 1:min(length(a_date), NB_LOOP_MAX)
          tranStartDate = a_date(id) - ((a_msgBlockNum(id)-1)*nbMsg*transRepPeriod)/86400;
@@ -209,7 +190,7 @@ if (~isempty(tabTsd2))
    o_tst2 = tabTsd2;
 end
 
-return
+return;
 
 % ------------------------------------------------------------------------------
 % Compute one APEX TST.
@@ -242,4 +223,4 @@ blockTransTime = deltaDate/deltaNum;
 
 o_tranStartDate = a_date2 - (a_num2-1)*blockTransTime;
 
-return
+return;

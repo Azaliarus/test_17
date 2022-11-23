@@ -3,12 +3,11 @@
 %
 % SYNTAX :
 %  [o_nMeasData, o_nCycleData, o_historyData] = read_file_traj_3_1( ...
-%    a_inputPathFileName, a_withAdj, a_auxfileFlag)
+%    a_inputPathFileName, a_withAdj)
 %
 % INPUT PARAMETERS :
 %   a_inputPathFileName : trajectory file path name
 %   a_withAdj           : read Adj parameter flag
-%   a_auxfileFlag       : 1 if it is an auxiliary file, 0 otherwise
 %
 % OUTPUT PARAMETERS :
 %   o_nMeasData  : N_MEASUREMENT data
@@ -24,7 +23,7 @@
 %   06/12/2014 - RNU - creation
 % ------------------------------------------------------------------------------
 function [o_nMeasData, o_nCycleData, o_historyData] = read_file_traj_3_1( ...
-   a_inputPathFileName, a_withAdj, a_auxfileFlag)
+   a_inputPathFileName, a_withAdj)
 
 % output parameters initialization
 o_nMeasData = [];
@@ -48,55 +47,63 @@ SORT_PARAM = 1;
 % check the NetCDF file
 if ~(exist(a_inputPathFileName, 'file') == 2)
    fprintf('File not found : %s\n', a_inputPathFileName);
-   return
+   return;
 end
 
 % open NetCDF file
 fCdf = netcdf.open(a_inputPathFileName, 'NC_NOWRITE');
 if (isempty(fCdf))
    fprintf('ERROR: Unable to open NetCDF input file: %s\n', a_inputPathFileName);
-   return
+   return;
 end
 
 formatVersion = netcdf.getVar(fCdf, netcdf.inqVarID(fCdf, 'FORMAT_VERSION'))';
 
-if ((str2num(formatVersion) ~= 3.1) && ~a_auxfileFlag)
-
+if (str2num(formatVersion) ~= 3.1)
+   
    fprintf('File format version is %s (3.1 expected) => exit\n', ...
       formatVersion, a_inputPathFileName);
-
+   
 else
-
+   
+   paramList2 = [ ...
+      {'TEMP_STD'} ...
+      {'TEMP_MED'} ...
+      {'PSAL_STD'} ...
+      {'PSAL_MED'} ...
+      ];
+   sufixList = [{''} {'_STD'} {'_MED'}];
+   
    % dimensions
    nParam = [];
    if (dim_is_present_dec_argo(fCdf, 'N_PARAM'))
-      [~, nParam] = netcdf.inqDim(fCdf, netcdf.inqDimID(fCdf, 'N_PARAM'));
+      [unused, nParam] = netcdf.inqDim(fCdf, netcdf.inqDimID(fCdf, 'N_PARAM'));
    end
-
+   
    % misc
    platformNumber = strtrim(netcdf.getVar(fCdf, netcdf.inqVarID(fCdf, 'PLATFORM_NUMBER'))');
-
+   
    % parameter variables
    trajectoryParameters = [];
    if (var_is_present_dec_argo(fCdf, 'TRAJECTORY_PARAMETERS'))
       trajectoryParameters = netcdf.getVar(fCdf, netcdf.inqVarID(fCdf, 'TRAJECTORY_PARAMETERS'));
    end
-
+   
    % N_MEASUREMENT variables
    cycleNumber = netcdf.getVar(fCdf, netcdf.inqVarID(fCdf, 'CYCLE_NUMBER'))';
    cycleNumberAdj = '';
    if (var_is_present_dec_argo(fCdf, 'CYCLE_NUMBER_ADJUSTED'))
       cycleNumberAdj = netcdf.getVar(fCdf, netcdf.inqVarID(fCdf, 'CYCLE_NUMBER_ADJUSTED'))';
    end
-
+   
    measCode = netcdf.getVar(fCdf, netcdf.inqVarID(fCdf, 'MEASUREMENT_CODE'))';
-
+   
    juld = netcdf.getVar(fCdf, netcdf.inqVarID(fCdf, 'JULD'));
    juldFillVal = netcdf.getAtt(fCdf, netcdf.inqVarID(fCdf, 'JULD'), '_FillValue');
    juld(find(juld == juldFillVal)) = g_decArgo_dateDef;
    juldStatus = netcdf.getVar(fCdf, netcdf.inqVarID(fCdf, 'JULD_STATUS'));
    juldQc = netcdf.getVar(fCdf, netcdf.inqVarID(fCdf, 'JULD_QC'));
-
+   
    juldAdj = '';
    juldAdjStatus = '';
    juldAdjQc = '';
@@ -107,31 +114,26 @@ else
       juldAdjStatus = netcdf.getVar(fCdf, netcdf.inqVarID(fCdf, 'JULD_ADJUSTED_STATUS'));
       juldAdjQc = netcdf.getVar(fCdf, netcdf.inqVarID(fCdf, 'JULD_ADJUSTED_QC'));
    end
-
-   if (~a_auxfileFlag)
-      latitude = netcdf.getVar(fCdf, netcdf.inqVarID(fCdf, 'LATITUDE'));
-      latitudeFillVal = netcdf.getAtt(fCdf, netcdf.inqVarID(fCdf, 'LATITUDE'), '_FillValue');
-      latitude(find(latitude == latitudeFillVal)) = g_decArgo_argosLatDef;
-
-      longitude = netcdf.getVar(fCdf, netcdf.inqVarID(fCdf, 'LONGITUDE'));
-      longitudeFillVal = netcdf.getAtt(fCdf, netcdf.inqVarID(fCdf, 'LONGITUDE'), '_FillValue');
-      longitude(find(longitude == longitudeFillVal)) = g_decArgo_argosLonDef;
-
-      positionAccuracy = netcdf.getVar(fCdf, netcdf.inqVarID(fCdf, 'POSITION_ACCURACY'));
-      positionQc = netcdf.getVar(fCdf, netcdf.inqVarID(fCdf, 'POSITION_QC'));
-      positioAxErrEllMajor = netcdf.getVar(fCdf, netcdf.inqVarID(fCdf, 'AXES_ERROR_ELLIPSE_MAJOR'));
-      positioAxErrEllMinor = netcdf.getVar(fCdf, netcdf.inqVarID(fCdf, 'AXES_ERROR_ELLIPSE_MINOR'));
-      positioAxErrEllAngle = netcdf.getVar(fCdf, netcdf.inqVarID(fCdf, 'AXES_ERROR_ELLIPSE_ANGLE'));
-      positionSat = netcdf.getVar(fCdf, netcdf.inqVarID(fCdf, 'SATELLITE_NAME'));
-   end
-
+   
+   latitude = netcdf.getVar(fCdf, netcdf.inqVarID(fCdf, 'LATITUDE'));
+   latitudeFillVal = netcdf.getAtt(fCdf, netcdf.inqVarID(fCdf, 'LATITUDE'), '_FillValue');
+   latitude(find(latitude == latitudeFillVal)) = g_decArgo_argosLatDef;
+   
+   longitude = netcdf.getVar(fCdf, netcdf.inqVarID(fCdf, 'LONGITUDE'));
+   longitudeFillVal = netcdf.getAtt(fCdf, netcdf.inqVarID(fCdf, 'LONGITUDE'), '_FillValue');
+   longitude(find(longitude == longitudeFillVal)) = g_decArgo_argosLonDef;
+   
+   positionAccuracy = netcdf.getVar(fCdf, netcdf.inqVarID(fCdf, 'POSITION_ACCURACY'));
+   positionQc = netcdf.getVar(fCdf, netcdf.inqVarID(fCdf, 'POSITION_QC'));
+   positionSat = netcdf.getVar(fCdf, netcdf.inqVarID(fCdf, 'SATELLITE_NAME'));
+   
    paramNameList = [];
    paramDataFormatList = [];
    paramDataNbDimList = [];
    paramData = [];
    paramQcNameList = [];
    paramQcData = [];
-
+   
    if (a_withAdj == 1)
       paramAdjNameList = [];
       paramAdjDataFormatList = [];
@@ -140,72 +142,132 @@ else
       paramAdjQcNameList = [];
       paramAdjQcData = [];
    end
-
+   
    for idParam = 1:nParam
       parameterName = strtrim(trajectoryParameters(:, idParam)');
-
       if (isempty(parameterName))
-         continue
+         continue;
       end
-
-      paramName = parameterName;
-      paramQcName = sprintf('%s_QC', paramName);
-
-      if (any(strcmp(paramName, paramNameList)))
-         continue
-      end
-
-      paramNameList = [paramNameList {paramName}];
-      paramFormat = netcdf.getAtt(fCdf, netcdf.inqVarID(fCdf, paramName), 'C_format');
-      paramDataFormatList = [paramDataFormatList {paramFormat}];
-      paramQcNameList = [paramQcNameList {paramQcName}];
-      data = netcdf.getVar(fCdf, netcdf.inqVarID(fCdf, paramName));
-      if (var_is_present_dec_argo(fCdf, paramQcName))
-         dataQc = netcdf.getVar(fCdf, netcdf.inqVarID(fCdf, paramQcName));
-         dataQc(find(dataQc == g_decArgo_qcStrDef)) = g_decArgo_qcStrUnused2;
-         dataQc = str2num(dataQc);
-         dataQc(find(dataQc == str2num(g_decArgo_qcStrUnused2))) = -1;
-      else
-         dataQc = ones(size(data, 1), 1)*g_decArgo_qcDef;
-      end
-      if (size(data, 2) == 1)
-         paramDataNbDimList = [paramDataNbDimList 1];
-         paramData = [paramData double(data)];
-         paramQcData = [paramQcData dataQc];
-      else
-         paramDataNbDimList = [paramDataNbDimList size(data, 1)];
-         paramData = [paramData double(data)'];
-         paramQcData = [paramQcData dataQc];
-      end
-
-      if (a_withAdj == 1)
-         paramAdjName = sprintf('%s_ADJUSTED', paramName);
-         paramAdjQcName = sprintf('%s_QC', paramAdjName);
-
-         if (var_is_present_dec_argo(fCdf, paramAdjName))
-            paramAdjFillVal = netcdf.getAtt(fCdf, netcdf.inqVarID(fCdf, paramAdjName), '_FillValue');
-            dataAdj = netcdf.getVar(fCdf, netcdf.inqVarID(fCdf, paramAdjName));
-            %                if (~isempty(find(dataAdj ~= paramAdjFillVal, 1)))
-            paramAdjNameList = [paramAdjNameList {paramAdjName}];
-            paramAdjFormat = netcdf.getAtt(fCdf, netcdf.inqVarID(fCdf, paramAdjName), 'C_format');
-            paramAdjDataFormatList = [paramAdjDataFormatList {paramAdjFormat}];
-            paramAdjQcNameList = [paramAdjQcNameList {paramAdjQcName}];
-            dataAdjQc = netcdf.getVar(fCdf, netcdf.inqVarID(fCdf, paramAdjQcName));
-            if (size(dataAdj, 2) == 1)
-               paramAdjDataNbDimList = [paramAdjDataNbDimList 1];
-               paramAdjData = [paramAdjData double(dataAdj)];
-               paramAdjQcData = [paramAdjQcData dataAdjQc];
+      
+      for idS = 1:length(sufixList)
+         paramName = [parameterName sufixList{idS}];
+         paramQcName = sprintf('%s_QC', paramName);
+         
+         if ((idS == 1) || ((idS > 1) && (var_is_present_dec_argo(fCdf, paramName))))
+            paramNameList = [paramNameList {paramName}];
+            paramFormat = netcdf.getAtt(fCdf, netcdf.inqVarID(fCdf, paramName), 'C_format');
+            paramDataFormatList = [paramDataFormatList {paramFormat}];
+            paramQcNameList = [paramQcNameList {paramQcName}];
+            data = netcdf.getVar(fCdf, netcdf.inqVarID(fCdf, paramName));
+            if (var_is_present_dec_argo(fCdf, paramQcName))
+               dataQc = netcdf.getVar(fCdf, netcdf.inqVarID(fCdf, paramQcName));
+               dataQc(find(dataQc == g_decArgo_qcStrDef)) = g_decArgo_qcStrUnused2;
+               dataQc = str2num(dataQc);
+               dataQc(find(dataQc == str2num(g_decArgo_qcStrUnused2))) = -1;
             else
-               paramAdjDataNbDimList = [paramAdjDataNbDimList size(dataAdj, 1)];
-               paramAdjData = [paramAdjData double(dataAdj)'];
-               paramAdjQcData = [paramAdjQcData dataAdjQc'];
+               dataQc = ones(size(data, 1), 1)*g_decArgo_qcDef;
+            end
+            if (size(data, 2) == 1)
+               paramDataNbDimList = [paramDataNbDimList 1];
+               paramData = [paramData data];
+               paramQcData = [paramQcData dataQc];
+            else
+               paramDataNbDimList = [paramDataNbDimList size(data, 1)];
+               paramData = [paramData data'];
+               paramQcData = [paramQcData dataQc];
+            end
+            
+            if (a_withAdj == 1)
+               paramAdjName = sprintf('%s_ADJUSTED', paramName);
+               paramAdjQcName = sprintf('%s_QC', paramAdjName);
+               
+               if (var_is_present_dec_argo(fCdf, paramAdjName))
+                  paramAdjFillVal = netcdf.getAtt(fCdf, netcdf.inqVarID(fCdf, paramAdjName), '_FillValue');
+                  dataAdj = netcdf.getVar(fCdf, netcdf.inqVarID(fCdf, paramAdjName));
+                  %                if (~isempty(find(dataAdj ~= paramAdjFillVal, 1)))
+                  paramAdjNameList = [paramAdjNameList {paramAdjName}];
+                  paramAdjFormat = netcdf.getAtt(fCdf, netcdf.inqVarID(fCdf, paramAdjName), 'C_format');
+                  paramAdjDataFormatList = [paramAdjDataFormatList {paramAdjFormat}];
+                  paramAdjQcNameList = [paramAdjQcNameList {paramAdjQcName}];
+                  dataAdjQc = netcdf.getVar(fCdf, netcdf.inqVarID(fCdf, paramAdjQcName));
+                  if (size(dataAdj, 2) == 1)
+                     paramAdjDataNbDimList = [paramAdjDataNbDimList 1];
+                     paramAdjData = [paramAdjData dataAdj];
+                     paramAdjQcData = [paramAdjQcData dataAdjQc];
+                  else
+                     paramAdjDataNbDimList = [paramAdjDataNbDimList size(dataAdj, 1)];
+                     paramAdjData = [paramAdjData dataAdj'];
+                     paramAdjQcData = [paramAdjQcData dataAdjQc'];
+                  end
+                  %                end
+               end
+            end
+         end
+      end
+      
+      if (strcmp(parameterName, 'PRES'))
+         for idP2 = 1:length(paramList2)
+            paramName = paramList2{idP2};
+            
+            if (var_is_present_dec_argo(fCdf, paramName))
+               
+               paramQcName = sprintf('%s_QC', paramName);
+               
+               paramNameList = [paramNameList {paramName}];
+               paramFormat = netcdf.getAtt(fCdf, netcdf.inqVarID(fCdf, paramName), 'C_format');
+               paramDataFormatList = [paramDataFormatList {paramFormat}];
+               paramQcNameList = [paramQcNameList {paramQcName}];
+               data = netcdf.getVar(fCdf, netcdf.inqVarID(fCdf, paramName));
+               if (var_is_present_dec_argo(fCdf, paramQcName))
+                  dataQc = netcdf.getVar(fCdf, netcdf.inqVarID(fCdf, paramQcName));
+                  dataQc(find(dataQc == g_decArgo_qcStrDef)) = g_decArgo_qcStrUnused2;
+                  dataQc = str2num(dataQc);
+                  dataQc(find(dataQc == str2num(g_decArgo_qcStrUnused2))) = -1;
+               else
+                  dataQc = ones(size(data, 1), 1)*g_decArgo_qcDef;
+               end
+               if (size(data, 2) == 1)
+                  paramDataNbDimList = [paramDataNbDimList 1];
+                  paramData = [paramData data];
+                  paramQcData = [paramQcData dataQc];
+               else
+                  paramDataNbDimList = [paramDataNbDimList size(data, 1)];
+                  paramData = [paramData data'];
+                  paramQcData = [paramQcData dataQc];
+               end
+               
+               if (a_withAdj == 1)
+                  paramAdjName = sprintf('%s_ADJUSTED', paramName);
+                  paramAdjQcName = sprintf('%s_QC', paramAdjName);
+                  
+                  if (var_is_present_dec_argo(fCdf, paramAdjName))
+                     paramAdjFillVal = netcdf.getAtt(fCdf, netcdf.inqVarID(fCdf, paramAdjName), '_FillValue');
+                     dataAdj = netcdf.getVar(fCdf, netcdf.inqVarID(fCdf, paramAdjName));
+                     %                   if (~isempty(find(dataAdj ~= paramAdjFillVal, 1)))
+                     paramAdjNameList = [paramAdjNameList {paramAdjName}];
+                     paramAdjFormat = netcdf.getAtt(fCdf, netcdf.inqVarID(fCdf, paramAdjName), 'C_format');
+                     paramAdjDataFormatList = [paramAdjDataFormatList {paramAdjFormat}];
+                     paramAdjQcNameList = [paramAdjQcNameList {paramAdjQcName}];
+                     dataAdjQc = netcdf.getVar(fCdf, netcdf.inqVarID(fCdf, paramAdjQcName));
+                     if (size(dataAdj, 2) == 1)
+                        paramAdjDataNbDimList = [paramAdjDataNbDimList 1];
+                        paramAdjData = [paramAdjData dataAdj];
+                        paramAdjQcData = [paramAdjQcData dataAdjQc];
+                     else
+                        paramAdjDataNbDimList = [paramAdjDataNbDimList size(dataAdj, 1)];
+                        paramAdjData = [paramAdjData dataAdj'];
+                        paramAdjQcData = [paramAdjQcData dataAdjQc'];
+                     end
+                     %                   end
+                  end
+               end
             end
          end
       end
    end
-
+   
    if (SORT_PARAM == 1)
-
+      
       % sort parameters according to a given list
       paramSortedList = [ ...
          {'PRES'}; ...
@@ -227,8 +289,7 @@ else
          {'MLPL_DOXY'}; ...
          {'TEMP_DOXY'}; ...
          {'PPOX_DOXY'}; ...
-         {'NB_SAMPLE_CTD'}; ...
-         {'NB_SAMPLE_SFET'}; ...
+         {'NB_SAMPLE'}; ...
          {'CHLA'}; ...
          {'BBP700'}; ...
          {'BBP532'}; ...
@@ -255,16 +316,16 @@ else
          {'FIT_ERROR_NITRATE'}; ...
          {'UV_INTENSITY_NITRATE'}; ...
          ];
-
+      
       sufixList = [{''} {'_STD'} {'_MED'}];
-
+      
       paramNameListTmp = [];
       paramDataFormatListTmp = [];
       paramDataNbDimListTmp = [];
       paramDataTmp = [];
       paramQcNameListTmp = [];
       paramQcDataTmp = [];
-
+      
       if (a_withAdj == 1)
          paramAdjNameListTmp = [];
          paramAdjDataFormatListTmp = [];
@@ -273,93 +334,87 @@ else
          paramAdjQcNameListTmp = [];
          paramAdjQcDataTmp = [];
       end
-
+      
       paramDone = zeros(length(paramNameList), 1);
-
+      
       offset = zeros(length(paramNameList), 1);
       for idParam = 1:length(paramNameList)
          offset(idParam) = sum(paramDataNbDimList(1:idParam-1)) - idParam + 1;
       end
-      if (a_withAdj == 1)
-         offsetAdj = zeros(length(paramAdjNameList), 1);
-         for idParam = 1:length(paramAdjNameList)
-            offsetAdj(idParam) = sum(paramAdjDataNbDimList(1:idParam-1)) - idParam + 1;
-         end
-      end
       for idParam = 1:length(paramSortedList)
          for idS = 1:length(sufixList)
             paramName = [paramSortedList{idParam} sufixList{idS}];
-
+            
             idF = find(strcmp(paramName, paramNameList) == 1);
             if (~isempty(idF))
-
+               
                paramNameListTmp = [paramNameListTmp paramNameList(idF)];
                paramDataFormatListTmp = [paramDataFormatListTmp paramDataFormatList(idF)];
                paramDataNbDimListTmp = [paramDataNbDimListTmp paramDataNbDimList(idF)];
                paramDataTmp = [paramDataTmp paramData(:, idF+offset(idF):idF+paramDataNbDimList(idF)-1+offset(idF))];
                paramQcNameListTmp = [paramQcNameListTmp paramQcNameList(idF)];
                paramQcDataTmp = [paramQcDataTmp paramQcData(:, idF)];
-
+               
                paramDone(idF) = 1;
             end
-
+            
             if (a_withAdj == 1)
                paramAdjName = sprintf('%s_ADJUSTED', paramName);
-
+               
                idF = find(strcmp(paramAdjName, paramAdjNameList) == 1);
                if (~isempty(idF))
-
+                  
                   paramAdjNameListTmp = [paramAdjNameListTmp paramAdjNameList(idF)];
                   paramAdjDataFormatListTmp = [paramAdjDataFormatListTmp paramAdjDataFormatList(idF)];
                   paramAdjDataNbDimListTmp = [paramAdjDataNbDimListTmp paramAdjDataNbDimList(idF)];
-                  paramAdjDataTmp = [paramAdjDataTmp paramAdjData(:, idF+offsetAdj(idF):idF+paramAdjDataNbDimList(idF)-1+offsetAdj(idF))];
+                  paramAdjDataTmp = [paramAdjDataTmp paramAdjData(:, idF+offset(idF):idF+paramAdjDataNbDimList(idF)-1+offset(idF))];
                   paramAdjQcNameListTmp = [paramAdjQcNameListTmp paramAdjQcNameList(idF)];
                   paramAdjQcDataTmp = [paramAdjQcDataTmp paramAdjQcData(:, idF)];
                end
             end
          end
       end
-
+      
       idList = find(paramDone == 0);
       for idParam = 1:length(idList)
          paramName = paramNameList{idList(idParam)};
-
+         
          idF = find(strcmp(paramName, paramNameList) == 1);
          if (~isempty(idF))
-
+            
             paramNameListTmp = [paramNameListTmp paramNameList(idF)];
             paramDataFormatListTmp = [paramDataFormatListTmp paramDataFormatList(idF)];
             paramDataNbDimListTmp = [paramDataNbDimListTmp paramDataNbDimList(idF)];
             paramDataTmp = [paramDataTmp paramData(:, idF+offset(idF):idF+paramDataNbDimList(idF)-1+offset(idF))];
             paramQcNameListTmp = [paramQcNameListTmp paramQcNameList(idF)];
             paramQcDataTmp = [paramQcDataTmp paramQcData(:, idF)];
-
+            
             paramDone(idF) = 1;
          end
-
+         
          if (a_withAdj == 1)
             paramAdjName = sprintf('%s_ADJUSTED', paramName);
-
+            
             idF = find(strcmp(paramAdjName, paramAdjNameList) == 1);
             if (~isempty(idF))
-
+               
                paramAdjNameListTmp = [paramAdjNameListTmp paramAdjNameList(idF)];
                paramAdjDataFormatListTmp = [paramAdjDataFormatListTmp paramAdjDataFormatList(idF)];
                paramAdjDataNbDimListTmp = [paramAdjDataNbDimListTmp paramAdjDataNbDimList(idF)];
-               paramAdjDataTmp = [paramAdjDataTmp paramAdjData(:, idF+offsetAdj(idF):idF+paramAdjDataNbDimList(idF)-1+offsetAdj(idF))];
+               paramAdjDataTmp = [paramAdjDataTmp paramAdjData(:, idF+offset(idF):idF+paramAdjDataNbDimList(idF)-1+offset(idF))];
                paramAdjQcNameListTmp = [paramAdjQcNameListTmp paramAdjQcNameList(idF)];
                paramAdjQcDataTmp = [paramAdjQcDataTmp paramAdjQcData(:, idF)];
             end
          end
       end
-
+      
       paramNameList = paramNameListTmp;
       paramDataFormatList = paramDataFormatListTmp;
       paramDataNbDimList = paramDataNbDimListTmp;
       paramData = paramDataTmp;
       paramQcNameList = paramQcNameListTmp;
       paramQcData = paramQcDataTmp;
-
+      
       if (a_withAdj == 1)
          paramAdjNameList = paramAdjNameListTmp;
          paramAdjDataFormatList = paramAdjDataFormatListTmp;
@@ -369,116 +424,64 @@ else
          paramAdjQcData = paramAdjQcDataTmp;
       end
    end
-
+   
    % store the N_MEASUREMENT data
    if (a_withAdj == 1)
-      if (~a_auxfileFlag)
-         o_nMeasData = struct( ...
-            'platformNumber', platformNumber, ...
-            'cycleNumber', cycleNumber', ...
-            'cycleNumberAdj', cycleNumberAdj', ...
-            'measCode', measCode', ...
-            'juld', juld, ...
-            'juldStatus', juldStatus, ...
-            'juldQc', juldQc, ...
-            'juldAdj', juldAdj, ...
-            'juldAdjStatus', juldAdjStatus, ...
-            'juldAdjQc', juldAdjQc, ...
-            'latitude', latitude, ...
-            'longitude', longitude, ...
-            'positionAccuracy', positionAccuracy, ...
-            'positionQc', positionQc, ...
-            'positioAxErrEllMajor', positioAxErrEllMajor, ...
-            'positioAxErrEllMinor', positioAxErrEllMinor, ...
-            'positioAxErrEllAngle', positioAxErrEllAngle, ...
-            'positionSat', positionSat, ...
-            'paramNameList', {paramNameList}, ...
-            'paramDataFormat', {paramDataFormatList}, ...
-            'paramDataNbDim', paramDataNbDimList, ...
-            'paramData', paramData, ...
-            'paramQcNameList', {paramQcNameList}, ...
-            'paramQcData', paramQcData, ...
-            'adjParamNameList', {paramAdjNameList}, ...
-            'adjParamDataFormat', {paramAdjDataFormatList}, ...
-            'adjParamDataNbDim', paramAdjDataNbDimList, ...
-            'adjParamData', paramAdjData, ...
-            'adjParamQcNameList', {paramAdjQcNameList}, ...
-            'adjParamQcData', paramAdjQcData);
-      else
-         o_nMeasData = struct( ...
-            'platformNumber', platformNumber, ...
-            'cycleNumber', cycleNumber', ...
-            'cycleNumberAdj', cycleNumberAdj', ...
-            'measCode', measCode', ...
-            'juld', juld, ...
-            'juldStatus', juldStatus, ...
-            'juldQc', juldQc, ...
-            'juldAdj', juldAdj, ...
-            'juldAdjStatus', juldAdjStatus, ...
-            'juldAdjQc', juldAdjQc, ...
-            'paramNameList', {paramNameList}, ...
-            'paramDataFormat', {paramDataFormatList}, ...
-            'paramDataNbDim', paramDataNbDimList, ...
-            'paramData', paramData, ...
-            'paramQcNameList', {paramQcNameList}, ...
-            'paramQcData', paramQcData, ...
-            'adjParamNameList', {paramAdjNameList}, ...
-            'adjParamDataFormat', {paramAdjDataFormatList}, ...
-            'adjParamDataNbDim', paramAdjDataNbDimList, ...
-            'adjParamData', paramAdjData, ...
-            'adjParamQcNameList', {paramAdjQcNameList}, ...
-            'adjParamQcData', paramAdjQcData);
-      end
+      o_nMeasData = struct( ...
+         'platformNumber', platformNumber, ...
+         'cycleNumber', cycleNumber', ...
+         'cycleNumberAdj', cycleNumberAdj', ...
+         'measCode', measCode', ...
+         'juld', juld, ...
+         'juldStatus', juldStatus, ...
+         'juldQc', juldQc, ...
+         'juldAdj', juldAdj, ...
+         'juldAdjStatus', juldAdjStatus, ...
+         'juldAdjQc', juldAdjQc, ...
+         'latitude', latitude, ...
+         'longitude', longitude, ...
+         'positionAccuracy', positionAccuracy, ...
+         'positionQc', positionQc, ...
+         'positionSat', positionSat, ...
+         'paramNameList', {paramNameList}, ...
+         'paramDataFormat', {paramDataFormatList}, ...
+         'paramDataNbDim', paramDataNbDimList, ...
+         'paramData', paramData, ...
+         'paramQcNameList', {paramQcNameList}, ...
+         'paramQcData', paramQcData, ...
+         'adjParamNameList', {paramAdjNameList}, ...
+         'adjParamDataFormat', {paramAdjDataFormatList}, ...
+         'adjParamDataNbDim', paramAdjDataNbDimList, ...
+         'adjParamData', paramAdjData, ...
+         'adjParamQcNameList', {paramAdjQcNameList}, ...
+         'adjParamQcData', paramAdjQcData);
    else
-      if (~a_auxfileFlag)
-         o_nMeasData = struct( ...
-            'platformNumber', platformNumber, ...
-            'cycleNumber', cycleNumber', ...
-            'cycleNumberAdj', cycleNumberAdj', ...
-            'measCode', measCode', ...
-            'juld', juld, ...
-            'juldStatus', juldStatus, ...
-            'juldQc', juldQc, ...
-            'juldAdj', juldAdj, ...
-            'juldAdjStatus', juldAdjStatus, ...
-            'juldAdjQc', juldAdjQc, ...
-            'latitude', latitude, ...
-            'longitude', longitude, ...
-            'positionAccuracy', positionAccuracy, ...
-            'positionQc', positionQc, ...
-            'positioAxErrEllMajor', positioAxErrEllMajor, ...
-            'positioAxErrEllMinor', positioAxErrEllMinor, ...
-            'positioAxErrEllAngle', positioAxErrEllAngle, ...
-            'positionSat', positionSat, ...
-            'paramNameList', {paramNameList}, ...
-            'paramDataFormat', {paramDataFormatList}, ...
-            'paramDataNbDim', paramDataNbDimList, ...
-            'paramData', paramData, ...
-            'paramQcNameList', {paramQcNameList}, ...
-            'paramQcData', paramQcData);
-      else
-         o_nMeasData = struct( ...
-            'platformNumber', platformNumber, ...
-            'cycleNumber', cycleNumber', ...
-            'cycleNumberAdj', cycleNumberAdj', ...
-            'measCode', measCode', ...
-            'juld', juld, ...
-            'juldStatus', juldStatus, ...
-            'juldQc', juldQc, ...
-            'juldAdj', juldAdj, ...
-            'juldAdjStatus', juldAdjStatus, ...
-            'juldAdjQc', juldAdjQc, ...
-            'paramNameList', {paramNameList}, ...
-            'paramDataFormat', {paramDataFormatList}, ...
-            'paramDataNbDim', paramDataNbDimList, ...
-            'paramData', paramData, ...
-            'paramQcNameList', {paramQcNameList}, ...
-            'paramQcData', paramQcData);
-      end
+      o_nMeasData = struct( ...
+         'platformNumber', platformNumber, ...
+         'cycleNumber', cycleNumber', ...
+         'cycleNumberAdj', cycleNumberAdj', ...
+         'measCode', measCode', ...
+         'juld', juld, ...
+         'juldStatus', juldStatus, ...
+         'juldQc', juldQc, ...
+         'juldAdj', juldAdj, ...
+         'juldAdjStatus', juldAdjStatus, ...
+         'juldAdjQc', juldAdjQc, ...
+         'latitude', latitude, ...
+         'longitude', longitude, ...
+         'positionAccuracy', positionAccuracy, ...
+         'positionQc', positionQc, ...
+         'positionSat', positionSat, ...
+         'paramNameList', {paramNameList}, ...
+         'paramDataFormat', {paramDataFormatList}, ...
+         'paramDataNbDim', paramDataNbDimList, ...
+         'paramData', paramData, ...
+         'paramQcNameList', {paramQcNameList}, ...
+         'paramQcData', paramQcData);
    end
-
+         
    % N_CYCLE variables
-
+   
    % store the N_CYCLE data
    if (var_is_present_dec_argo(fCdf, 'JULD_DESCENT_START'))
       o_nCycleData = struct( ...
@@ -530,7 +533,7 @@ else
             'dataMode', netcdf.getVar(fCdf, netcdf.inqVarID(fCdf, 'DATA_MODE')));
       end
    end
-
+   
    % retrieve HISTORY information
    historyItemList = [ ...
       {'HISTORY_INSTITUTION'} ...
@@ -564,4 +567,4 @@ end
 
 netcdf.close(fCdf);
 
-return
+return;

@@ -51,38 +51,31 @@
 function nc_convert_mono_profile_argos_to_V3_1(varargin)
 
 % top directory of input NetCDF mono-profile files
-% DIR_INPUT_NC_FILES = 'C:\Users\jprannou\_DATA\IN\NC_CONVERTION_TO_3.1\NC_files_nke_old_versions_to_convert_to_3.1_fromArchive201510\';
-DIR_INPUT_NC_FILES = 'C:\Users\jprannou\_DATA\Conversion_en_3.1_20210913\IN2\';
+DIR_INPUT_NC_FILES = 'C:\Users\jprannou\_DATA\IN\NC_CONVERTION_TO_3.1\NC_files_nke_old_versions_to_convert_to_3.1_fromArchive201510\';
 
 % top directory of output NetCDF mono-profile files
-% DIR_OUTPUT_NC_FILES = 'C:\Users\jprannou\_DATA\OUT\NC_CONVERTION_TO_3.1\nke_old_versions_nc\';
-DIR_OUTPUT_NC_FILES = 'C:\Users\jprannou\_DATA\Conversion_en_3.1_20210913\OUT2\';
+DIR_OUTPUT_NC_FILES = 'C:\Users\jprannou\_DATA\OUT\NC_CONVERTION_TO_3.1\nke_old_versions_nc\';
 
 % directory to store the log file
-DIR_LOG_FILE = 'C:\Users\jprannou\_RNU\DecArgo_soft\work\log\';
+DIR_LOG_FILE = 'C:\Users\jprannou\_RNU\DecArgo_soft\work\';
 
 % default list of floats to process
 FLOAT_LIST_FILE_NAME = 'C:\Users\jprannou\_RNU\Argo\ActionsCoriolis\ConvertNkeOldVersionsTo3.1\list\nke_old_all_argos.txt';
 % FLOAT_LIST_FILE_NAME = 'C:\Users\jprannou\_RNU\Argo\ActionsCoriolis\ConvertNkeOldVersionsTo3.1\list\tmp.txt';
-FLOAT_LIST_FILE_NAME = 'C:\Users\jprannou\_RNU\Argo\ActionsCoriolis\ConvertNkeOldVersionsTo3.1_20210913\list\provor_4.6_4.61.txt';
 
 % reference files
-refNcFileName1 = 'C:\Users\jprannou\_RNU\DecArgo_soft\soft\util\misc/ArgoProf_V3.1_cfile_part1.nc';
-refNcFileName2 = 'C:\Users\jprannou\_RNU\DecArgo_soft\soft\util\misc/ArgoProf_V3.1_cfile_part2.nc';
+refNcFileName1 = 'C:\Users\jprannou\_RNU\DecArgo_soft\work\ref/ArgoProf_V3.1_cfile_part1.nc';
+refNcFileName2 = 'C:\Users\jprannou\_RNU\DecArgo_soft\work\ref/ArgoProf_V3.1_cfile_part2.nc';
 
 % list of corrected cycle numbers
 corCyNumFile = 'C:\Users\jprannou\_RNU\Argo\ActionsCoriolis\ConvertNkeOldVersionsTo3.1\misc_info/correctedCycleNumbers_argos.txt';
 
 % json meta-data file directory
 jsonFloatMetaDatafileDir = 'C:\Users\jprannou\_RNU\Argo\ActionsCoriolis\ConvertNkeOldVersionsTo3.1\generate_json_float_meta_argos_nke_old_versions\';
-jsonFloatMetaDatafileDir = 'C:\Users\jprannou\_RNU\Argo\ActionsCoriolis\ConvertNkeOldVersionsTo3.1_20210913\generate_json_float_meta_argos_provor_4.6_4.61\';
 
 % program version
 global g_cofc_ncConvertMonoProfileVersion;
-g_cofc_ncConvertMonoProfileVersion = '2.9';
-
-% float WMO number
-global g_cofc_floatNum;
+g_cofc_ncConvertMonoProfileVersion = '2.8';
 
 % default values initialization
 init_default_values;
@@ -94,7 +87,7 @@ if (nargin == 0)
    floatListFileName = FLOAT_LIST_FILE_NAME;
    if ~(exist(floatListFileName, 'file') == 2)
       fprintf('ERROR: File not found: %s\n', floatListFileName);
-      return
+      return;
    end
    
    fprintf('Floats from list: %s\n', floatListFileName);
@@ -107,11 +100,11 @@ end
 % check the reference files
 if ~(exist(refNcFileName1, 'file') == 2)
    fprintf('ERROR: File not found: %s\n', refNcFileName1);
-   return
+   return;
 end
 if ~(exist(refNcFileName2, 'file') == 2)
    fprintf('ERROR: File not found: %s\n', refNcFileName2);
-   return
+   return;
 end
 
 % create and start log file recording
@@ -152,7 +145,6 @@ nbFloats = length(floatList);
 for idFloat = 1:nbFloats
    
    floatNum = floatList(idFloat);
-   g_cofc_floatNum = floatNum;
    fprintf('%03d/%03d %d\n', idFloat, nbFloats, floatNum);
    
    % convert the mono-profile files of the current float
@@ -161,15 +153,15 @@ for idFloat = 1:nbFloats
    jsonInputFileName = [jsonFloatMetaDatafileDir '/' sprintf('%d_meta.json', floatNum)];
    metaData = get_meta_data(metaDataFilePathName, jsonInputFileName);
    if (isempty(metaData))
-      fprintf('ERROR: float #%d: NetCDf V3.1 meta-data file not found - float ignored\n', floatNum);
-      continue
+      fprintf('ERROR: float #%d: NetCDf V3.1 meta-data file not found => float ignored\n', a_floatNum);
+      continue;
    end
    
    % retrieve the cut off pressure of the CTD profile
    cutOffPres = get_cutoff_pres(metaData);
    if (isempty(cutOffPres))
-      fprintf('ERROR: float #%d: cut-off pressure not found - float ignored\n', floatNum);
-      continue
+      fprintf('ERROR: float #%d: cut-off pressure not found => float ignored\n', a_floatNum);
+      continue;
    end
    
    % retrieve information for the vertical sampling scheme detailed description
@@ -224,7 +216,7 @@ fprintf('done (Elapsed time is %.1f seconds)\n', ellapsedTime);
 
 diary off;
 
-return
+return;
 
 % ------------------------------------------------------------------------------
 % Convert a given NetCDF mono_profile files from format version V2.2, V2.3 or
@@ -283,7 +275,7 @@ if ((strcmp(inputFileFormatVersionStr, '3.0') == 0) && ...
       (strcmp(inputFileFormatVersionStr, '2.2') == 0))
    o_comment = sprintf('Input file (%s) is expected to be of 2.2 or 2.3 or 3.0 format version (but FORMAT_VERSION = %s)', ...
       a_inputFileName, inputFileFormatVersionStr);
-   return
+   return;
 end
 
 if (a_cutOffPres == -1)
@@ -302,7 +294,7 @@ else
    end
 end
 
-return
+return;
 
 % ------------------------------------------------------------------------------
 % Convert a NetCDF mono_profile files from format version V2.2, V2.3 or
@@ -342,9 +334,6 @@ function [o_ok, o_comment] = convert_file( ...
 % output parameters initialization
 o_ok = 0;
 o_comment = [];
-
-% float WMO number
-global g_cofc_floatNum;
 
 % common long_name for nc files
 global g_decArgo_longNameOfParamAdjErr;
@@ -460,7 +449,7 @@ for idParam = 1:length(paramlist)
    paramName = paramlist{idParam};
    if (isempty(paramName))
       o_comment = sprintf('ERROR: empty parameter name in STATION_PARAMETERS of file: %s\n', a_inputFileName);
-      return
+      return;
    end
    profParamQcName = ['PROFILE_' paramName '_QC'];
    paramNameQc = [paramName '_QC'];
@@ -853,7 +842,7 @@ for idProf = 1:nProfDim
          date = deblank(scientificCalibDate(:, idParam, idCalib, idProf)');
          if (~isempty(param) || ~isempty(equation) || ~isempty(coef) || ~isempty(comment) || ~isempty(date))
             calibToDel = 0;
-            break
+            break;
          end
       end
       if (calibToDel == 1)
@@ -868,7 +857,7 @@ for idProf = 1:nProfDim
       firstCalibToDel = max(firstCalibToDel, find(calibToDelList(idProf, :) == 0, 1, 'last')+1);
    else
       firstCalibToDel = -1;
-      break
+      break;
    end
 end
 if (firstCalibToDel > 1)
@@ -898,7 +887,7 @@ if (firstCalibToDel > 1)
    inputNCalib = nCalibDimClean;
 
    list = sprintf('%d, ', firstCalibToDel:nCalibDim);
-   fprintf('INFO: CALIBRATION information empty for N_CALIB = (%s) - removed (file %s)\n', ...
+   fprintf('INFO: CALIBRATION information empty for N_CALIB = (%s) => removed (file %s)\n', ...
       list(1:end-2), a_outputFileName);
 end
 
@@ -946,7 +935,7 @@ if (exist(a_outputFileName, 'file') == 2)
    if (exist(a_outputFileName, 'file') == 2)
       o_comment = sprintf('Cannot remove existing file %s', ...
          a_outputFileName);
-      return
+      return;
    end
 end
 ncwriteschema(a_outputFileName, a_refFileSchema(1));
@@ -955,7 +944,7 @@ ncwriteschema(a_outputFileName, a_refFileSchema(1));
 fCdf = netcdf.open(a_outputFileName, 'NC_WRITE');
 if (isempty(fCdf))
    o_comment = sprintf('ERROR: Unable to open NetCDF input file: %s\n', a_outputFileName);
-   return
+   return;
 end
 
 netcdf.reDef(fCdf);
@@ -977,7 +966,7 @@ netcdf.putAtt(fCdf, globalVarId, 'history', globalHistoryText);
 
 % set the resolution attribute to the JULD and JULD_LOCATION parameters
 % assign time resolution for each float transmission type
-profJulDLocRes = double(1/86400); % 1 second
+profJulDLocRes = double(1/5184000); % 1 second
 [profJulDRes, profJulDComment] = get_prof_juld_resolution(a_vssInfoStruct.dacFormatId);
 if (var_is_present_dec_argo(fCdf, 'JULD'))
    juldVarId = netcdf.inqVarID(fCdf, 'JULD');
@@ -1019,7 +1008,7 @@ for idParam = 1:length(paramlist)
    paramStruct = get_netcdf_param_attributes_3_1(paramName);
    if (isempty(paramStruct))
       o_comment = sprintf('ERROR: Parameter ''%s'' not managed yet by this program\n', paramName);
-      return
+      return;
    end
    
    % create the parameter variable and attributes
@@ -1180,7 +1169,7 @@ ncwriteschema(a_outputFileName, a_refFileSchema(2));
 fCdf = netcdf.open(a_outputFileName, 'NC_WRITE');
 if (isempty(fCdf))
    o_comment = sprintf('ERROR: Unable to open NetCDF input file: %s\n', a_outputFileName);
-   return
+   return;
 end
 
 % ready to add the data
@@ -1194,11 +1183,11 @@ for idVar = 1:length(metaVarList)
       idVal = find(strcmp(varName, a_metaData(1:2:end)) == 1, 1);
       varValue = a_metaData{2*idVal};
       if (isempty(varValue))
-         continue
+         continue;
       end
       netcdf.putVar(fCdf, netcdf.inqVarID(fCdf, varName), varValue);
    else
-      fprintf('INFO: Variable %s not present in output format - not copied in output file\n', ...
+      fprintf('INFO: Variable %s not present in output format => not copied in output file\n', ...
          varName);
    end
 end
@@ -1210,7 +1199,7 @@ for idVar = 1:length(wantedInputVars)
    varNameIn = wantedInputVars{idVar};
    varNameOut = varNameIn;
    if (strcmp(varNameIn, 'PRES'))
-      continue
+      continue;
    end
    
    if ((a_inputFileFormatVersion == 2.2) || ...
@@ -1225,7 +1214,7 @@ for idVar = 1:length(wantedInputVars)
       idVal = find(strcmp(varNameIn, inputData(1:2:end)) == 1, 1);
       varValue = inputData{2*idVal};
       if (isempty(varValue))
-         continue
+         continue;
       end
       
       if (strcmp(varNameOut, 'HISTORY_INSTITUTION') == 0)
@@ -1293,7 +1282,7 @@ for idVar = 1:length(wantedInputVars)
                   end
                else
                   o_comment = sprintf('ERROR: Size length of variable %s is greather than 4\n', varNameOut);
-                  return
+                  return;
                end
             else
                netcdf.putVar(fCdf, netcdf.inqVarID(fCdf, varNameOut), varValue);
@@ -1306,7 +1295,7 @@ for idVar = 1:length(wantedInputVars)
          inputFileNHistory = size(varValue, 3);
       end
    else
-      fprintf('INFO: Variable %s not present in output format - not copied in output file\n', ...
+      fprintf('INFO: Variable %s not present in output format => not copied in output file\n', ...
          varNameOut);
    end
 end
@@ -1321,7 +1310,7 @@ for idVar = 1:length(wantedInputMeasVars)
       idVal = find(strcmp(varNameIn, inputMeasData(1:2:end)) == 1, 1);
       varValue = inputMeasData{2*idVal};
       if (isempty(varValue))
-         continue
+         continue;
       end
       
       % update the profile quality flags
@@ -1343,7 +1332,7 @@ for idVar = 1:length(wantedInputMeasVars)
       
       netcdf.putVar(fCdf, netcdf.inqVarID(fCdf, varNameOut), varValue);
    else
-      fprintf('INFO: Variable %s not present in output format - not copied in output file\n', ...
+      fprintf('INFO: Variable %s not present in output format => not copied in output file\n', ...
          varNameOut);
    end
 end
@@ -1445,10 +1434,10 @@ if (var_is_present_dec_argo(fCdf, 'DATA_MODE') && ...
                         netcdf.putVar(fCdf, netcdf.inqVarID(fCdf, 'SCIENTIFIC_CALIB_DATE'), ...
                            fliplr([idProf-1 idCalib-1 idParam-1 0]), ...
                            fliplr([1 1 1 length(inputDateUpdate)]), inputDateUpdate');
-                        fprintf('INFO: ''SCIENTIFIC_CALIB_DATE'' is empty for %s parameter - set to ''DATE_UPDATE'' of input DM file (= %s) (file %s)\n', ...
+                        fprintf('INFO: ''SCIENTIFIC_CALIB_DATE'' is empty for %s parameter => set to ''DATE_UPDATE'' of input DM file (= %s) (file %s)\n', ...
                            param, inputDateUpdate, a_outputFileName);
                      else
-                        fprintf('WARNING: ''SCIENTIFIC_CALIB_DATE'' is empty for %s parameter - nothing done since ''DATE_UPDATE'' of input DM file is empty (file %s)\n', ...
+                        fprintf('WARNING: ''SCIENTIFIC_CALIB_DATE'' is empty for %s parameter => nothing done since ''DATE_UPDATE'' of input DM file is empty (file %s)\n', ...
                            param, a_outputFileName);
                      end
                   end
@@ -1458,7 +1447,7 @@ if (var_is_present_dec_argo(fCdf, 'DATA_MODE') && ...
                      netcdf.putVar(fCdf, netcdf.inqVarID(fCdf, 'SCIENTIFIC_CALIB_COMMENT'), ...
                         fliplr([idProf-1 idCalib-1 idParam-1 0]), ...
                         fliplr([1 1 1 length(defaultComment)]), defaultComment');
-                     fprintf('INFO: ''SCIENTIFIC_CALIB_COMMENT'' is empty for %s parameter - set to ''%s'' (file %s)\n', ...
+                     fprintf('INFO: ''SCIENTIFIC_CALIB_COMMENT'' is empty for %s parameter => set to ''%s'' (file %s)\n', ...
                         param, defaultComment,a_outputFileName);
                   end
                end
@@ -1476,7 +1465,7 @@ netcdf.close(fCdf);
 
 o_ok = 1;
 
-return
+return;
 
 % ------------------------------------------------------------------------------
 % Convert a NetCDF mono_profile files from format version V2.2, V2.3 or
@@ -1519,9 +1508,6 @@ function [o_ok, o_comment] = convert_and_update_file( ...
 o_ok = 0;
 o_comment = [];
 
-% float WMO number
-global g_cofc_floatNum;
-
 % common long_name for nc files
 global g_decArgo_longNameOfParamAdjErr;
 
@@ -1563,7 +1549,7 @@ if (length(julD) == 2)
    
    if (length(unique(julD)) ~= 1)
       o_comment = sprintf('ERROR: multiple profiles in file: %s\n', a_inputFileName);
-      return
+      return;
    else
       % collect the station parameter list
       idVal = find(strcmp('STATION_PARAMETERS', inputData(1:2:end)) == 1, 1);
@@ -1586,12 +1572,12 @@ if (length(julD) == 2)
       end
       if (strcmp(paramListStr{1}, paramListStr{2}) == 0)
          o_comment = sprintf('ERROR: multiple profiles in file: %s\n', a_inputFileName);
-         return
+         return;
       end
    end
 elseif (length(julD) > 2)
    o_comment = sprintf('ERROR: multiple profiles in file: %s\n', a_inputFileName);
-   return
+   return;
 end
 
 % create the list of parameters
@@ -1605,7 +1591,6 @@ for idProf = 1:inputNProf
    end
 end
 paramForProf = paramForProf(1, :);
-% specific
 if (strcmp(a_inputFileName(end-14:end), 'D1900078_016.nc'))
    paramForProf{end} = 'CNDC';
 end
@@ -1617,7 +1602,7 @@ for idParam = 1:length(paramlist)
    paramName = paramlist{idParam};
    if (isempty(paramName))
       o_comment = sprintf('ERROR: empty parameter name in STATION_PARAMETERS of file: %s\n', a_inputFileName);
-      return
+      return;
    end
    paramNameQc = [paramName '_QC'];
    paramNameAdj = [paramName '_ADJUSTED'];
@@ -1979,7 +1964,7 @@ end
 fCdf = netcdf.open(a_inputFileName, 'NC_NOWRITE');
 if (isempty(fCdf))
    o_comment = sprintf('ERROR: Unable to open NetCDF input file: %s\n', a_outputFileName);
-   return
+   return;
 end
 
 % compute the indices of useful levels in each profile of Input file
@@ -2067,7 +2052,6 @@ wantedInputVars = [ ...
    {'LATITUDE'} ...
    {'LONGITUDE'} ...
    {'POSITION_QC'} ...
-   {'CONFIG_MISSION_NUMBER'} ...
    {'PRES'} ...
    {'PARAMETER'} ...
    {'SCIENTIFIC_CALIB_EQUATION'} ...
@@ -2138,22 +2122,6 @@ else
    idValDate = idValDate2;
 end
 
-% specific
-% empty PARAMETER
-if (strcmp(a_inputFileName(end-14:end), 'D6900952_233.nc'))
-   idValParam = find(strcmp('PARAMETER', inputData(1:2:end)) == 1, 1);
-   parameter = inputData{2*idValParam};
-   parameter(1:length('PRES'), 1, 1, 1) = 'PRES';
-   parameter(1:length('PSAL'), 2, 1, 1) = 'PSAL';
-   parameter(1:length('TEMP'), 3, 1, 1) = 'TEMP';
-   
-   idValParam = find(strcmp('PARAMETER', inputData(1:2:end)) == 1, 1);
-   inputData{2*idValParam} = parameter;
-   
-   fprintf('INFO: PARAMETER information empty - set (file %s)\n', ...
-      a_outputFileName);
-end
-
 [~, nParamDim, nCalibDim, nProfDim] = size(parameter);
 calibToDelList = zeros(nProfDim, nCalibDim);
 for idProf = 1:nProfDim
@@ -2167,7 +2135,7 @@ for idProf = 1:nProfDim
          date = deblank(scientificCalibDate(:, idParam, idCalib, idProf)');
          if (~isempty(param) || ~isempty(equation) || ~isempty(coef) || ~isempty(comment) || ~isempty(date))
             calibToDel = 0;
-            break
+            break;
          end
       end
       if (calibToDel == 1)
@@ -2182,7 +2150,7 @@ for idProf = 1:nProfDim
       firstCalibToDel = max(firstCalibToDel, find(calibToDelList(idProf, :) == 0, 1, 'last')+1);
    else
       firstCalibToDel = -1;
-      break
+      break;
    end
 end
 if (firstCalibToDel > 1)
@@ -2212,7 +2180,7 @@ if (firstCalibToDel > 1)
    inputNCalib = nCalibDimClean;
 
    list = sprintf('%d, ', firstCalibToDel:nCalibDim);
-   fprintf('INFO: CALIBRATION information empty for N_CALIB = (%s) - removed (file %s)\n', ...
+   fprintf('INFO: CALIBRATION information empty for N_CALIB = (%s) => removed (file %s)\n', ...
       list(1:end-2), a_outputFileName);
 end
 
@@ -2232,23 +2200,6 @@ if (any(juld > creationDate))
    inputData{2*idValCreationDate} = creationDateNewStr';
    fprintf('INFO: DATE_CREATION set to %s (file %s)\n', ...
       creationDateNewStr, a_outputFileName);
-end
-
-% specific
-% when not set, copy JULD into JULD_LOCATION for Provor 4.6 & 4.61 floats
-if (ismember(g_cofc_floatNum, [6901878, 6902681, 6902683]))
-   idVal = find(strcmp('JULD', inputData(1:2:end)) == 1, 1);
-   juld = inputData{2*idVal};
-   idVal = find(strcmp('JULD_LOCATION', inputData(1:2:end)) == 1, 1);
-   juldLocation = inputData{2*idVal};
-   for idProf = 1:length(juld)
-      if ((juldLocation == 999999) && (juld ~= 999999))
-         juldLocation(idProf) = juld(idProf);
-         inputData{2*idVal} = juldLocation;
-         fprintf('INFO: JULD_LOCATION information empty - set to JULD (file %s)\n', ...
-            a_outputFileName);
-      end
-   end
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -2276,7 +2227,7 @@ if (exist(a_outputFileName, 'file') == 2)
    if (exist(a_outputFileName, 'file') == 2)
       o_comment = sprintf('Cannot remove existing file %s', ...
          a_outputFileName);
-      return
+      return;
    end
 end
 ncwriteschema(a_outputFileName, a_refFileSchema(1));
@@ -2285,7 +2236,7 @@ ncwriteschema(a_outputFileName, a_refFileSchema(1));
 fCdf = netcdf.open(a_outputFileName, 'NC_WRITE');
 if (isempty(fCdf))
    o_comment = sprintf('ERROR: Unable to open NetCDF input file: %s\n', a_outputFileName);
-   return
+   return;
 end
 
 netcdf.reDef(fCdf);
@@ -2307,7 +2258,7 @@ netcdf.putAtt(fCdf, globalVarId, 'history', globalHistoryText);
 
 % set the resolution attribute to the JULD and JULD_LOCATION parameters
 % assign time resolution for each float transmission type
-profJulDLocRes = double(1/86400); % 1 second
+profJulDLocRes = double(1/5184000); % 1 second
 [profJulDRes, profJulDComment] = get_prof_juld_resolution(a_vssInfoStruct.dacFormatId);
 if (var_is_present_dec_argo(fCdf, 'JULD'))
    juldVarId = netcdf.inqVarID(fCdf, 'JULD');
@@ -2349,7 +2300,7 @@ for idParam = 1:length(paramlist)
    paramStruct = get_netcdf_param_attributes_3_1(paramName);
    if (isempty(paramStruct))
       o_comment = sprintf('ERROR: Parameter ''%s'' not managed yet by this program\n', paramName);
-      return
+      return;
    end
    
    % create the parameter variable and attributes
@@ -2510,7 +2461,7 @@ ncwriteschema(a_outputFileName, a_refFileSchema(2));
 fCdf = netcdf.open(a_outputFileName, 'NC_WRITE');
 if (isempty(fCdf))
    o_comment = sprintf('ERROR: Unable to open NetCDF input file: %s\n', a_outputFileName);
-   return
+   return;
 end
 
 % list of variables without N_PROF dimension
@@ -2532,11 +2483,11 @@ for idVar = 1:length(list1InputVars)
       idVal = find(strcmp(varNameIn, inputData(1:2:end)) == 1, 1);
       varValue = inputData{2*idVal};
       if (isempty(varValue))
-         continue
+         continue;
       end
       netcdf.putVar(fCdf, netcdf.inqVarID(fCdf, varNameOut), varValue);
    else
-      fprintf('INFO: Variable %s not present in output format - not copied in output file\n', ...
+      fprintf('INFO: Variable %s not present in output format => not copied in output file\n', ...
          varNameOut);
    end
 end
@@ -2553,7 +2504,7 @@ for idVar = 1:length(metaVarList)
       idVal = find(strcmp(varName, a_metaData(1:2:end)) == 1, 1);
       varValue = a_metaData{2*idVal};
       if (isempty(varValue))
-         continue
+         continue;
       end
       
       if (inputNProf == outputNProf)
@@ -2571,7 +2522,7 @@ for idVar = 1:length(metaVarList)
          end
       end
    else
-      fprintf('INFO: Variable %s not present in output format - not copied in output file\n', ...
+      fprintf('INFO: Variable %s not present in output format => not copied in output file\n', ...
          varName);
    end
 end
@@ -2650,7 +2601,7 @@ for idVar = 1:length(list2InputVars)
       idVal = find(strcmp(varNameIn, inputData(1:2:end)) == 1, 1);
       varValue = inputData{2*idVal};
       if (isempty(varValue))
-         continue
+         continue;
       end
       
       if (inputNProf == outputNProf)
@@ -2720,7 +2671,7 @@ for idVar = 1:length(list2InputVars)
                      end
                   else
                      o_comment = sprintf('ERROR: Size length of variable %s is greather than 4\n', varNameOut);
-                     return
+                     return;
                   end
                else
                   netcdf.putVar(fCdf, netcdf.inqVarID(fCdf, varNameOut), varValue);
@@ -2807,7 +2758,7 @@ for idVar = 1:length(list2InputVars)
       end
       
    else
-      fprintf('INFO: Variable %s not present in output format - not copied in output file\n', ...
+      fprintf('INFO: Variable %s not present in output format => not copied in output file\n', ...
          varNameOut);
    end
 end
@@ -2826,17 +2777,17 @@ for idParam = 1:length(paramForProf)
          idVal = find(strcmp(varNameIn, inputMeasData(1:2:end)) == 1, 1);
          varValue = inputMeasData{2*idVal};
          if (~isempty(varValue))
-            fprintf('INFO: Variable %s not present in output format - not copied in output file\n', ...
+            fprintf('INFO: Variable %s not present in output format => not copied in output file\n', ...
                varNameOut);
          end
-         continue
+         continue;
       end
       
       if (var_is_present_dec_argo(fCdf, varNameOut))
          idVal = find(strcmp(varNameIn, inputMeasData(1:2:end)) == 1, 1);
          varValue = inputMeasData{2*idVal};
          if (isempty(varValue))
-            continue
+            continue;
          end
          
          if (inputNProf == 1)
@@ -2889,7 +2840,7 @@ for idParam = 1:length(paramForProf)
             end
          end
       else
-         fprintf('INFO: Variable %s not present in output format - not copied in output file\n', ...
+         fprintf('INFO: Variable %s not present in output format => not copied in output file\n', ...
             varNameOut);
       end
    end
@@ -2911,8 +2862,7 @@ cycleNumber = unique(inputData{2*idVal});
 [confMissionNumber, noCorCyNum] = compute_config_mission_number(cycleNumber, a_metaData, a_corCyNumData);
 if (~isempty(confMissionNumber))
    for idProf = 1:outputNProf
-      %       if (((idProf == 1) && (nLevelsPrimary > 0)) || (idProf > 1))
-      if (((idProf == 1) && ((nLevelsPrimary > 0) || (dataMode() == 'D'))) || (idProf > 1))
+      if (((idProf == 1) && (nLevelsPrimary > 0)) || (idProf > 1))
          netcdf.putVar(fCdf, netcdf.inqVarID(fCdf, 'CONFIG_MISSION_NUMBER'), ...
             idProf-1, 1, confMissionNumber);
       end
@@ -2997,10 +2947,10 @@ if (var_is_present_dec_argo(fCdf, 'DATA_MODE') && ...
                         netcdf.putVar(fCdf, netcdf.inqVarID(fCdf, 'SCIENTIFIC_CALIB_DATE'), ...
                            fliplr([idProf-1 idCalib-1 idParam-1 0]), ...
                            fliplr([1 1 1 length(inputDateUpdate)]), inputDateUpdate');
-                        fprintf('INFO: ''SCIENTIFIC_CALIB_DATE'' is empty for %s parameter - set to ''DATE_UPDATE'' of input DM file (= %s) (file %s)\n', ...
+                        fprintf('INFO: ''SCIENTIFIC_CALIB_DATE'' is empty for %s parameter => set to ''DATE_UPDATE'' of input DM file (= %s) (file %s)\n', ...
                            param, inputDateUpdate, a_outputFileName);
                      else
-                        fprintf('WARNING: ''SCIENTIFIC_CALIB_DATE'' is empty for %s parameter - nothing done since ''DATE_UPDATE'' of input DM file is empty (file %s)\n', ...
+                        fprintf('WARNING: ''SCIENTIFIC_CALIB_DATE'' is empty for %s parameter => nothing done since ''DATE_UPDATE'' of input DM file is empty (file %s)\n', ...
                            param, a_outputFileName);
                      end
                   end
@@ -3010,7 +2960,7 @@ if (var_is_present_dec_argo(fCdf, 'DATA_MODE') && ...
                      netcdf.putVar(fCdf, netcdf.inqVarID(fCdf, 'SCIENTIFIC_CALIB_COMMENT'), ...
                         fliplr([idProf-1 idCalib-1 idParam-1 0]), ...
                         fliplr([1 1 1 length(defaultComment)]), defaultComment');
-                     fprintf('INFO: ''SCIENTIFIC_CALIB_COMMENT'' is empty for %s parameter - set to ''%s'' (file %s)\n', ...
+                     fprintf('INFO: ''SCIENTIFIC_CALIB_COMMENT'' is empty for %s parameter => set to ''%s'' (file %s)\n', ...
                         param, defaultComment,a_outputFileName);
                   end
                end
@@ -3028,7 +2978,7 @@ netcdf.close(fCdf);
 
 o_ok = 1;
 
-return
+return;
 
 % ------------------------------------------------------------------------------
 % Compute the configuration number associated to a given cycle number.
@@ -3059,12 +3009,9 @@ function [o_confMissionNumber, o_noCorCyNum] = compute_config_mission_number(a_c
 o_confMissionNumber = [];
 o_noCorCyNum = 0;
 
-% float WMO number
-global g_cofc_floatNum;
-
 
 if (isempty(a_metaData))
-   return
+   return;
 end
 
 idVal = find(strcmp('PLATFORM_NUMBER', a_metaData(1:2:end)) == 1, 1);
@@ -3079,7 +3026,7 @@ if (~isempty(floatWmo) && ~isempty(dacFormatId) && ~isempty(metaConfMisNum))
    % retrieve the corrected cycle number
    idF = find((a_corCyNumData(:,1) == floatWmo) & (a_corCyNumData(:,3) == a_cycleNumber));
    if (isempty(idF))
-      fprintf('INFO: Float %d: Corrected cycle number not found for cycle number #%d - no correction done + ''comment'' global attribute added\n', ...
+      fprintf('INFO: Float %d: Corrected cycle number not found for cycle number #%d => no correction done + ''comment'' global attribute added\n', ...
          floatWmo, a_cycleNumber);
       corCycleNumber = a_cycleNumber;
       o_noCorCyNum = 1;
@@ -3087,115 +3034,48 @@ if (~isempty(floatWmo) && ~isempty(dacFormatId) && ~isempty(metaConfMisNum))
       corCycleNumber = a_corCyNumData(idF,3);
    end
    
-   % specific
-   % unusual configurations of Provor 4.6 & 4.61
-   if (ismember(g_cofc_floatNum, [6900947, 6900952, 6900998, 6901876, 6901878]))
-      
-      switch (g_cofc_floatNum)
-         case 6900947
-            if (rem(corCycleNumber, 2) == 0)
-               if (corCycleNumber > 46)
-                  o_confMissionNumber = metaConfMisNum(4);
-               else
-                  o_confMissionNumber = metaConfMisNum(2);
-               end
-            else
-               if (corCycleNumber > 46)
-                  o_confMissionNumber = metaConfMisNum(5);
-               else
-                  o_confMissionNumber = metaConfMisNum(3);
-               end
-            end
-         case 6900952
-            if (rem(corCycleNumber, 2) == 0)
-               if ((corCycleNumber > 117) && (corCycleNumber < 231))
-                  o_confMissionNumber = metaConfMisNum(4);
-               else
-                  o_confMissionNumber = metaConfMisNum(2);
-               end
-            else
-               if ((corCycleNumber > 117) && (corCycleNumber < 231))
-                  o_confMissionNumber = metaConfMisNum(5);
-               else
-                  o_confMissionNumber = metaConfMisNum(3);
-               end
-            end
-         case 6900998
-            if (rem(corCycleNumber, 2) == 0)
-               if (corCycleNumber > 11)
-                  o_confMissionNumber = metaConfMisNum(4);
-               else
-                  o_confMissionNumber = metaConfMisNum(2);
-               end
-            else
-               if (corCycleNumber > 11)
-                  o_confMissionNumber = metaConfMisNum(5);
-               else
-                  o_confMissionNumber = metaConfMisNum(3);
-               end
-            end
-         case 6901876
-            if (corCycleNumber <= 30)
-               o_confMissionNumber = metaConfMisNum(2);
-            elseif ((corCycleNumber > 30) && (corCycleNumber <= 40))
-               o_confMissionNumber = metaConfMisNum(3);
-            else
-               o_confMissionNumber = metaConfMisNum(4);
-            end
-         case 6901878
-            if (corCycleNumber <= 17)
-               o_confMissionNumber = metaConfMisNum(2);
-            elseif ((corCycleNumber > 17) && (corCycleNumber <= 199))
-               o_confMissionNumber = metaConfMisNum(3);
-            else
-               o_confMissionNumber = metaConfMisNum(4);
-            end
+   firstProfCycleNum = [];
+   switch (dacFormatId)
+      case {'1', '2.2', '2.6', '2.7', '3.21', '3.5', '3.61', '3.8', '3.81', '4.0', '4.1', '4.11'}
+         firstProfCycleNum = 0;
+      case {'4.6', '4.61'}
+         firstProfCycleNum = 1; % from Coriolis nc files since these floats are not in DEP files
+      case {'5.0', '5.1', '5.2', '5.5'}
+         firstProfCycleNum = 1;
+      otherwise
+         fprintf('WARNING: Nothing done yet to first deep cycle number for dacFormatId %s\n', dacFormatId);
+   end
+   
+   if (length(metaConfMisNum) < 3)
+      if (corCycleNumber == firstProfCycleNum)
+         o_confMissionNumber = metaConfMisNum(1);
+      else
+         o_confMissionNumber = metaConfMisNum(2);
       end
    else
-      
-      firstProfCycleNum = [];
-      switch (dacFormatId)
-         case {'1', '2.2', '2.6', '2.7', '3.21', '3.5', '3.61', '3.8', '3.81', '4.0', '4.1', '4.11'}
-            firstProfCycleNum = 0;
-         case {'4.6', '4.61'}
-            firstProfCycleNum = 1; % from Coriolis nc files since these floats are not in DEP files
-         case {'5.0', '5.1', '5.2', '5.5'}
-            firstProfCycleNum = 1;
-         otherwise
-            fprintf('WARNING: Nothing done yet to first deep cycle number for dacFormatId %s\n', dacFormatId);
-      end
-      
-      if (length(metaConfMisNum) < 3)
-         if (corCycleNumber == firstProfCycleNum)
-            o_confMissionNumber = metaConfMisNum(1);
-         else
-            o_confMissionNumber = metaConfMisNum(2);
-         end
+      if (corCycleNumber == firstProfCycleNum)
+         o_confMissionNumber = metaConfMisNum(1);
       else
-         if (corCycleNumber == firstProfCycleNum)
-            o_confMissionNumber = metaConfMisNum(1);
+         idVal = find(strcmp('CONFIG_REPETITION_RATE', a_metaData(1:2:end)) == 1, 1);
+         repRateMetaData = a_metaData{2*idVal};
+         sumRepRate = 0;
+         for idRep = 1:length(repRateMetaData)
+            sumRepRate = sumRepRate + ...
+               str2num(repRateMetaData{idRep}.(char(fieldnames(repRateMetaData{idRep}))));
+         end
+         if (rem(corCycleNumber, sumRepRate) ~= 0)
+            o_confMissionNumber = metaConfMisNum(2);
          else
-            idVal = find(strcmp('CONFIG_REPETITION_RATE', a_metaData(1:2:end)) == 1, 1);
-            repRateMetaData = a_metaData{2*idVal};
-            sumRepRate = 0;
-            for idRep = 1:length(repRateMetaData)
-               sumRepRate = sumRepRate + ...
-                  str2num(repRateMetaData{idRep}.(char(fieldnames(repRateMetaData{idRep}))));
-            end
-            if (rem(corCycleNumber, sumRepRate) ~= 0)
-               o_confMissionNumber = metaConfMisNum(2);
-            else
-               o_confMissionNumber = metaConfMisNum(3);
-            end
+            o_confMissionNumber = metaConfMisNum(3);
          end
       end
    end
 end
 
-% fprintf('INFO: profNum %d <-> %d corNum - confNum %d\n', ...
+% fprintf('INFO: profNum %d <-> %d corNum => confNum %d\n', ...
 %    a_cycleNumber, corCycleNumber, o_confMissionNumber);
 
-return
+return;
 
 % ------------------------------------------------------------------------------
 % Retrieve information from float configuration to create the detailed
@@ -3225,7 +3105,7 @@ o_vssInfoStruct = [];
 
 
 if (isempty(a_metaData))
-   return
+   return;
 end
 
 idVal = find(strcmp('LAUNCH_CONFIG_PARAMETER_NAME', a_metaData(1:2:end)) == 1, 1);
@@ -3243,7 +3123,7 @@ if (~isempty(configParamName) && ~isempty(configParamValue) && ~isempty(dacForma
    
    switch (dacFormatId)
       
-      case {'1', '2.2', '2.6', '2.7', '3.21', '3.5', '3.61', '3.8', '3.81', '4.0', '4.1', '4.11', '4.6', '4.61'}
+      case {'1', '2.2', '2.6', '2.7', '3.21', '3.5', '3.61', '3.8', '3.81', '4.0', '4.1', '4.11'}
          
          o_vssInfoStruct.nbThreshold = 1;
          o_vssInfoStruct.descSamplingPeriod = get_config_value('CONFIG_DescentToParkPresSamplingTime_seconds', configParamName, configParamValue);
@@ -3254,18 +3134,18 @@ if (~isempty(configParamName) && ~isempty(configParamValue) && ~isempty(dacForma
          o_vssInfoStruct.thickSurf = get_config_value('CONFIG_ProfileSurfaceSlicesThickness_dbar', configParamName, configParamValue);
          o_vssInfoStruct.thickBottom = get_config_value('CONFIG_ProfileBottomSlicesThickness_dbar', configParamName, configParamValue);
          
-         %       case {'4.6', '4.61', }
-         %
-         %          o_vssInfoStruct.nbThreshold = 2;
-         %          o_vssInfoStruct.descSamplingPeriod = get_config_value('CONFIG_DescentToParkPresSamplingTime_seconds', configParamName, configParamValue);
-         %          o_vssInfoStruct.ascSamplingPeriod = get_config_value('CONFIG_AscentSamplingPeriod_seconds', configParamName, configParamValue);
-         %          o_vssInfoStruct.parkPres = get_config_value('CONFIG_ParkPressure_dbar', configParamName, configParamValue);
-         %          o_vssInfoStruct.profilePres = get_config_value('CONFIG_ProfilePressure_dbar', configParamName, configParamValue);
-         %          o_vssInfoStruct.threshold1 = get_config_value('CONFIG_PressureThresholdDataReductionShallowToIntermediate_dbar', configParamName, configParamValue);
-         %          o_vssInfoStruct.threshold2 = get_config_value('CONFIG_PressureThresholdDataReductionIntermediateToDeep_dbar', configParamName, configParamValue);
-         %          o_vssInfoStruct.thickSurf = get_config_value('CONFIG_ProfileSurfaceSlicesThickness_dbar', configParamName, configParamValue);
-         %          o_vssInfoStruct.thickMiddle = get_config_value('CONFIG_ProfileIntermediateSlicesThickness_dbar', configParamName, configParamValue);
-         %          o_vssInfoStruct.thickBottom = get_config_value('CONFIG_ProfileBottomSlicesThickness_dbar', configParamName, configParamValue);
+      case {'4.6', '4.61', }
+         
+         o_vssInfoStruct.nbThreshold = 2;
+         o_vssInfoStruct.descSamplingPeriod = get_config_value('CONFIG_DescentToParkPresSamplingTime_seconds', configParamName, configParamValue);
+         o_vssInfoStruct.ascSamplingPeriod = get_config_value('CONFIG_AscentSamplingPeriod_seconds', configParamName, configParamValue);
+         o_vssInfoStruct.parkPres = get_config_value('CONFIG_ParkPressure_dbar', configParamName, configParamValue);
+         o_vssInfoStruct.profilePres = get_config_value('CONFIG_ProfilePressure_dbar', configParamName, configParamValue);
+         o_vssInfoStruct.threshold1 = get_config_value('CONFIG_PressureThresholdDataReductionShallowToIntermediate_dbar', configParamName, configParamValue);
+         o_vssInfoStruct.threshold2 = get_config_value('CONFIG_PressureThresholdDataReductionIntermediateToDeep_dbar', configParamName, configParamValue);
+         o_vssInfoStruct.thickSurf = get_config_value('CONFIG_ProfileSurfaceSlicesThickness_dbar', configParamName, configParamValue);
+         o_vssInfoStruct.thickMiddle = get_config_value('CONFIG_ProfileIntermediateSlicesThickness_dbar', configParamName, configParamValue);
+         o_vssInfoStruct.thickBottom = get_config_value('CONFIG_ProfileBottomSlicesThickness_dbar', configParamName, configParamValue);
          
       otherwise
          fprintf('WARNING: nothing done yet in get_vss_info for dacFormatId %s\n', ...
@@ -3281,7 +3161,7 @@ if (~isempty(configParamName) && ~isempty(configParamValue) && ~isempty(dacForma
    end
 end
 
-return
+return;
 
 % ------------------------------------------------------------------------------
 % Retrieve the profile cut-off pressure of a float from configuration.
@@ -3310,7 +3190,7 @@ o_cutOffPres = [];
 
 
 if (isempty(a_metaData))
-   return
+   return;
 end
 
 idVal = find(strcmp('LAUNCH_CONFIG_PARAMETER_NAME', a_metaData(1:2:end)) == 1, 1);
@@ -3325,7 +3205,7 @@ if (~isempty(configParamName) && ~isempty(configParamValue))
    end
 end
 
-return
+return;
 
 % ------------------------------------------------------------------------------
 % Retrieve information from V3.1 nc meta file and JSON meta-data file.
@@ -3355,7 +3235,7 @@ o_metaData = [];
 
 
 if ~(exist(a_metaDataFilePathName, 'file') == 2)
-   return
+   return;
 end
 
 % retrieve information from Input file
@@ -3388,13 +3268,13 @@ if (exist(a_jsonInputFileName, 'file') == 2)
    [repRateMetaData] = get_meta_data_from_json_file(a_jsonInputFileName, wantedMetaNames);
    repRate = repRateMetaData{2};
 else
-   fprintf('ERROR: Json meta-data file not found: %s - CONFIG_REPETITION_RATE not found\n', ...
+   fprintf('ERROR: Json meta-data file not found: %s => CONFIG_REPETITION_RATE not found\n', ...
       a_jsonInputFileName);
 end
 o_metaData{end+1} = 'CONFIG_REPETITION_RATE';
 o_metaData{end+1} = repRate;
 
-return
+return;
 
 % ------------------------------------------------------------------------------
 % Retrieve information from json meta-data file.
@@ -3430,7 +3310,7 @@ for idField = 1:length(a_wantedMetaNames)
    fieldName = char(a_wantedMetaNames(idField));
    
    if (isfield(metaData, fieldName))
-      fieldValue = metaData.(fieldName);
+      fieldValue = getfield(metaData, fieldName);
       if (~isempty(fieldValue))
          o_metaData = [o_metaData {fieldName} {fieldValue}];
       else
@@ -3445,7 +3325,7 @@ for idField = 1:length(a_wantedMetaNames)
    end
 end
 
-return
+return;
 
 % ------------------------------------------------------------------------------
 % Create the vertical sampling scheme description.
@@ -3543,11 +3423,7 @@ else
             %                a_outputFileName);
          end
          
-         if (any(strfind(description, '99999')))
-            o_vssText = [o_vssText ' []'];
-         else
-            o_vssText = [o_vssText ' [' description ']'];
-         end
+         o_vssText = [o_vssText ' [' description ']'];
       else
          if (~isempty(a_vssInfoStruct.ascSamplingPeriod) && ...
                ~isempty(a_vssInfoStruct.profilePres) && ...
@@ -3604,11 +3480,7 @@ else
             %                a_outputFileName);
          end
          
-         if (any(strfind(description, '99999')))
-            o_vssText = [o_vssText ' []'];
-         else
-            o_vssText = [o_vssText ' [' description ']'];
-         end
+         o_vssText = [o_vssText ' [' description ']'];
       end
    else
       if (a_vssInfoStruct.nbThreshold == 1)
@@ -3633,11 +3505,7 @@ else
             %                a_outputFileName);
          end
          
-         if (any(strfind(description, '99999')))
-            o_vssText = [o_vssText ' []'];
-         else
-            o_vssText = [o_vssText ' [' description ']'];
-         end
+         o_vssText = [o_vssText ' [' description ']'];
       else
          if (~isempty(a_vssInfoStruct.descSamplingPeriod) && ...
                ~isempty(a_vssInfoStruct.parkPres) && ...
@@ -3667,16 +3535,12 @@ else
             %                a_outputFileName);
          end
          
-         if (any(strfind(description, '99999')))
-            o_vssText = [o_vssText ' []'];
-         else
-            o_vssText = [o_vssText ' [' description ']'];
-         end
+         o_vssText = [o_vssText ' [' description ']'];
       end
    end
 end
 
-return
+return;
 
 % ------------------------------------------------------------------------------
 % Get a config value from a given configuration.
@@ -3711,7 +3575,7 @@ if (~isempty(idPos) && ~isnan(a_configValues(idPos)))
    o_configValue = a_configValues(idPos);
 end
 
-return
+return;
 
 % ------------------------------------------------------------------------------
 % Modify the value of a dimension in a NetCDF schema.
@@ -3761,7 +3625,7 @@ end
 
 o_outputSchema = a_inputSchema;
 
-return
+return;
 
 % ------------------------------------------------------------------------------
 % Retrieve the dimensions of a given NetCDF variable.
@@ -3796,7 +3660,7 @@ for idDim = 1:length(varDims)
    o_varSize = [o_varSize dimLen];
 end
 
-return
+return;
 
 % ------------------------------------------------------------------------------
 % Retrieve data from NetCDF file.
@@ -3831,7 +3695,7 @@ if (exist(a_ncPathFileName, 'file') == 2)
    fCdf = netcdf.open(a_ncPathFileName, 'NC_NOWRITE');
    if (isempty(fCdf))
       fprintf('ERROR: Unable to open NetCDF input file: %s\n', a_ncPathFileName);
-      return
+      return;
    end
    
    % retrieve variables from NetCDF file
@@ -3852,7 +3716,7 @@ if (exist(a_ncPathFileName, 'file') == 2)
    netcdf.close(fCdf);
 end
 
-return
+return;
 
 % ------------------------------------------------------------------------------
 % Retrieve the resolution of the profile JULD for a given DAC format Id.
@@ -3892,4 +3756,4 @@ switch (a_dacFormatId)
       fprintf('WARNING: Nothing done yet to retrieve JULD resolution for dacFormatId %s\n', a_dacFormatId);
 end
 
-return
+return;

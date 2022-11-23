@@ -54,7 +54,7 @@ if ((nargin == 0) || (nargin > 3))
    fprintf('   freeze_argos_cycle_files(WMO, start_cycle)            => freeze Argos cycle files of float #WMO from start_cycle to the last cycle or\n');
    fprintf('   freeze_argos_cycle_files(WMO)                         => freeze all Argos cycle files of float #WMO\n');
    fprintf('aborted ...\n');
-   return
+   return;
 else
    firstCycle = [];
    lastCycle = [];
@@ -71,7 +71,7 @@ else
       if (firstCycle > lastCycle)
          fprintf('Start and end cycles should be consistently ordered!\n');
          fprintf('aborted ...\n');
-         return
+         return;
       end
    end
    
@@ -92,8 +92,8 @@ end
 
 % check the input directory
 if ~(exist(DIR_INPUT_ARGOS_FILES, 'dir') == 7)
-   fprintf('ERROR: The Argos cycle files directory %s does not exist - exit\n', DIR_INPUT_ARGOS_FILES);
-   return
+   fprintf('ERROR: The Argos cycle files directory %s does not exist => exit\n', DIR_INPUT_ARGOS_FILES);
+   return;
 end
 
 % get floats information
@@ -105,8 +105,8 @@ end
 % find current float Argos Id
 idF = find(listWmoNum == floatNum, 1);
 if (isempty(idF))
-   fprintf('ERROR: No information on float #%d - exit\n', floatNum);
-   return
+   fprintf('ERROR: No information on float #%d => exit\n', floatNum);
+   return;
 end
 floatArgosId = str2num(listArgosId{idF});
 
@@ -183,4 +183,4 @@ end
 
 fprintf('done\n');
 
-return
+return;

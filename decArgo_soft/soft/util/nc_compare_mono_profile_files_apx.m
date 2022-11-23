@@ -23,26 +23,19 @@ function nc_compare_mono_profile_files_apx(varargin)
 
 % top directory of base NetCDF mono-profile files
 % DIR_INPUT_BASE_NC_FILES = 'C:\Users\jprannou\_DATA\OUT\nc_output_decArgo_ref_apx_bascule\';
-% DIR_INPUT_BASE_NC_FILES = 'C:\Users\jprannou\_DATA\OUT\nc_output_decArgo_apres_PARAM_SURF\';
 % DIR_INPUT_BASE_NC_FILES = 'C:\Users\jprannou\_DATA\convert_DM_apex_in_3.1\updated_data\';
-% DIR_INPUT_BASE_NC_FILES = 'C:\Users\jprannou\_DATA\OUT\nc_output_decArgo\';
-% DIR_INPUT_BASE_NC_FILES = 'C:\Users\jprannou\_DATA\OUT\Apx_Ir_rudics_&_Navis_20170817\';
-DIR_INPUT_BASE_NC_FILES = 'C:\Users\jprannou\_DATA\Conversion_en_3.1\OUT\';
+DIR_INPUT_BASE_NC_FILES = 'C:\Users\jprannou\_DATA\OUT\nc_output_decArgo\';
 
 % top directory of new NetCDF mono-profile files
 % DIR_INPUT_NEW_NC_FILES = 'C:\Users\jprannou\_DATA\nc_file_apex_co_in_archive_201602\';
 % DIR_INPUT_NEW_NC_FILES = 'C:\Users\jprannou\_DATA\convert_DM_apex_in_3.1\DM_profile_file_apex_co_in_archive_201602\';
-% DIR_INPUT_NEW_NC_FILES = 'H:\archive_201608\coriolis\';
-% DIR_INPUT_NEW_NC_FILES = 'C:\Users\jprannou\_DATA\OUT\nc_output_decArgo_avant_PARAM_SURF\';
-% DIR_INPUT_NEW_NC_FILES = 'H:\archive_201708\coriolis\';
-DIR_INPUT_NEW_NC_FILES = 'C:\Users\jprannou\_DATA\Conversion_en_3.1\IN\';
-DIR_INPUT_NEW_NC_FILES = 'C:\Users\jprannou\_DATA\Conversion_en_3.1\IN\';
+DIR_INPUT_NEW_NC_FILES = 'H:\archive_201608\coriolis\';
 
 % directory to store the log and the csv files
 DIR_LOG_CSV_FILE = 'C:\Users\jprannou\_RNU\DecArgo_soft\work\';
 
 % default list of floats to compare
-% FLOAT_LIST_FILE_NAME = 'C:\Users\jprannou\_RNU\DecArgo_soft\lists\tmp.txt';
+FLOAT_LIST_FILE_NAME = 'C:\Users\jprannou\_RNU\DecArgo_soft\lists\tmp.txt';
 % FLOAT_LIST_FILE_NAME = 'C:\Users\jprannou\_RNU\DecArgo_soft\lists\_apex_argos_071412.txt';
 % FLOAT_LIST_FILE_NAME = 'C:\Users\jprannou\_RNU\DecArgo_soft\lists\_apex_argos_062608.txt';
 % FLOAT_LIST_FILE_NAME = 'C:\Users\jprannou\_RNU\DecArgo_soft\lists\_apex_argos_061609.txt';
@@ -55,25 +48,15 @@ DIR_LOG_CSV_FILE = 'C:\Users\jprannou\_RNU\DecArgo_soft\work\';
 % FLOAT_LIST_FILE_NAME = 'C:\Users\jprannou\_RNU\DecArgo_soft\lists\_apex_argos_090413.txt';
 % FLOAT_LIST_FILE_NAME = 'C:\Users\jprannou\_RNU\DecArgo_soft\lists\_apex_argos_121512.txt';
 % FLOAT_LIST_FILE_NAME = 'C:\Users\jprannou\_RNU\DecArgo_soft\lists\_apex_argos_082213.txt';
-% FLOAT_LIST_FILE_NAME = 'C:\Users\jprannou\_RNU\DecArgo_soft\lists\_apex_argos_all1.txt';
-% FLOAT_LIST_FILE_NAME = 'C:\Users\jprannou\_RNU\DecArgo_soft\lists\_apex_argos_071807.txt';
-% FLOAT_LIST_FILE_NAME = 'C:\Users\jprannou\_RNU\DecArgo_soft\lists\_apex_argos_020110.txt';
-% FLOAT_LIST_FILE_NAME = 'C:\Users\jprannou\_RNU\DecArgo_soft\lists\_apex_argos_090810.txt';
+% FLOAT_LIST_FILE_NAME = 'C:\Users\jprannou\_RNU\DecArgo_soft\lists\_apex_argos_matlab_all.txt';
 % FLOAT_LIST_FILE_NAME = 'C:\Users\jprannou\_RNU\DecArgo_soft\lists\_apex_with_DM_profile_071412.txt';
 % FLOAT_LIST_FILE_NAME = 'C:\Users\jprannou\_RNU\DecArgo_soft\lists\_apex_with_DM_profile_061609.txt';
-% FLOAT_LIST_FILE_NAME = 'C:\Users\jprannou\_RNU\Argo\ActionsCoriolis\ConvertApexOldVersionsTo3.1\list\Apex_11.txt';
-% FLOAT_LIST_FILE_NAME = 'C:\Users\jprannou\_RNU\Argo\ActionsCoriolis\ConvertApexOldVersionsTo3.1\list\Apex_old_pts_all.txt';
-% FLOAT_LIST_FILE_NAME = 'C:\Users\jprannou\_RNU\Argo\ActionsCoriolis\ConvertApexOldVersionsTo3.1\list\Apex_new_pts_all.txt';
-FLOAT_LIST_FILE_NAME = 'C:\Users\jprannou\_RNU\Argo\ActionsCoriolis\ConvertApexOldVersionsTo3.1\list\Apex_all.txt';
-
-% flag to link cycle numbers of 2 data set using profile dates
-LINK_DATA_SET_FLAG = 0;
 
 % flag to print data measurements (when different) in the log file
 PRINT_DIFF_DATA_FLAG = 1;
 
 % when comparing data measurements consider only parameters of BASE data set
-BASE_PARAM_ONLY = 1;
+BASE_PARAM_ONLY = 0;
 
 % default values
 global g_dateDef;
@@ -86,7 +69,6 @@ SHIFT_DATE = 712224;
 
 % half interval for profile fit
 INTERVAL_HOUR = 10;
-INTERVAL_HOUR = 24;
 INTERVAL_DAY = INTERVAL_HOUR/24;
 
 % first profile date to stop the comparison (leave it empty if you don't want
@@ -105,7 +87,7 @@ if (nargin == 0)
    floatListFileName = FLOAT_LIST_FILE_NAME;
    if ~(exist(floatListFileName, 'file') == 2)
       fprintf('ERROR: File not found: %s\n', floatListFileName);
-      return
+      return;
    end
    
    fprintf('Floats from list: %s\n', floatListFileName);
@@ -150,7 +132,7 @@ fprintf('\n');
 outputFileName = [DIR_LOG_CSV_FILE '/' 'nc_compare_mono_profile_files_apx' name '_' datestr(now, 'yyyymmddTHHMMSS') '.csv'];
 fidOut = fopen(outputFileName, 'wt');
 if (fidOut == -1)
-   return
+   return;
 end
 header = ['; ; ; ; DIFF; DIFF; DIFF; DIFF; DIFF; DIFF; DIFF; DIFF;' ...
    'BASE; BASE; BASE; BASE; BASE; BASE; BASE; BASE; BASE; ' ...
@@ -282,7 +264,7 @@ for idFloat = 1:nbFloats
          descProfNumBase2New(idProf) = descProfNumNew(idMin);
          
          numbers = sprintf(' #%d', descProfNumNew(idF));
-         fprintf('WARNING: %d descent new profiles found around date %s (corresponding to profiles%s) - (the #%d is selected)\n', ...
+         fprintf('WARNING: %d descent new profiles found around date %s (corresponding to profiles%s) => (the #%d is selected)\n', ...
             length(idF), julian_2_gregorian(profDateBase), numbers, idMin);
          
          descProfNumNew(idMin) = [];
@@ -326,7 +308,7 @@ for idFloat = 1:nbFloats
                sprintf('/%d/profiles/D%d_%03dD.nc', floatNum, floatNum, descProfNumBase2New(idProf))];
             if ~(exist(profFileNameNew, 'file') == 2)
                fprintf('WARNING: expected file name is missing (%s)\n', profFileNameNew);
-               continue
+               continue;
             end
          end
          [profDate, profLocDate, profLon, profLat, ...
@@ -363,7 +345,7 @@ for idFloat = 1:nbFloats
                sprintf('/%d/profiles/D%d_%03dD.nc', floatNum, floatNum, descProfNumBase(idProf))];
             if ~(exist(profFileNameBase, 'file') == 2)
                fprintf('WARNING: expected file name is missing (%s)\n', profFileNameBase);
-               continue
+               continue;
             end
          end
          [profDate, profLocDate, profLon, profLat, ...
@@ -401,7 +383,7 @@ for idFloat = 1:nbFloats
                sprintf('/%d/profiles/D%d_%03dD.nc', floatNum, floatNum, descProfNumBase(idProf))];
             if ~(exist(profFileNameBase, 'file') == 2)
                fprintf('WARNING: expected file name is missing (%s)\n', profFileNameBase);
-               continue
+               continue;
             end
          end
          [profDateBase, profLocDateBase, profLonBase, profLatBase, ...
@@ -415,7 +397,7 @@ for idFloat = 1:nbFloats
                sprintf('/%d/profiles/D%d_%03dD.nc', floatNum, floatNum, descProfNumBase2New(idProf))];
             if ~(exist(profFileNameNew, 'file') == 2)
                fprintf('WARNING: expected file name is missing (%s)\n', profFileNameNew);
-               continue
+               continue;
             end
          end
          if (BASE_PARAM_ONLY == 0)
@@ -457,7 +439,7 @@ for idFloat = 1:nbFloats
             for idLev = 1:size(dataStrBase, 1)
                if (~strcmp(dataStrBase(idLev, :), dataStrNew(idLev, :)))
                   profDataFlag = 1;
-                  break
+                  break;
                end
             end
          end
@@ -521,72 +503,54 @@ for idFloat = 1:nbFloats
    % ascent profiles processing
    %%%%%%%%%%%%%%%%%%%%%%%%%%%%
    
-   if (~LINK_DATA_SET_FLAG)
+   % try to link the 2 sets according to profile dates
+   ascProfNumBase2New = ones(length(ascProfNumBase), 1)*-1;
+   for idProf = 1:length(ascProfNumBase)
+      profNumBase = ascProfNumBase(idProf);
+      profDateBase = ascProfDateBase(idProf);
       
-      % don't compute link between 2 data sets
-      ascProfNumBase2New = ascProfNumBase;
-      %       ascProfNumBase2New = ones(length(ascProfNumBase), 1)*-1;
-      %       for idProf = 1:length(ascProfNumBase)
-      %          profNumBase = ascProfNumBase(idProf);
-      %          idF = find((corCyNumData(:,1) == floatNum) & (corCyNumData(:,2) == profNumBase));
-      %          if (isempty(idF))
-      %             fprintf('INFO: Float %d: Corrected cycle number not found for cycle number #%d\n', ...
-      %                floatNum, profNumBase);
-      %          else
-      %             ascProfNumBase2New(idProf) = corCyNumData(idF, 3);
-      %          end
-      %       end
-   else
-      
-      % try to link the 2 sets according to profile dates
-      ascProfNumBase2New = ones(length(ascProfNumBase), 1)*-1;
-      for idProf = 1:length(ascProfNumBase)
-         profNumBase = ascProfNumBase(idProf);
-         profDateBase = ascProfDateBase(idProf);
+      % look for the corresponding New profile
+      idF = find(abs(ascProfDateNew - profDateBase) <= INTERVAL_DAY);
+      if (length(idF) == 1)
+         ascProfNumBase2New(idProf) = ascProfNumNew(idF);
          
-         % look for the corresponding New profile
-         idF = find(abs(ascProfDateNew - profDateBase) <= INTERVAL_DAY);
-         if (length(idF) == 1)
-            ascProfNumBase2New(idProf) = ascProfNumNew(idF);
-            
-            ascProfNumNew(idF) = [];
-            ascProfDateNew(idF) = [];
-         elseif (length(idF) > 1)
-            [~, idMin] = min(abs(ascProfDateNew - profDateBase));
-            ascProfNumBase2New(idProf) = ascProfNumNew(idMin);
-            
-            numbers = sprintf(' #%d', ascProfNumNew(idF));
-            fprintf('WARNING: %d ascent new profiles found around date %s (corresponding to profiles%s) - (the #%d is selected)\n', ...
-               length(idF), julian_2_gregorian(profDateBase), numbers, idMin);
-            
-            ascProfNumNew(idMin) = [];
-            ascProfDateNew(idMin) = [];
-         end
-      end
-      
-      % process the remaining New profiles
-      for idProf = 1:length(ascProfNumNew)
-         profNumNew = ascProfNumNew(idProf);
-         profDateNew = ascProfDateNew(idProf);
+         ascProfNumNew(idF) = [];
+         ascProfDateNew(idF) = [];
+      elseif (length(idF) > 1)
+         [~, idMin] = min(abs(ascProfDateNew - profDateBase));
+         ascProfNumBase2New(idProf) = ascProfNumNew(idMin);
          
-         % find the right place (chronological order) to store the remaining
-         % profile
-         idF = find(ascProfDateBase < profDateNew);
-         if (~isempty(idF))
-            if (idF(end) < length(ascProfDateBase))
-               ascProfNumBase(idF(end)+2:end+1) = ascProfNumBase(idF(end)+1:end);
-               ascProfDateBase(idF(end)+2:end+1) = ascProfDateBase(idF(end)+1:end);
-               ascProfNumBase2New(idF(end)+2:end+1) = ascProfNumBase2New(idF(end)+1:end);
-            end
-            ascProfNumBase(idF(end)+1) = -1;
-            ascProfDateBase(idF(end)+1) = profDateNew;
-            ascProfNumBase2New(idF(end)+1) = profNumNew;
-         else
-            ascProfNumBase = [-1; ascProfNumBase];
-            ascProfDateBase = [profDateNew; ascProfDateBase];
-            ascProfNumBase2New = [profNumNew; ascProfNumBase2New];
-         end
+         numbers = sprintf(' #%d', ascProfNumNew(idF));
+         fprintf('WARNING: %d ascent new profiles found around date %s (corresponding to profiles%s) => (the #%d is selected)\n', ...
+            length(idF), julian_2_gregorian(profDateBase), numbers, idMin);
+         
+         ascProfNumNew(idMin) = [];
+         ascProfDateNew(idMin) = [];
       end
+   end
+
+   % process the remaining New profiles
+   for idProf = 1:length(ascProfNumNew)
+      profNumNew = ascProfNumNew(idProf);
+      profDateNew = ascProfDateNew(idProf);
+      
+      % find the right place (chronological order) to store the remaining
+      % profile
+      idF = find(ascProfDateBase < profDateNew);
+      if (~isempty(idF))
+         if (idF(end) < length(ascProfDateBase))
+            ascProfNumBase(idF(end)+2:end+1) = ascProfNumBase(idF(end)+1:end);
+            ascProfDateBase(idF(end)+2:end+1) = ascProfDateBase(idF(end)+1:end);
+            ascProfNumBase2New(idF(end)+2:end+1) = ascProfNumBase2New(idF(end)+1:end);
+         end
+         ascProfNumBase(idF(end)+1) = -1;
+         ascProfDateBase(idF(end)+1) = profDateNew;
+         ascProfNumBase2New(idF(end)+1) = profNumNew;
+      else
+         ascProfNumBase = [-1; ascProfNumBase];
+         ascProfDateBase = [profDateNew; ascProfDateBase];
+         ascProfNumBase2New = [profNumNew; ascProfNumBase2New];
+      end         
    end
    
    % compare the mono-profile files
@@ -601,7 +565,7 @@ for idFloat = 1:nbFloats
                sprintf('/%d/profiles/D%d_%03d.nc', floatNum, floatNum, ascProfNumBase2New(idProf))];
             if ~(exist(profFileNameNew, 'file') == 2)
                fprintf('WARNING: expected file name is missing (%s)\n', profFileNameNew);
-               continue
+               continue;
             end
          end
          [profDate, profLocDate, profLon, profLat, ...
@@ -638,7 +602,7 @@ for idFloat = 1:nbFloats
                sprintf('/%d/profiles/D%d_%03d.nc', floatNum, floatNum, ascProfNumBase(idProf))];
             if ~(exist(profFileNameBase, 'file') == 2)
                fprintf('WARNING: expected file name is missing (%s)\n', profFileNameBase);
-               continue
+               continue;
             end
          end
          [profDate, profLocDate, profLon, profLat, ...
@@ -676,7 +640,7 @@ for idFloat = 1:nbFloats
                sprintf('/%d/profiles/D%d_%03d.nc', floatNum, floatNum, ascProfNumBase(idProf))];
             if ~(exist(profFileNameBase, 'file') == 2)
                fprintf('WARNING: expected file name is missing (%s)\n', profFileNameBase);
-               continue
+               continue;
             end
          end
          [profDateBase, profLocDateBase, profLonBase, profLatBase, ...
@@ -691,7 +655,7 @@ for idFloat = 1:nbFloats
                sprintf('/%d/profiles/D%d_%03d.nc', floatNum, floatNum, ascProfNumBase2New(idProf))];
             if ~(exist(profFileNameNew, 'file') == 2)
                fprintf('WARNING: expected file name is missing (%s)\n', profFileNameNew);
-               continue
+               continue;
             end
          end
          if (BASE_PARAM_ONLY == 0)
@@ -734,7 +698,7 @@ for idFloat = 1:nbFloats
             for idLev = 1:size(dataStrBase, 1)
                if (~strcmp(dataStrBase(idLev, :), dataStrNew(idLev, :)))
                   profDataFlag = 1;
-                  break
+                  break;
                end
             end
          end
@@ -807,7 +771,7 @@ fprintf('done (Elapsed time is %.1f seconds)\n', ellapsedTime);
 
 diary off;
 
-return
+return;
 
 % ------------------------------------------------------------------------------
 % Retrieve information on profile dates of a mono-profile NetCDF file.
@@ -867,7 +831,7 @@ for idFile = 1:length(monoProfFiles)
    fileName = monoProfFiles(idFile).name;
    % do not consider b file (if exists)
    if (fileName(1) == 'B')
-      continue
+      continue;
    end
    profFileName = [monoProfDirName fileName];
 
@@ -877,7 +841,7 @@ for idFile = 1:length(monoProfFiles)
       fCdf = netcdf.open(profFileName, 'NC_NOWRITE');
       if (isempty(fCdf))
          fprintf('ERROR: Unable to open NetCDF input file: %s\n', profFileName);
-         return
+         return;
       end
 
       % retrieve information
@@ -910,7 +874,7 @@ for idFile = 1:length(monoProfFiles)
          
          [uJulD, idA, idC] = unique(julD);
          if (length(uJulD) > 1)
-            fprintf('WARNING: %d profiles in the %s NetCDF input file: %s - only the first one is considered\n', ...
+            fprintf('WARNING: %d profiles in the %s NetCDF input file: %s => only the first one is considered\n', ...
                length(uJulD), a_commentStr, profFileName);
          end
                     
@@ -937,7 +901,7 @@ for idFile = 1:length(monoProfFiles)
                a_commentStr, profFileName);
          end
          netcdf.close(fCdf);
-         continue
+         continue;
       end
    end
 end
@@ -957,7 +921,7 @@ o_ascProfNum = profNum(idAsc);
 o_ascProfDate = profDate(idAsc);
 o_ascProfLocDate = profLocDate(idAsc);
 
-return
+return;
 
 % ------------------------------------------------------------------------------
 % Retrieve information on profile of a mono-profile NetCDF file.
@@ -1028,7 +992,7 @@ if (exist(a_profFilePathName, 'file') == 2)
    fCdf = netcdf.open(a_profFilePathName, 'NC_NOWRITE');
    if (isempty(fCdf))
       fprintf('ERROR: Unable to open NetCDF input file: %s\n', a_profFilePathName);
-      return
+      return;
    end
    
    % retrieve information
@@ -1098,7 +1062,7 @@ if (exist(a_profFilePathName, 'file') == 2)
       
       %       if (length(julD) > 2)
       %          fprintf('ERROR: multiple profiles in file: %s\n', a_profFilePathName);
-      %          return
+      %          return;
       %       elseif (length(julD) == 2)
       
       % there are 2 profiles in the file; check that it is because of
@@ -1130,7 +1094,7 @@ if (exist(a_profFilePathName, 'file') == 2)
       end
       %             if (strcmp(paramListStr{1}, paramListStr{2}) == 0)
       %                fprintf('ERROR: multiple profiles in file: %s\n', a_profFilePathName);
-      %                return
+      %                return;
       %             else
       % output parameters
       o_profDate = julD(1);
@@ -1178,7 +1142,7 @@ if (exist(a_profFilePathName, 'file') == 2)
                      if (isempty(find(strcmp(paramName, a_paramList) == 1, 1)))
                         fprintf('INFO: Parameter %s ignored in file %s\n', ...
                            paramName, a_profFilePathName);
-                        continue
+                        continue;
                      end
                   end
                   paramForProf{end+1} = paramName;
@@ -1196,7 +1160,7 @@ if (exist(a_profFilePathName, 'file') == 2)
             fCdfB = netcdf.open(bProfFilePathName, 'NC_NOWRITE');
             if (isempty(fCdfB))
                fprintf('ERROR: Unable to open NetCDF input file: %s\n', bProfFilePathName);
-               return
+               return;
             end
          
             % collect the station parameter list
@@ -1211,7 +1175,7 @@ if (exist(a_profFilePathName, 'file') == 2)
                         if (isempty(find(strcmp(paramName, a_paramList) == 1, 1)))
                            fprintf('INFO: Parameter %s ignored in file %s\n', ...
                               paramName, a_profFilePathName);
-                           continue
+                           continue;
                         end
                      end
                      paramForProfB{end+1} = paramName;
@@ -1323,7 +1287,7 @@ else
    fprintf('ERROR: file not found: %s\n', a_profFilePathName);
 end
 
-return
+return;
 
 % ------------------------------------------------------------------------------
 % Check if a variable (defined by its name) is present in a NetCDF file.
@@ -1356,11 +1320,11 @@ for idVar= 0:nbVars-1
    [varName, varType, varDims, nbAtts] = netcdf.inqVar(a_ncId, idVar);
    if (strcmp(varName, a_varName))
       o_present = 1;
-      break
+      break;
    end
 end
 
-return
+return;
 
 % ------------------------------------------------------------------------------
 % Convert a julian 1950 date to a gregorian date.
@@ -1402,7 +1366,7 @@ for idDate = 1:length(dayNum)
    end
 end
 
-return
+return;
 
 % ------------------------------------------------------------------------------
 % Split of a julian 1950 date in gregorian date parts.
@@ -1478,4 +1442,4 @@ for id = 1:length(a_juld)
    
 end
 
-return
+return;

@@ -1,4 +1,3 @@
-
 % ------------------------------------------------------------------------------
 % Initialize measurement code values.
 %
@@ -20,7 +19,6 @@
 function init_measurement_codes(varargin)
 
 % global measurement codes
-global g_MC_FillValue;
 global g_MC_Launch;
 global g_MC_CycleStart;
 global g_MC_DST;
@@ -36,21 +34,17 @@ global g_MC_DescProfDeepestBin;
 global g_MC_PST;
 global g_MC_SpyAtPark;
 global g_MC_DriftAtPark;
-global g_MC_RafosCorrelationStart;
 global g_MC_DriftAtParkStd;
-global g_MC_DriftAtParkMeanOfDiff;
 global g_MC_DriftAtParkMean;
 global g_MC_MinPresInDriftAtPark;
 global g_MC_MaxPresInDriftAtPark;
 global g_MC_PET;
 global g_MC_RPP;
 global g_MC_SpyInDescToProf;
-global g_MC_Desc2Prof;
 global g_MC_MaxPresInDescToProf;
 global g_MC_DDET;
 global g_MC_DPST;
 global g_MC_SpyAtProf;
-global g_MC_DriftAtProf;
 global g_MC_MinPresInDriftAtProf;
 global g_MC_MaxPresInDriftAtProf;
 global g_MC_AST;
@@ -61,13 +55,8 @@ global g_MC_SpyInAscProf;
 global g_MC_AscProf;
 global g_MC_MedianValueInAscProf;
 global g_MC_LastAscPumpedCtd;
-global g_MC_IceThermalDetectionTrue;
-global g_MC_IceBreakupDetectionFlag;
-global g_MC_IceAscentAbortNum;
-global g_MC_ContinuousProfileStartOrStop;
 global g_MC_AET;
 global g_MC_AET_Float;
-global g_MC_SpyAtSurface;
 global g_MC_TST;
 global g_MC_TST_Float;
 global g_MC_FMT;
@@ -75,14 +64,7 @@ global g_MC_Surface;
 global g_MC_LMT;
 global g_MC_TET;
 global g_MC_Grounded;
-
-global g_MC_InWaterSeriesOfMeasPartOfSurfaceSequenceRelativeToDST;
-global g_MC_InAirSeriesOfMeasPartOfSurfaceSequenceRelativeToDST;
-global g_MC_InWaterSeriesOfMeasPartOfEndOfProfileRelativeToTST;
-global g_MC_InAirSingleMeasRelativeToTST;
-global g_MC_InWaterSeriesOfMeasPartOfSurfaceSequenceRelativeToTST;
-global g_MC_InAirSeriesOfMeasPartOfSurfaceSequenceRelativeToTST;
-global g_MC_InAirSingleMeasRelativeToTET;
+global g_MC_InAirSingleMeas;
 
 % global time status
 global g_JULD_STATUS_fill_value;
@@ -104,7 +86,6 @@ global g_RPP_STATUS_6;
 global g_RPP_STATUS_7;
 
 % measurement code values
-g_MC_FillValue = 99999;
 g_MC_Launch = 0;
 g_MC_CycleStart = 89;
 g_MC_DST = 100;
@@ -120,21 +101,17 @@ g_MC_MinPresInDriftAtParkSupportMeas = 287;
 g_MC_MaxPresInDriftAtParkSupportMeas = 288;
 g_MC_SpyAtPark = 289;
 g_MC_DriftAtPark = 290;
-g_MC_RafosCorrelationStart = 290; % for TRAJ_AUX of Apex APF11 iridium floats
 g_MC_DriftAtParkStd = 294;
-g_MC_DriftAtParkMeanOfDiff = 293;
 g_MC_DriftAtParkMean = 296;
 g_MC_MinPresInDriftAtPark = 297;
 g_MC_MaxPresInDriftAtPark = 298;
 g_MC_PET = 300;
 g_MC_RPP = 301;
 g_MC_SpyInDescToProf = 389;
-g_MC_Desc2Prof = 390;
 g_MC_MaxPresInDescToProf = 398;
 g_MC_DDET = 400;
 g_MC_DPST = 450;
 g_MC_SpyAtProf = 489;
-g_MC_DriftAtProf = 490;
 g_MC_MinPresInDriftAtProf = 497;
 g_MC_MaxPresInDriftAtProf = 498;
 g_MC_AST = 500;
@@ -145,13 +122,8 @@ g_MC_SpyInAscProf = 589;
 g_MC_AscProf = 590;
 g_MC_MedianValueInAscProf = 595;
 g_MC_LastAscPumpedCtd = 599;
-g_MC_ContinuousProfileStartOrStop = 599; % for TRAJ_AUX of Apex APF11 iridium floats
-g_MC_IceThermalDetectionTrue = 599; % for TRAJ_AUX of Apex APF11 iridium floats
-g_MC_IceBreakupDetectionFlag = 599; % for TECH_AUX of Apex APF11 iridium floats
-g_MC_IceAscentAbortNum = 599; % for TECH_AUX of Apex APF11 iridium float
 g_MC_AET = 600;
 g_MC_AET_Float = 602;
-g_MC_SpyAtSurface = 689;
 g_MC_TST = 700;
 g_MC_TST_Float = 701;
 g_MC_FMT = 702;
@@ -159,14 +131,7 @@ g_MC_Surface = 703;
 g_MC_LMT = 704;
 g_MC_TET = 800;
 g_MC_Grounded = 901;
-
-g_MC_InWaterSeriesOfMeasPartOfSurfaceSequenceRelativeToDST = 110;
-g_MC_InAirSeriesOfMeasPartOfSurfaceSequenceRelativeToDST = 111;
-g_MC_InWaterSeriesOfMeasPartOfEndOfProfileRelativeToTST = 690;
-g_MC_InAirSingleMeasRelativeToTST = 699;
-g_MC_InWaterSeriesOfMeasPartOfSurfaceSequenceRelativeToTST = 710;
-g_MC_InAirSeriesOfMeasPartOfSurfaceSequenceRelativeToTST = 711;
-g_MC_InAirSingleMeasRelativeToTET = 799;
+g_MC_InAirSingleMeas = 1099;
 
 % status values
 g_JULD_STATUS_fill_value = ' ';
@@ -186,4 +151,4 @@ g_RPP_STATUS_5 = '5';
 g_RPP_STATUS_6 = '6';
 g_RPP_STATUS_7 = '7';
 
-return
+return;

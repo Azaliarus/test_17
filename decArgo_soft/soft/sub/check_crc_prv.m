@@ -21,6 +21,10 @@
 % ------------------------------------------------------------------------------
 function [o_crcCheckOk] = check_crc_prv(a_sensor, a_decoderId)
 
+% o_crcCheckOk = 1;
+% a=1
+% return;
+
 switch (a_decoderId)
    case {1, 3, 4, 11, 12, 17, 19, 24, 25, 27, 28, 29, 30, 31, 32}
 
@@ -40,7 +44,7 @@ switch (a_decoderId)
          a_decoderId);
 end
 
-return
+return;
 
 % ------------------------------------------------------------------------------
 % Compute PROVOR CRC for given data.
@@ -85,4 +89,4 @@ end
 
 o_computedCrc = crc;
 
-return
+return;

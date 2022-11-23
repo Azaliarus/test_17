@@ -80,12 +80,12 @@ for idNewDir = 1:nbNewDirs
                   end
                   
                   % move the new file in the base dir
-                  move_file(newFilePathName, filePathName);
+                  movefile(newFilePathName, filePathName);
                end
             end
          else
             % move the new dir in the base dir
-            move_file(newDirPathName, DIR_BASE_ARGOS_FILES);
+            movefile(newDirPathName, DIR_BASE_ARGOS_FILES);
          end
       end
    end
@@ -96,4 +96,4 @@ fprintf('done (Elapsed time is %.1f seconds)\n', ellapsedTime);
 
 diary off;
 
-return
+return;

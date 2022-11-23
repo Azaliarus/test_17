@@ -49,30 +49,30 @@ for id = 1:length(idF)
       
       cyNumBefore = -1;
       idFBefore = find(([g_decArgo_iridiumMailData.cycleNumber] ~= -1) & ...
-         ([g_decArgo_iridiumMailData.timeOfSessionJuld] <= g_decArgo_iridiumMailData(idF(id)).timeOfSessionJuld), 1, 'last');
+         ([g_decArgo_iridiumMailData.timeOfSessionJuld] <= g_decArgo_iridiumMailData(idF(id)).timeOfSessionJuld));
       if (~isempty(idFBefore))
-         cyNumBefore = g_decArgo_iridiumMailData(idFBefore).cycleNumber;
+         cyNumBefore = g_decArgo_iridiumMailData(idFBefore(end)).cycleNumber;
       end
       cyNumAfter = -1;
       idFAfter = find(([g_decArgo_iridiumMailData.cycleNumber] ~= -1) & ...
-         ([g_decArgo_iridiumMailData.timeOfSessionJuld] >= g_decArgo_iridiumMailData(idF(id)).timeOfSessionJuld), 1, 'first');
+         ([g_decArgo_iridiumMailData.timeOfSessionJuld] >= g_decArgo_iridiumMailData(idF(id)).timeOfSessionJuld));
       if (~isempty(idFAfter))
-         cyNumAfter = g_decArgo_iridiumMailData(idFAfter).cycleNumber;
+         cyNumAfter = g_decArgo_iridiumMailData(idFAfter(1)).cycleNumber;
       end
-
-      if (idF(id) == 1)
-         if (cyNumAfter ~= -1)
-            g_decArgo_iridiumMailData(idF(id)).cycleNumber = cyNumAfter;
-         end
-      elseif ((idF(id) > 1) && (idF(id) < length(g_decArgo_iridiumMailData)))
-         %          if ((cyNumBefore ~= -1) && (cyNumAfter ~= -1) && (idF(id)-1 == idFBefore) && (idF(id)+1 == idFAfter))
-         if ((cyNumBefore ~= -1) && (cyNumAfter ~= -1))
-            if (abs(g_decArgo_iridiumMailData(idF(id)).timeOfSessionJuld - g_decArgo_iridiumMailData(idFBefore).timeOfSessionJuld) < ...
-                  abs(g_decArgo_iridiumMailData(idF(id)).timeOfSessionJuld - g_decArgo_iridiumMailData(idFAfter).timeOfSessionJuld))
+      if ((idF(id) > 1) && (idF(id) < length(g_decArgo_iridiumMailData)))
+         if (abs(g_decArgo_iridiumMailData(idF(id)).timeOfSessionJuld - g_decArgo_iridiumMailData(idF(id)-1).timeOfSessionJuld) < ...
+               abs(g_decArgo_iridiumMailData(idF(id)).timeOfSessionJuld - g_decArgo_iridiumMailData(idF(id)+1).timeOfSessionJuld))
+            if (cyNumBefore ~= -1)
                g_decArgo_iridiumMailData(idF(id)).cycleNumber = cyNumBefore;
-            else
+            end
+         else
+            if (cyNumAfter ~= -1)
                g_decArgo_iridiumMailData(idF(id)).cycleNumber = cyNumAfter;
             end
+         end
+      elseif (idF(id) == 1)
+         if (cyNumAfter ~= -1)
+            g_decArgo_iridiumMailData(idF(id)).cycleNumber = cyNumAfter;
          end
       end
       
@@ -103,4 +103,4 @@ for id = 1:length(idF)
    end
 end
 
-return
+return;

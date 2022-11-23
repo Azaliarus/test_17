@@ -2,11 +2,10 @@
 % Set the float configuration used to process the data of given profiles.
 %
 % SYNTAX :
-%  set_float_config_ir_sbd_nva(a_cyNum, a_deepCycle)
+%  set_float_config_ir_sbd_nva(a_cyNum)
 %
 % INPUT PARAMETERS :
-%   a_cyNum     : cycle number associated to the configuration
-%   a_deepCycle : deep cycle flag
+%   a_cyNum : cycle number associated to the configuration
 %
 % OUTPUT PARAMETERS :
 %
@@ -18,7 +17,7 @@
 % RELEASES :
 %   04/28/2016 - RNU - creation
 % ------------------------------------------------------------------------------
-function set_float_config_ir_sbd_nva(a_cyNum, a_deepCycle)
+function set_float_config_ir_sbd_nva(a_cyNum)
 
 % current float WMO number
 global g_decArgo_floatNum;
@@ -26,15 +25,8 @@ global g_decArgo_floatNum;
 % float configuration
 global g_decArgo_floatConfig;
 
-
-% if it is a surface cycle the cycle could be already in the configuration
-% (second Iridium session or EOL)
-if (a_deepCycle == 0)
-   idUsedConf = find(g_decArgo_floatConfig.USE.CYCLE == a_cyNum);
-   if (~isempty(idUsedConf))
-      return
-   end
-end
+% flag to detect a second Iridium session
+global g_decArgo_secondIridiumSession;
 
 
 % update the configuration
@@ -65,7 +57,7 @@ end
 [configNum] = config_exists_ir_sbd_argos( ...
    currentConfig, ...
    g_decArgo_floatConfig.DYNAMIC.NUMBER, ...
-   g_decArgo_floatConfig.DYNAMIC.VALUES, []);
+   g_decArgo_floatConfig.DYNAMIC.VALUES);
 
 % if configNum == -1 the new configuration doesn't exist
 % if configNum == 0 the new configuration is identical to launch configuration,
@@ -77,8 +69,8 @@ idUsedConf = find(g_decArgo_floatConfig.USE.CYCLE == a_cyNum);
 
 if (~isempty(idUsedConf))
    
-   if (a_cyNum > 0)
-      fprintf('WARNING: Float #%d: config already exists for cycle #%d - updating the current one\n', ...
+   if (g_decArgo_secondIridiumSession == 0)
+      fprintf('WARNING: Float #%d: config already exists for cycle #%d => updating the current one\n', ...
          g_decArgo_floatNum, a_cyNum);
    end
    
@@ -109,6 +101,6 @@ else
    
 end
      
-% create_csv_to_print_config_ir_sbd('setConfig_', 1, g_decArgo_floatConfig);
+% print_config_in_csv_file_ir_sbd('setConfig_', 1, g_decArgo_floatConfig);
 
-return
+return;

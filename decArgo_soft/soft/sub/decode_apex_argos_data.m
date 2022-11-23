@@ -4,11 +4,11 @@
 % SYNTAX :
 % function [o_tabProfiles, ...
 %    o_tabTrajNMeas, o_tabTrajNCycle, ...
-%    o_tabNcTechIndex, o_tabNcTechVal, o_tabTechAuxNMeas, ...
+%    o_tabNcTechIndex, o_tabNcTechVal, ...
 %    o_structConfig] = decode_apex_argos_data( ...
 %    a_floatNum, a_cycleList, a_excludedCycleList, ...
 %    a_decoderId, a_floatArgosId, ...
-%    a_frameLength, a_floatEndDate)
+%    a_frameLength, a_floatSurfData, a_floatEndDate)
 %
 % INPUT PARAMETERS :
 %   a_floatNum            : float WMO number
@@ -17,16 +17,16 @@
 %   a_decoderId           : float decoder Id
 %   a_floatArgosId        : float PTT number
 %   a_frameLength         : Argos data frame length
+%   a_floatSurfData       : float surface data structure
 %   a_floatEndDate      : end date of the data to process
 %
 % OUTPUT PARAMETERS :
-%   o_tabProfiles     : decoded profiles
-%   o_tabTrajNMeas    : decoded trajectory N_MEASUREMENT data
-%   o_tabTrajNCycle   : decoded trajectory N_CYCLE data
-%   o_tabNcTechIndex  : decoded technical index information
-%   o_tabNcTechVal    : decoded technical data
-%   o_tabTechAuxNMeas : decoded technical N_MEASUREMENT AUX data
-%   o_structConfig    : NetCDF float configuration
+%   o_tabProfiles    : decoded profiles
+%   o_tabTrajNMeas   : decoded trajectory N_MEASUREMENT data
+%   o_tabTrajNCycle  : decoded trajectory N_CYCLE data
+%   o_tabNcTechIndex : decoded technical index information
+%   o_tabNcTechVal   : decoded technical data
+%   o_structConfig   : NetCDF float configuration
 %
 % EXAMPLES :
 %
@@ -38,11 +38,11 @@
 % ------------------------------------------------------------------------------
 function [o_tabProfiles, ...
    o_tabTrajNMeas, o_tabTrajNCycle, ...
-   o_tabNcTechIndex, o_tabNcTechVal, o_tabTechAuxNMeas, ...
+   o_tabNcTechIndex, o_tabNcTechVal, ...
    o_structConfig] = decode_apex_argos_data( ...
    a_floatNum, a_cycleList, a_excludedCycleList, ...
    a_decoderId, a_floatArgosId, ...
-   a_frameLength, a_floatEndDate)
+   a_frameLength, a_floatSurfData, a_floatEndDate)
 
 % output parameters initialization
 o_tabProfiles = [];
@@ -50,7 +50,6 @@ o_tabTrajNMeas = [];
 o_tabTrajNCycle = [];
 o_tabNcTechIndex = [];
 o_tabNcTechVal = [];
-o_tabTechAuxNMeas = [];
 o_structConfig = [];
 
 % current float WMO number
@@ -74,29 +73,17 @@ global g_decArgo_dateDef;
 global g_decArgo_argosLonDef;
 global g_decArgo_argosLatDef;
 
-% float configuration
-global g_decArgo_floatConfig;
-
 % configuration creation flag
 global g_decArgo_configDone;
 g_decArgo_configDone = 0;
 
 % cycle timings storage
 global g_decArgo_timeData;
-g_decArgo_timeData = get_apx_argos_float_time_init_struct(a_decoderId);
+g_decArgo_timeData = get_apx_float_time_init_struct(a_decoderId);
 
 % pressure offset storage
 global g_decArgo_presOffsetData;
 g_decArgo_presOffsetData = get_apx_pres_offset_init_struct;
-
-% array to store surface data of Argos floats
-global g_decArgo_floatSurfData;
-
-% TRAJ 3.2 file generation flag
-global g_decArgo_generateNcTraj32;
-
-% Argos error ellipses storage
-global g_decArgo_addErrorEllipses;
 
 
 % inits for output CSV file
@@ -107,9 +94,6 @@ end
 
 % initialize RT offset and DO calibration coefficients from JSON meta-data file
 init_float_config_apx_argos(a_decoderId);
-if (isempty(g_decArgo_floatConfig))
-   return
-end
 
 % inits for output NetCDF file
 decArgoConfParamNames = [];
@@ -136,9 +120,9 @@ for idCy = 1:length(a_cycleList)
    
    % update the float surface data structure with the previous excluded cycles
    if (~isempty(find((a_excludedCycleList < cycleNum) & ...
-         (a_excludedCycleList > g_decArgo_floatSurfData.updatedForCycleNumber), 1)))
-      [g_decArgo_floatSurfData] = update_previous_cycle_surf_data( ...
-         g_decArgo_floatSurfData, a_floatArgosId, a_floatNum, a_frameLength, ...
+         (a_excludedCycleList > a_floatSurfData.updatedForCycleNumber), 1)))
+      [a_floatSurfData] = update_previous_cycle_surf_data( ...
+         a_floatSurfData, a_floatArgosId, a_floatNum, a_frameLength, ...
          a_excludedCycleList, cycleNum);
    end
    
@@ -147,7 +131,7 @@ for idCy = 1:length(a_cycleList)
    if (isempty(argosPathFileName))
       fprintf('INFO: Float #%d Cycle #%d: not processed according to float end date restriction\n', ...
          g_decArgo_floatNum, g_decArgo_cycleNum);
-      continue
+      continue;
    end
    
    % read the Argos file and select the data
@@ -158,7 +142,7 @@ for idCy = 1:length(a_cycleList)
    
    % retrieve the previous cycle surface information
    [prevCycleNum, lastLocDate, lastLocLon, lastLocLat, lastMsgDate] = ...
-      get_previous_cycle_surf_data(g_decArgo_floatSurfData, cycleNum);
+      get_previous_cycle_surf_data(a_floatSurfData, cycleNum);
    
    % compute the JAMSTEC QC for the cycle locations
    lastLocDateOfPrevCycle = g_decArgo_dateDef;
@@ -189,60 +173,53 @@ for idCy = 1:length(a_cycleList)
    cycleSurfData.argosLocQc = argosLocQc;
    
    % update the float surface data structure
-   g_decArgo_floatSurfData.cycleNumbers = [g_decArgo_floatSurfData.cycleNumbers cycleNum];
-   g_decArgo_floatSurfData.cycleData = [g_decArgo_floatSurfData.cycleData cycleSurfData];
-   g_decArgo_floatSurfData.updatedForCycleNumber = cycleNum;
+   a_floatSurfData.cycleNumbers = [a_floatSurfData.cycleNumbers cycleNum];
+   a_floatSurfData.cycleData = [a_floatSurfData.cycleData cycleSurfData];
+   a_floatSurfData.updatedForCycleNumber = cycleNum;
    
    % decode the selected data according to decoder Id
    
-   % 071412, 062608, 061609, 021009, 061810, 093008, 082213,
-   % 021208, 032213, 110613&090413, 121512, 110813, 071807, 082807, 020110,
-   % 090810, 2.8.0.A, 2.10.4.A
-   if (ismember(a_decoderId, [1001, 1002, 1003, 1004, 1005, 1006, 1007, ...
-         1008, 1009, 1010, 1011, 1012, 1013, 1014, 1015, 1016, ...
-         1021, 1022]))
+   % 071412, 062608, 061609, 021009, 061810, 093008, 082213, 021208,
+   % 032213, 110613&090413, 121512, 110813
+   if (ismember(a_decoderId, [1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008, 1009, 1010, 1011, 1012]))
       
       [miscInfo, auxInfo, profData, profNstData, parkData, astData, surfData, metaData, techData, trajData, ...
-         timeInfo, tabTechAuxNMeas, g_decArgo_timeData, g_decArgo_presOffsetData] = ...
-         decode_apx_argos(argosDataData, argosDataUsed, argosDataDate, sensorData, sensorDate, ...
+         timeInfo, g_decArgo_timeData, g_decArgo_presOffsetData] = ...
+         decode_apx(argosDataData, argosDataUsed, argosDataDate, sensorData, sensorDate, ...
          cycleNum, g_decArgo_timeData, g_decArgo_presOffsetData, a_decoderId);
       
       % create the configuration
       if (g_decArgo_configDone == 0)
          create_float_config_apx_argos(metaData, a_decoderId);
-         if (isempty(g_decArgo_floatConfig))
-            return
-         end
-         
          if (~isempty(g_decArgo_outputCsvFileId))
-            if (ismember(a_decoderId, [1006 1008 1009, 1013, 1014, 1015, 1016]))
+            if (ismember(a_decoderId, [1006 1008 1009]))
                print_calib_coef_in_csv_file(a_decoderId);
             end
          end
       end
       
       % apply pressure adjustment
-      [miscInfo, profData, profNstData, parkData, astData, surfData, trajData, g_decArgo_timeData, g_decArgo_presOffsetData] = ...
-         adjust_pres_from_surf_offset_apx_argos(miscInfo, profData, profNstData, parkData, astData, surfData, trajData, ...
-         g_decArgo_timeData, cycleNum, g_decArgo_presOffsetData);
+      [miscInfo, profData, profNstData, parkData, astData, surfData, g_decArgo_timeData, g_decArgo_presOffsetData] = ...
+         adjust_pres_from_surf_offset(miscInfo, profData, profNstData, parkData, astData, surfData, ...
+         g_decArgo_timeData, cycleNum, g_decArgo_presOffsetData, a_decoderId);
       
       % compute the times of the cycle
       finalStep = 0;
-      if ((idCy == length(a_cycleList)) || ~isempty(g_decArgo_outputCsvFileId))
-         %       if ((idCy == length(a_cycleList)))
+      %          if ((idCy == length(a_cycleList)) || ~isempty(g_decArgo_outputCsvFileId))
+      if ((idCy == length(a_cycleList)))
          finalStep = 1;
       end
       g_decArgo_timeData = compute_apx_times(g_decArgo_timeData, timeInfo, cycleNum, ...
          argosDataData, argosDataUsed, argosDataDate, cycleSurfData, a_decoderId, finalStep);
       
       % update surface times in the float surface data structure
-      g_decArgo_floatSurfData = update_surf_data(g_decArgo_floatSurfData, g_decArgo_timeData, cycleNum);
+      a_floatSurfData = update_surf_data(a_floatSurfData, g_decArgo_timeData, cycleNum);
       
       if (~isempty(g_decArgo_outputCsvFileId))
          
          % output CSV file
          
-         print_misc_info_in_csv_file(miscInfo, '');
+         print_misc_info_in_csv_file(miscInfo);
          print_park_data_in_csv_file(parkData);
          print_ast_data_in_csv_file(astData);
          print_prof_data_in_csv_file(profData);
@@ -261,8 +238,8 @@ for idCy = 1:length(a_cycleList)
          % PROF NetCDF file
          
          % process profile data for PROF NetCDF file
-         [cycleProfile] = process_apx_argos_profile(profData, profNstData, cycleNum, ...
-            g_decArgo_timeData, g_decArgo_presOffsetData, g_decArgo_floatSurfData, a_decoderId);
+         [cycleProfile] = process_apx_profile(profData, profNstData, cycleNum, ...
+            g_decArgo_timeData, g_decArgo_presOffsetData, a_floatSurfData, a_decoderId);
          
          print = 0;
          if (print == 1)
@@ -298,10 +275,10 @@ for idCy = 1:length(a_cycleList)
          
          % process trajectory data for TRAJ NetCDF file
          % (store all but times in the TRAJ structures)
-         [tabTrajNMeas, tabTrajNCycle] = process_trajectory_data_apx_argos( ...
+         [tabTrajNMeas, tabTrajNCycle] = process_trajectory_data_apx( ...
             cycleNum, ...
-            addLaunchData, g_decArgo_floatSurfData, ...
-            trajData, parkData, astData, profData, surfData, g_decArgo_timeData, a_decoderId);
+            addLaunchData, a_floatSurfData, ...
+            trajData, parkData, astData, profData, surfData, g_decArgo_timeData, g_decArgo_presOffsetData, a_decoderId);
          
          o_tabTrajNMeas = [o_tabTrajNMeas; tabTrajNMeas];
          o_tabTrajNCycle = [o_tabTrajNCycle; tabTrajNCycle];
@@ -310,7 +287,7 @@ for idCy = 1:length(a_cycleList)
          % TECH NetCDF file
          
          % store technical data for output NetCDF files
-         store_tech_data_for_nc_apx_argos(techData);
+         store_tech_data_for_nc_apx(techData);
          
          % update NetCDF technical data
          update_technical_data_argos_sbd(a_decoderId);
@@ -321,10 +298,6 @@ for idCy = 1:length(a_cycleList)
          g_decArgo_outputNcParamIndex = [];
          g_decArgo_outputNcParamValue = [];
          
-         if (~isempty(tabTechAuxNMeas))
-            o_tabTechAuxNMeas = [o_tabTechAuxNMeas; tabTechAuxNMeas];
-         end
-
       end
       
    else
@@ -341,14 +314,11 @@ if (isempty(g_decArgo_outputCsvFileId))
    
    % output NetCDF files
    
-   % if trajectory data is empty (no transmission from the float) add float
-   % launch date and position in trajectory data structure
-   if (isempty(o_tabTrajNMeas))
-      o_tabTrajNMeas = add_launch_data_in_traj(g_decArgo_floatSurfData);
-   end
-   
-   % add interpolated/extrapolated profile locations
-   [o_tabProfiles] = fill_empty_profile_locations_argos(g_decArgo_floatSurfData, o_tabProfiles);
+   % fill empty profile locations with interpolated positions
+   % (profile locations have been computed cycle by cycle, we will check if
+   % some empty profile locations can not be determined using interpolations of the
+   % surface trajectory)
+   [o_tabProfiles] = fill_empty_profile_locations_argos(a_floatSurfData, o_tabProfiles);
    
    % process trajectory data for TRAJ NetCDF file
    % (store times in the TRAJ structures)
@@ -360,7 +330,7 @@ if (isempty(g_decArgo_outputCsvFileId))
       addLaunchData = 0;
    end
    [o_tabTrajNMeas, o_tabTrajNCycle] = process_trajectory_data_time_apx( ...
-      addLaunchData, g_decArgo_floatSurfData, ...
+      addLaunchData, a_floatSurfData, ...
       g_decArgo_timeData, g_decArgo_presOffsetData, o_tabTrajNMeas, o_tabTrajNCycle);
    
    % sort trajectory data structures according to the predefined measurement
@@ -368,32 +338,12 @@ if (isempty(g_decArgo_outputCsvFileId))
    [o_tabTrajNMeas] = sort_trajectory_data(o_tabTrajNMeas, a_decoderId);
    
    % update the output cycle number in the structures
-   [o_tabProfiles, o_tabTrajNMeas, o_tabTrajNCycle, ~, o_tabTechAuxNMeas] = ...
-      update_output_cycle_number_ir_sbd( ...
-      o_tabProfiles, o_tabTrajNMeas, o_tabTrajNCycle, [], o_tabTechAuxNMeas);
-
-   if (g_decArgo_addErrorEllipses == 1)
-      % add Argos error ellipses
-      [o_tabTrajNMeas] = add_argos_error_ellipses(a_floatArgosId, o_tabTrajNMeas);
-   end
+   [o_tabProfiles, o_tabTrajNMeas, o_tabTrajNCycle] = update_output_cycle_number_argos( ...
+      o_tabProfiles, o_tabTrajNMeas, o_tabTrajNCycle);
    
-   % update N_CYCLE arrays so that N_CYCLE and N_MEASUREMENT arrays are
-   % consistent
-   [o_tabTrajNMeas, o_tabTrajNCycle] = set_n_cycle_vs_n_meas_consistency(o_tabTrajNMeas, o_tabTrajNCycle);
-
    % create output float configuration
-   [o_structConfig] = create_output_float_config_argos(decArgoConfParamNames, ncConfParamNames, a_decoderId);
-   
-   % perform PARAMETER adjustment
-   [o_tabProfiles, o_tabTrajNMeas, o_tabTrajNCycle] = ...
-      compute_rt_adjusted_param(o_tabProfiles, o_tabTrajNMeas, o_tabTrajNCycle, g_decArgo_floatSurfData.launchDate, 1, a_decoderId);
-
-   if (g_decArgo_generateNcTraj32 ~= 0)
-      % report profile PARAMETER adjustments in TRAJ data
-      [o_tabTrajNMeas, o_tabTrajNCycle] = report_rt_adjusted_profile_data_in_trajectory( ...
-         o_tabTrajNMeas, o_tabTrajNCycle, o_tabProfiles);
-   end
+   [o_structConfig] = create_output_float_config_argos(decArgoConfParamNames, ncConfParamNames);
    
 end
 
-return
+return;

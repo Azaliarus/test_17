@@ -2,16 +2,12 @@
 % Create NetCDF TECH file .
 %
 % SYNTAX :
-%  create_nc_tech_file_3_1(a_decoderId, ...
-%    a_tabNcTechIndex, a_tabNcTechVal, a_tabTechNMeas, a_tabTechAuxNMeas, ...
-%    a_tabNcTechLabelInfo, a_metaDataFromJson)
+%  create_nc_tech_file_3_1( ...
+%    a_tabNcTechIndex, a_tabNcTechVal, a_tabNcTechLabelInfo, a_metaDataFromJson)
 %
 % INPUT PARAMETERS :
-%   a_decoderId          : float decoder Id
 %   a_tabNcTechIndex     : index information on technical data
-%   a_tabNcTechVal       : values of technical data
-%   a_tabTechNMeas       : values of technical parameter data
-%   a_tabTechAuxNMeas    : values of technical parameter AUX data
+%   a_tabNcTechVal       : values of thecnical data
 %   a_tabNcTechLabelInfo : additional information for technical labels
 %   a_metaDataFromJson   : additional information retrieved from JSON meta-data
 %                          file
@@ -26,9 +22,8 @@
 % RELEASES :
 %   06/22/2014 - RNU - creation
 % ------------------------------------------------------------------------------
-function create_nc_tech_file_3_1(a_decoderId, ...
-   a_tabNcTechIndex, a_tabNcTechVal, a_tabTechNMeas, a_tabTechAuxNMeas, ...
-   a_tabNcTechLabelInfo, a_metaDataFromJson)
+function create_nc_tech_file_3_1( ...
+   a_tabNcTechIndex, a_tabNcTechVal, a_tabNcTechLabelInfo, a_metaDataFromJson)
 
 % current float WMO number
 global g_decArgo_floatNum;
@@ -42,6 +37,9 @@ global g_decArgo_outputNcParamId;
 
 % output NetCDF technical parameter labels
 global g_decArgo_outputNcParamLabel;
+
+% output NetCDF technical parameter labels
+global g_decArgo_outputNcParamLabelBis;
 
 % decoder version
 global g_decArgo_decoderVersion;
@@ -57,35 +55,9 @@ global g_decArgo_reportStruct;
 % verbose mode flag
 VERBOSE_MODE = 1;
 
-% consider only Argo TECH labels
-idToDel = zeros(size(a_tabNcTechIndex, 1), 1);
-techAuxData = 0;
-for idPar = 1:size(a_tabNcTechIndex, 1)
-   idParamName = find(g_decArgo_outputNcParamId == a_tabNcTechIndex(idPar, 5));
-   paramName = char(g_decArgo_outputNcParamLabel{idParamName});
-   if (strncmp(paramName, 'TECH_AUX', length('TECH_AUX')))
-      idToDel(idPar) = 1;
-      techAuxData = 1;
-   end   
-   if (strncmp(paramName, 'META_', length('META_')))
-      idToDel(idPar) = 1;
-   end
-end
-tabNcTechIndex = a_tabNcTechIndex;
-tabNcTechVal = a_tabNcTechVal;
-tabNcTechIndex(find(idToDel == 1), :) = [];
-tabNcTechVal(find(idToDel == 1)) = [];
-
-% create/update update NetCDF TECH_AUX file
-if ((techAuxData == 1) || (~isempty(a_tabTechAuxNMeas)))
-   create_nc_tech_aux_file(a_decoderId, ...
-      a_tabNcTechIndex, a_tabNcTechVal, a_tabTechAuxNMeas, ...
-      a_tabNcTechLabelInfo, a_metaDataFromJson);
-end
-
 % no data to save
-if (isempty(tabNcTechIndex) && isempty(a_tabTechNMeas))
-   return
+if (isempty(a_tabNcTechIndex))
+   return;
 end
 
 % create output file pathname
@@ -131,7 +103,7 @@ currentDate = datestr(now_utc, 'yyyymmddHHMMSS');
 fCdf = netcdf.create(ncPathFileName, 'NC_CLOBBER');
 if (isempty(fCdf))
    fprintf('ERROR: Unable to create NetCDF output file: %s\n', ncPathFileName);
-   return
+   return;
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -148,12 +120,6 @@ string8DimId = netcdf.defDim(fCdf, 'STRING8', 8);
 string4DimId = netcdf.defDim(fCdf, 'STRING4', 4);
 string2DimId = netcdf.defDim(fCdf, 'STRING2', 2);
 
-timeseriesFlag = 0;
-if (~isempty(a_tabTechNMeas) && (sum(cellfun(@length, {a_tabTechNMeas.tabMeas})) ~= 0))
-   nTechMeasurementDimId = netcdf.defDim(fCdf, 'N_TECH_MEASUREMENT', sum(cellfun(@length, {a_tabTechNMeas.tabMeas})));
-   timeseriesFlag = 1;
-end
-
 nTechParamDimId = netcdf.defDim(fCdf, 'N_TECH_PARAM', netcdf.getConstant('NC_UNLIMITED'));
 
 % create global attributes
@@ -163,7 +129,7 @@ institution = 'CORIOLIS';
 idVal = find(strcmp('DATA_CENTRE', a_metaDataFromJson) == 1);
 if (~isempty(idVal))
    dataCentre = char(a_metaDataFromJson{idVal+1});
-   [institution] = get_institution_from_data_centre(dataCentre, 1);
+   [institution] = get_institution_from_data_centre(dataCentre);
 end
 netcdf.putAtt(fCdf, globalVarId, 'institution', institution);
 netcdf.putAtt(fCdf, globalVarId, 'source', 'Argo float');
@@ -178,7 +144,6 @@ netcdf.putAtt(fCdf, globalVarId, 'history', globalHistoryText);
 netcdf.putAtt(fCdf, globalVarId, 'references', 'http://www.argodatamgt.org/Documentation');
 netcdf.putAtt(fCdf, globalVarId, 'user_manual_version', '3.1');
 netcdf.putAtt(fCdf, globalVarId, 'Conventions', 'Argo-3.1 CF-1.6');
-netcdf.putAtt(fCdf, globalVarId, 'decoder_version', sprintf('CODA_%s', g_decArgo_decoderVersion));
 
 % create general information variables
 platformNumberVarId = netcdf.defVar(fCdf, 'PLATFORM_NUMBER', 'NC_CHAR', string8DimId);
@@ -228,71 +193,6 @@ netcdf.putAtt(fCdf, cycleNumberVarId, 'long_name', 'Float cycle number');
 netcdf.putAtt(fCdf, cycleNumberVarId, 'conventions', '0...N, 0 : launch cycle (if exists), 1 : first complete cycle');
 netcdf.putAtt(fCdf, cycleNumberVarId, '_FillValue', int32(99999));
 
-% create timeseries technical variables
-if (timeseriesFlag)
-   
-   juldVarId = netcdf.defVar(fCdf, 'JULD', 'NC_DOUBLE', nTechMeasurementDimId);
-   netcdf.putAtt(fCdf, juldVarId, 'long_name', 'Julian day (UTC) of each measurement');
-   netcdf.putAtt(fCdf, juldVarId, 'standard_name', 'time');
-   netcdf.putAtt(fCdf, juldVarId, 'units', 'days since 1950-01-01 00:00:00 UTC');
-   netcdf.putAtt(fCdf, juldVarId, 'conventions', 'Relative julian days with decimal part (as parts of day)');
-   [resNominal, resComment] = get_param_comment_on_resolution('JULD', a_decoderId);
-   netcdf.putAtt(fCdf, juldVarId, 'resolution', resNominal);
-   netcdf.putAtt(fCdf, juldVarId, '_FillValue', double(999999));
-   netcdf.putAtt(fCdf, juldVarId, 'axis', 'T');
-
-   cycleNumberMeasVarId = netcdf.defVar(fCdf, 'CYCLE_NUMBER_MEAS', 'NC_INT', nTechMeasurementDimId);
-   
-   measurementCodeVarId = netcdf.defVar(fCdf, 'MEASUREMENT_CODE', 'NC_INT', nTechMeasurementDimId);
-   netcdf.putAtt(fCdf, measurementCodeVarId, 'long_name', 'Flag referring to a measurement event in the cycle');
-   netcdf.putAtt(fCdf, measurementCodeVarId, 'conventions', 'Argo reference table 15');
-   netcdf.putAtt(fCdf, measurementCodeVarId, '_FillValue', int32(99999));
-   
-   % parameter variables
-   paramNameDone = [];
-   for idNM = 1:length(a_tabTechNMeas)
-      nMeas = a_tabTechNMeas(idNM);
-      for idM = 1:length(nMeas.tabMeas)
-         meas = nMeas.tabMeas(idM);
-         measParamList = meas.paramList;
-         for idParam = 1:length(measParamList)
-            measParam = measParamList(idParam);
-            measParamName = measParam.name;
-            measParamNcType = measParam.paramNcType;
-            
-            if (isempty(find(strcmp(measParamName, paramNameDone), 1)))
-               
-               paramNameDone = [paramNameDone; {measParamName}];
-               
-               % create parameter variable and attributes
-               if (~var_is_present_dec_argo(fCdf, measParamName))
-                  
-                  measParamVarId = netcdf.defVar(fCdf, measParamName, measParamNcType, nTechMeasurementDimId);
-                  
-                  if (~isempty(measParam.longName))
-                     netcdf.putAtt(fCdf, measParamVarId, 'long_name', measParam.longName);
-                  end
-                  if (~isempty(measParam.fillValue))
-                     netcdf.putAtt(fCdf, measParamVarId, '_FillValue', measParam.fillValue);
-                  end
-                  if (~isempty(measParam.units))
-                     netcdf.putAtt(fCdf, measParamVarId, 'units', measParam.units);
-                  end
-                  
-                  if (~isempty(measParam.cFormat))
-                     netcdf.putAtt(fCdf, measParamVarId, 'C_format', measParam.cFormat);
-                  end
-                  
-                  if (~isempty(measParam.fortranFormat))
-                     netcdf.putAtt(fCdf, measParamVarId, 'FORTRAN_format', measParam.fortranFormat);
-                  end
-               end
-            end
-         end
-      end
-   end
-end
-
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % % DEFINE MODE END
 if (VERBOSE_MODE == 2)
@@ -331,24 +231,24 @@ netcdf.putVar(fCdf, dateUpdateVarId, currentDate);
 
 % fill technical parameter variables
 paramPos = 0;
-for outputCycleNumber = min(tabNcTechIndex(:, 6)):max(tabNcTechIndex(:, 6))
-
+for outputCycleNumber = min(a_tabNcTechIndex(:, 6)):max(a_tabNcTechIndex(:, 6))
+   
    % list of concerned parameters
-   idParam = find(tabNcTechIndex(:, 6) == outputCycleNumber);
+   idParam = find(a_tabNcTechIndex(:, 6) == outputCycleNumber);
    
    if (~isempty(idParam))
       for idP = 1:length(idParam)
          idPar = idParam(idP);
-
-         idParamName = find(g_decArgo_outputNcParamId == tabNcTechIndex(idPar, 5));
+         
+         idParamName = find(g_decArgo_outputNcParamId == a_tabNcTechIndex(idPar, 5));
          paramName = char(g_decArgo_outputNcParamLabel{idParamName});
          
-         if (tabNcTechIndex(idPar, 4) < -1)
-            [paramName] = create_param_name_ir_rudics_sbd2(paramName, a_tabNcTechLabelInfo{tabNcTechIndex(idPar, 4)*-1});
+         if (a_tabNcTechIndex(idPar, 4) < -1)
+            [paramName] = create_param_name_ir_rudics_sbd2(paramName, a_tabNcTechLabelInfo{a_tabNcTechIndex(idPar, 4)*-1});
          end
          netcdf.putVar(fCdf, technicalParameterNameVarId, fliplr([paramPos 0]), fliplr([1 length(paramName)]), paramName');
          
-         paramValue = tabNcTechVal{idPar};
+         paramValue = a_tabNcTechVal{idPar};
          if (isnumeric(paramValue))
             paramValueStr = num2str(paramValue);
          else
@@ -363,45 +263,6 @@ for outputCycleNumber = min(tabNcTechIndex(:, 6)):max(tabNcTechIndex(:, 6))
    end
 end
 
-% N_TECH_MEASUREMENT data
-if (timeseriesFlag)
-   measPos = 0;
-   for idNM = 1:length(a_tabTechNMeas)
-      nMeas = a_tabTechNMeas(idNM);
-      
-      for idM = 1:length(nMeas.tabMeas)
-         meas = nMeas.tabMeas(idM);
-         
-         netcdf.putVar(fCdf, cycleNumberMeasVarId, measPos, 1, nMeas.outputCycleNumber);
-         netcdf.putVar(fCdf, measurementCodeVarId, measPos, 1, meas.measCode);
-         
-         if (~isempty(meas.juld))
-            netcdf.putVar(fCdf, juldVarId, measPos, 1, meas.juld);
-         end
-         
-         % parameters
-         measParamList = meas.paramList;
-         for idParam = 1:length(measParamList)
-            
-            if (measParamList(idParam).paramType == 't')
-               
-               measParam = measParamList(idParam);
-               
-               measParamName = measParam.name;
-               measParamVarId = netcdf.inqVarID(fCdf, measParamName);
-                              
-               % parameter data
-               paramData = meas.paramData(:, idParam);
-               
-               % store the data
-               netcdf.putVar(fCdf, measParamVarId, measPos, size(paramData, 1), paramData);
-            end
-         end
-         measPos = measPos + 1;
-      end
-   end
-end
-
 netcdf.close(fCdf);
 
 if ((g_decArgo_realtimeFlag == 1)  || (g_decArgo_delayedModeFlag == 1) || (g_decArgo_applyRtqc == 1))
@@ -412,4 +273,4 @@ end
 
 fprintf('... NetCDF TECHNICAL file created\n');
 
-return
+return;

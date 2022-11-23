@@ -28,6 +28,9 @@ global g_decArgo_floatConfig;
 % number of the first deep cycle
 global g_decArgo_firstDeepCycleNumber;
 
+% flag to detect a second Iridium session
+global g_decArgo_secondIridiumSession;
+
 
 % update the configuration
       
@@ -68,7 +71,7 @@ end
 [configNum] = config_exists_ir_sbd_argos( ...
    currentConfig, ...
    g_decArgo_floatConfig.DYNAMIC.NUMBER, ...
-   g_decArgo_floatConfig.DYNAMIC.VALUES, []);
+   g_decArgo_floatConfig.DYNAMIC.VALUES);
 
 % if configNum == -1 the new configuration doesn't exist
 % if configNum == 0 the new configuration is identical to launch configuration,
@@ -80,8 +83,8 @@ idUsedConf = find(g_decArgo_floatConfig.USE.CYCLE == a_cyNum);
 
 if (~isempty(idUsedConf))
    
-   if (a_cyNum > 0)
-      fprintf('WARNING: Float #%d: config already exists for cycle #%d - updating the current one\n', ...
+   if ((g_decArgo_secondIridiumSession == 0) && (a_cyNum > 0))
+      fprintf('WARNING: Float #%d: config already exists for cycle #%d => updating the current one\n', ...
          g_decArgo_floatNum, a_cyNum);
    end
    
@@ -112,6 +115,6 @@ else
    
 end
      
-% create_csv_to_print_config_ir_sbd('setConfig_', 1, g_decArgo_floatConfig);
+% print_config_in_csv_file_ir_sbd('setConfig_', 1, g_decArgo_floatConfig);
 
-return
+return;

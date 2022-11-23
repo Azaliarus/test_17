@@ -58,7 +58,7 @@ if ((g_decArgo_realtimeFlag == 1) || (g_decArgo_delayedModeFlag == 1))
    if ~(exist(CONFIG_FILE_NAME, 'file') == 2)
       fprintf('ERROR: Configuration file not found: %s\n', CONFIG_FILE_NAME);
       o_inputError = 1;
-      return
+      return;
    else
       
       fprintf('INFO: Using configuration file: %s\n', which(CONFIG_FILE_NAME));
@@ -69,7 +69,7 @@ if ((g_decArgo_realtimeFlag == 1) || (g_decArgo_delayedModeFlag == 1))
       % variable
       varList1 = fieldnames(fileContents);
       for idField = 1:length(varList1)
-         valList1 = [valList1; {fileContents.(varList1{idField})}];
+         valList1 = [valList1; {getfield(fileContents, char(varList1(idField)))}];
       end
       
    end
@@ -77,11 +77,11 @@ if ((g_decArgo_realtimeFlag == 1) || (g_decArgo_delayedModeFlag == 1))
 else
    
    % configuration file name
-   CONFIG_FILE_NAME = '_argo_decoder_conf.txt';
+   CONFIG_FILE_NAME = '_argo_decoder.conf';
    if ~(exist(CONFIG_FILE_NAME, 'file') == 2)
       fprintf('ERROR: Configuration file not found: %s\n', CONFIG_FILE_NAME);
       o_inputError = 1;
-      return
+      return;
    else
       
       fprintf('INFO: Using configuration file: %s\n', which(CONFIG_FILE_NAME));
@@ -91,7 +91,7 @@ else
       if (fId == -1)
          fprintf('ERROR: Unable to open file: %s\n', CONFIG_FILE_NAME);
          o_inputError = 1;
-         return
+         return;
       end
       fileContents = textscan(fId, '%s', 'delimiter', '\n', 'commentstyle', 'matlab');
       fileContents = fileContents{:};
@@ -108,7 +108,7 @@ else
             idLine = idLine + 1;
          end
          if (idLine > length(fileContents))
-            break
+            break;
          end
       end
       
@@ -119,7 +119,7 @@ else
          if (isempty(eqPos) || (length(line) == eqPos))
             fprintf('ERROR: Error in configuration file, in line: %s\n', line);
             o_inputError = 1;
-            return
+            return;
          end;
          
          % variable
@@ -160,7 +160,7 @@ if (~isempty(a_varargin))
    inputArgs = a_varargin;
 
    if (rem(length(inputArgs), 2) ~= 0)
-      fprintf('ERROR: odd number of input arguments - exit\n');
+      fprintf('ERROR: odd number of input arguments => exit\n');
       o_inputError = 1;
    else
       varList2 = [inputArgs(1:2:end)];
@@ -184,4 +184,4 @@ o_unusedVarargin([listToDel*2-1 listToDel*2]) = [];
 g_decArgo_configVar = a_configVar;
 g_decArgo_configVal = o_configVal;
 
-return
+return;

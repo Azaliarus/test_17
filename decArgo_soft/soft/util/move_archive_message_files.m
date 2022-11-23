@@ -27,8 +27,8 @@ OUTPUT_DIR_NAME = 'E:\HDD\bascule_20140326\message_20140326_by_month\';
 
 % check the input directory
 % if ~(exist(INPUT_DIR_NAME, 'dir') == 7)
-%    fprintf('ERROR: Input directory doesn''t exist - exit\n');
-%    return
+%    fprintf('ERROR: Input directory doesn''t exist => exit\n');
+%    return;
 % end
 
 % create the output directory
@@ -62,9 +62,9 @@ for idF = 1:length(files)
                mkdir(dirName);
             end
 
-            move_file(filePathName, [dirName '/' fileName]);
+            movefile(filePathName, [dirName '/' fileName]);
             nbMoved = nbMoved + 1;
-            continue
+            continue;
          end
       end
 
@@ -81,9 +81,9 @@ for idF = 1:length(files)
                mkdir(dirName);
             end
 
-            move_file(filePathName, [dirName '/' fileName]);
+            movefile(filePathName, [dirName '/' fileName]);
             nbMoved = nbMoved + 1;
-            continue
+            continue;
          end
       end
       
@@ -94,7 +94,7 @@ for idF = 1:length(files)
          mkdir(dirName);
       end
 
-      move_file(filePathName, [dirName '/' fileName]);
+      movefile(filePathName, [dirName '/' fileName]);
       nbMoved = nbMoved + 1;
       
    end
@@ -119,4 +119,4 @@ fprintf('\n\n%d files moved\n\n\n', nbMoved);
 ellapsedTime = toc;
 fprintf('done (Elapsed time is %.1f seconds)\n', ellapsedTime);
 
-return
+return;

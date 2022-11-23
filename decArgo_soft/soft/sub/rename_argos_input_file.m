@@ -42,12 +42,6 @@ global g_decArgo_minNonTransDurForGhost;
 % default values
 global g_decArgo_janFirst1950InMatlab;
 
-% directory of json meta-data files
-global g_decArgo_dirInputJsonFloatMetaDataFile;
-
-% json meta-data
-global g_decArgo_jsonMetaData;
-
 % minimum duration of the non-transmission periods for a given file (in hour)
 MIN_NON_TRANS_DURATION_FOR_NEW_CYCLE = g_decArgo_minNonTransDurForNewCycle;
 
@@ -66,7 +60,7 @@ inputArgosFileName = [inputArgosFileName ext];
 [ok] = correct_cycle_file_cls_header(g_decArgo_inputArgosFile);
 if (ok == 0)
    fprintf('ERROR: Unable to correct CLS headers in input Argos file (%s)\n', inputArgosFileName);
-   return
+   return;
 end
 
 % find the WMO number of the float
@@ -79,7 +73,7 @@ if (~isempty(idPos))
       floatFrameLen, ...
       floatCycleTime, floatDriftSamplingPeriod, floatDpfFlag, ...
       floatLaunchDate, floatLaunchLon, floatLaunchLat, ...
-      floatRefDay, floatDmFlag] = get_one_float_info([], floatArgosId);
+      floatRefDay, floatEndDate, floatDmFlag] = get_one_float_info([], floatArgosId);
    
    if (~isempty(floatNum))
       o_floatList = floatNum;
@@ -88,7 +82,7 @@ if (~isempty(idPos))
          % this float cannot be decoded by this decoder
          minArgosDataDate = datenum(inputArgosFileName(8:26), 'yyyy-mm-dd-HH-MM-SS') - g_decArgo_janFirst1950InMatlab;
          move_argos_input_file(floatArgosId, minArgosDataDate, floatNum, [], 'MMM');
-         return
+         return;
       end
    else
       if (g_decArgo_processModeAll == 1)
@@ -103,14 +97,14 @@ if (~isempty(idPos))
             [argosLocDate, argosDataDate] = ...
                read_argos_file_fmt1_rough(g_decArgo_inputArgosFile, floatArgosId);
             
-            if (~isempty(argosLocDate) || ~isempty(argosDataDate))
+            if ~(isempty(argosDataDate) && isempty(argosDataDate))
                if (~isempty(argosDataDate))
                   move_argos_input_file(floatArgosId, min(argosDataDate), [], [], 'EEE');
                elseif (~isempty(argosLocDate))
                   move_argos_input_file(floatArgosId, min(argosLocDate), [], [], 'EEE');
                end
                
-               fprintf('DEC_INFO: Empty Argos file (%s) - stored\n', ...
+               fprintf('DEC_INFO: Empty Argos file (%s) => stored\n', ...
                   g_decArgo_inputArgosFile);
             else
                % create the Argos Id directory
@@ -129,7 +123,7 @@ if (~isempty(idPos))
                fileNamOut = [emptyFilesDirName inputArgosFileName];
                move_file(fileNameIn, fileNamOut);
                
-               fprintf('DEC_INFO: Empty Argos file (%s) - stored (in the ''empty_files'' directory)\n', ...
+               fprintf('DEC_INFO: Empty Argos file (%s) => stored (in the ''empty_files'' directory)\n', ...
                   g_decArgo_inputArgosFile);
             end
          else
@@ -139,44 +133,27 @@ if (~isempty(idPos))
             if (~isempty(find(diff(argosDataDate)*24 >= MIN_NON_TRANS_DURATION_FOR_NEW_CYCLE, 1)))
                fprintf('ERROR: Inconsistent input Argos file (%s) contents for the Real Time decoder (all non-transmission periods should be less than %d hours)\n', ...
                   g_decArgo_inputArgosFile, MIN_NON_TRANS_DURATION_FOR_NEW_CYCLE);
-               return
+               return;
             end
             
             if (length(unique(argosDataDate)) < g_decArgo_minNumMsgForNotGhost)
                move_argos_input_file(floatArgosId, firstArgosMsgDate, [], [], 'GGG');
                
-               fprintf('DEC_INFO: Ghost Argos file (%s) - stored\n', ...
+               fprintf('DEC_INFO: Ghost Argos file (%s) => stored\n', ...
                   g_decArgo_inputArgosFile);
             else
                move_argos_input_file(floatArgosId, firstArgosMsgDate, [], [], 'WWW');
                
-               fprintf('DEC_INFO: Argos file without associated WMO number (%s) - stored\n', ...
+               fprintf('DEC_INFO: Argos file without associated WMO number (%s) => stored\n', ...
                   g_decArgo_inputArgosFile);
             end
          end
       end
-      return
+      return;
    end
 else
    fprintf('ERROR: Inconsistent input Argos file name (%s)\n', inputArgosFileName);
-   return
-end
-
-% read the json meta-data file for this float
-jsonInputFileName = [g_decArgo_dirInputJsonFloatMetaDataFile '/' sprintf('%d_meta.json', floatNum)];
-
-if ~(exist(jsonInputFileName, 'file') == 2)
-   fprintf('ERROR: Json meta-data file not found: %s - nothing done\n', jsonInputFileName);
-   return
-end
-
-% read meta-data file
-g_decArgo_jsonMetaData = loadjson(jsonInputFileName);
-
-% specific
-if (floatNum == 6903816)
-   MIN_NON_TRANS_DURATION_FOR_NEW_CYCLE = 3;
-   MIN_NON_TRANS_DURATION_FOR_GHOST = 13;
+   return;
 end
 
 % read Argos file
@@ -191,7 +168,7 @@ argosDataDate = sort(argosDataDate);
 if (~isempty(find(diff(argosDataDate)*24 >= MIN_NON_TRANS_DURATION_FOR_NEW_CYCLE, 1)))
    fprintf('ERROR: Inconsistent input Argos file contents (%s) for the Real Time decoder (all non-transmission periods should be less than %d hours)\n', ...
       g_decArgo_inputArgosFile, MIN_NON_TRANS_DURATION_FOR_NEW_CYCLE);
-   return
+   return;
 end
 
 % do not consider empty files or files with only ghost messages
@@ -208,7 +185,7 @@ if (g_decArgo_processModeAll == 1)
             move_argos_input_file(floatArgosId, min(argosLocDate), floatNum, [], 'EEE');
          end
          
-         fprintf('DEC_WARNING: Empty Argos file (%s) - stored but not decoded\n', ...
+         fprintf('DEC_WARNING: Empty Argos file (%s) => stored but not decoded\n', ...
             g_decArgo_inputArgosFile);
       else
          % create the Argos Id directory
@@ -227,18 +204,18 @@ if (g_decArgo_processModeAll == 1)
          fileNamOut = [emptyFilesDirName inputArgosFileName];
          move_file(fileNameIn, fileNamOut);
          
-         fprintf('DEC_WARNING: Empty Argos file (%s) - stored (in the ''empty_files'' directory) but not decoded\n', ...
+         fprintf('DEC_WARNING: Empty Argos file (%s) => stored (in the ''empty_files'' directory) but not decoded\n', ...
             g_decArgo_inputArgosFile);
       end
       
-      return
+      return;
    elseif (length(unique(argosDataDate)) < g_decArgo_minNumMsgForNotGhost)
       move_argos_input_file(floatArgosId, firstArgosMsgDate, floatNum, [], 'GGG');
       
-      fprintf('DEC_WARNING: Ghost Argos file (%s) - stored but not decoded\n', ...
+      fprintf('DEC_WARNING: Ghost Argos file (%s) => stored but not decoded\n', ...
          g_decArgo_inputArgosFile);
       
-      return
+      return;
    end
 end
 
@@ -256,11 +233,11 @@ if (floatDecId < 1000)
       if (g_decArgo_processModeAll == 1)
          move_argos_input_file(floatArgosId, firstArgosMsgDate, floatNum, [], 'MMM');
          
-         fprintf('ERROR: Float #%d: Unable to compute cycle number because of missing meta-data - stored but not decoded\n', floatNum);
+         fprintf('ERROR: Float #%d: Unable to compute cycle number because of missing meta-data => stored but not decoded\n', floatNum);
       else
-         fprintf('ERROR: Float #%d: Unable to compute cycle number because of missing meta-data - not decoded\n', floatNum);
+         fprintf('ERROR: Float #%d: Unable to compute cycle number because of missing meta-data => not decoded\n', floatNum);
       end
-      return
+      return;
    end
    
    % retrieve useful TRAJ data
@@ -355,117 +332,8 @@ if (floatDecId < 1000)
             floatNum, floatArgosId, floatFrameLen, floatDecId);
          
          if (~isempty(decodedCycleNumber) && (decodedCycleNumber ~= -1))
-            
             % the cycle number has been decoded from the transmitted data
-            if (decodedCycleNumber ~= 0)
-               cycleNumber = decodedCycleNumber;
-            else
-               
-               % the cycle number reported by the float is #0
-               % it can be the prelude or a EOL, we must use additional dates and
-               % information to set the correct cycle number
-               
-               % multiple cycle durations only concern floats with a prelude phase
-               
-               % compute the duration of the cycle #1 (first deep cycle)
-               firstDeepCycleDuration = firstProfileEndDate - floatRefDay - ...
-                  delayBeforeMission/1440 - preludeDuration/1440;
-               
-               % compute the duration of the transition cycle
-               surfTime = firstProfileEndDate - fix(firstProfileEndDate);
-               transitionCycleStartDate = surfTime + (nbCyclesFirstMission-1)*cycleDuration(1);
-               transitionCycleEndDate = fix(transitionCycleStartDate + cycleDuration(2)) + surfTime;
-               transitionCycleDuration = transitionCycleEndDate - transitionCycleStartDate;
-               
-               % try to use already computed cycles
-               idPrevCycle = find(lastMsgDateTraj < firstArgosMsgDate);
-               if (~isempty(idPrevCycle))
-                  idPrevCycle = idPrevCycle(end);
-                  
-                  if (cycleNumberTraj(idPrevCycle) == 0)
-                     
-                     refDate = lastMsgDateTraj(idPrevCycle);
-                     dates = [ ...
-                        refDate+firstDeepCycleDuration ...
-                        repmat(cycleDuration(1), 1, nbCyclesFirstMission-1) ...
-                        transitionCycleDuration ...
-                        repmat(cycleDuration(2), 1, 999)];
-                     for id = 2:length(dates)
-                        dates(id) = dates(id) + dates(id-1);
-                     end
-                     cycleNumbers = 1:length(dates);
-                     
-                     [~, idMin] = min(abs(dates-firstArgosMsgDate));
-                     cycleNumber = cycleNumbers(idMin);
-                     
-                  elseif ((cycleNumberTraj(idPrevCycle) > 0) && (cycleNumberTraj(idPrevCycle) < nbCyclesFirstMission))
-                     
-                     refDate = firstMsgDateTraj(idPrevCycle);
-                     dates = [ ...
-                        refDate ...
-                        repmat(cycleDuration(1), 1, nbCyclesFirstMission-cycleNumberTraj(idPrevCycle)) ...
-                        transitionCycleDuration ...
-                        repmat(cycleDuration(2), 1, 999)];
-                     for id = 2:length(dates)
-                        dates(id) = dates(id) + dates(id-1);
-                     end
-                     cycleNumbers = cycleNumberTraj(idPrevCycle):cycleNumberTraj(idPrevCycle)+length(dates);
-                     
-                     [~, idMin] = min(abs(dates-firstArgosMsgDate));
-                     cycleNumber = cycleNumbers(idMin);
-                     
-                  elseif (cycleNumberTraj(idPrevCycle) == nbCyclesFirstMission)
-                     
-                     refDate = firstMsgDateTraj(idPrevCycle);
-                     dates = [ ...
-                        refDate ...
-                        transitionCycleDuration ...
-                        repmat(cycleDuration(2), 1, 999)];
-                     for id = 2:length(dates)
-                        dates(id) = dates(id) + dates(id-1);
-                     end
-                     cycleNumbers = cycleNumberTraj(idPrevCycle):cycleNumberTraj(idPrevCycle)+length(dates);
-                     
-                     [~, idMin] = min(abs(dates-firstArgosMsgDate));
-                     cycleNumber = cycleNumbers(idMin);
-                     
-                  else
-                     
-                     refDate = firstMsgDateTraj(idPrevCycle);
-                     dates = [ ...
-                        refDate ...
-                        repmat(cycleDuration(2), 1, 999)];
-                     for id = 2:length(dates)
-                        dates(id) = dates(id) + dates(id-1);
-                     end
-                     cycleNumbers = cycleNumberTraj(idPrevCycle):cycleNumberTraj(idPrevCycle)+length(dates);
-                     
-                     [~, idMin] = min(abs(dates-firstArgosMsgDate));
-                     cycleNumber = cycleNumbers(idMin);
-                     
-                  end
-                  
-               else
-                  
-                  % use float meta-data
-                  
-                  dates = [ ...
-                     floatRefDay+delayBeforeMission/1440 ...
-                     preludeDuration/1440+firstDeepCycleDuration ...
-                     repmat(cycleDuration(1), 1, nbCyclesFirstMission-1) ...
-                     transitionCycleDuration ...
-                     repmat(cycleDuration(2), 1, 999)];
-                  for id = 2:length(dates)
-                     dates(id) = dates(id) + dates(id-1);
-                  end
-                  cycleNumbers = 0:length(dates);
-                  
-                  [~, idMin] = min(abs(dates-firstArgosMsgDate));
-                  cycleNumber = cycleNumbers(idMin);
-                  
-               end
-            end
-            
+            cycleNumber = decodedCycleNumber;
          else
             
             % the cycle number cannot be decoded from the transmitted data
@@ -576,17 +444,17 @@ if (floatDecId < 1000)
       if (g_decArgo_processModeAll == 1)
          move_argos_input_file(floatArgosId, firstArgosMsgDate, floatNum, [], 'TTT');
          
-         fprintf('DEC_INFO: Float #%d: Last date of input file (%s) is before float launch date (%s) - stored but not decoded\n', ...
+         fprintf('DEC_INFO: Float #%d: Last date of input file (%s) is before float launch date (%s) => stored but not decoded\n', ...
             floatNum, ...
             julian_2_gregorian_dec_argo(lastArgosMsgDate), ...
             julian_2_gregorian_dec_argo(launchDate));
       else
-         fprintf('DEC_INFO: Float #%d: Last date of input file (%s) is before float launch date (%s) - not decoded\n', ...
+         fprintf('DEC_INFO: Float #%d: Last date of input file (%s) is before float launch date (%s) => not decoded\n', ...
             floatNum, ...
             julian_2_gregorian_dec_argo(lastArgosMsgDate), ...
             julian_2_gregorian_dec_argo(launchDate));
       end
-      return
+      return;
    end
    
    % create the name of the input file and move it to the approriate directory
@@ -595,10 +463,10 @@ if (floatDecId < 1000)
          if (g_decArgo_processModeAll == 1)
             move_argos_input_file(floatArgosId, firstArgosMsgDate, floatNum, [], 'MMM');
             
-            fprintf('ERROR: Float #%d: Computed cycle number is negative (%d): check the consistency of the meta-data - stored but not decoded\n', ...
+            fprintf('ERROR: Float #%d: Computed cycle number is negative (%d): check the consistency of the meta-data => stored but not decoded\n', ...
                floatNum, cycleNumber);
          else
-            fprintf('ERROR: Float #%d: Computed cycle number is negative (%d): check the consistency of the meta-data - not decoded\n', ...
+            fprintf('ERROR: Float #%d: Computed cycle number is negative (%d): check the consistency of the meta-data => not decoded\n', ...
                floatNum, cycleNumber);
          end
       else
@@ -622,17 +490,17 @@ elseif ((floatDecId > 1000) && (floatDecId < 2000))
    
    % retrieve useful float meta-data
    [launchDate, preludeDuration, profilePressure, cycleDuration, dpfFloatFlag] = ...
-      get_apx_meta_data_for_cycle_number_determination(floatNum, floatLaunchDate, floatCycleTime, floatDecId);
+      get_apx_meta_data_for_cycle_number_determination(floatNum, floatDecId, floatLaunchDate, floatCycleTime);
 
    if (isempty(launchDate))
       if (g_decArgo_processModeAll == 1)
          move_argos_input_file(floatArgosId, firstArgosMsgDate, floatNum, [], 'MMM');
          
-         fprintf('ERROR: Float #%d: Unable to compute cycle number because of missing meta-data - stored but not decoded\n', floatNum);
+         fprintf('ERROR: Float #%d: Unable to compute cycle number because of missing meta-data => stored but not decoded\n', floatNum);
       else
-         fprintf('ERROR: Float #%d: Unable to compute cycle number because of missing meta-data - not decoded\n', floatNum);
+         fprintf('ERROR: Float #%d: Unable to compute cycle number because of missing meta-data => not decoded\n', floatNum);
       end
-      return
+      return;
    end
    
    % minimum duration of the first deep cycle for a DPF float (first transmission
@@ -670,7 +538,7 @@ elseif ((floatDecId > 1000) && (floatDecId < 2000))
             else
                fprintf('ERROR: Float #%d: Unable to split Argos cycle file: %s\n', ...
                   floatNum, g_decArgo_inputArgosFile);
-               return
+               return;
             end
          end
       end
@@ -696,79 +564,6 @@ elseif ((floatDecId > 1000) && (floatDecId < 2000))
          
          [cycleNumber, cycleNumberCount] = decode_apex_cycle_number( ...
             g_decArgo_inputArgosFile, floatDecId, floatArgosId, checkTestMsg);
-         
-         % specific
-         if (floatNum == 3901639)
-            cycleNumber = -1;
-            cycleNumberCount = -1;
-         end
-         % specific
-         % OBSOLETE
-         %          if (floatNum == 3901663)
-         %             % Apex float 3901663 (decId 1022) regularly resets at sea
-         %             tabInfo_3901663 = [ ...
-         %                24946	0; ...
-         %                24956	1; ...
-         %                24965	2; ...
-         %                24975	3; ...
-         %                24985	4; ...
-         %                24995	5; ...
-         %                25005	6; ...
-         %                25015	7; ...
-         %                25025	8; ...
-         %                25035	9; ...
-         %                25045	10; ...
-         %                25054	11; ...
-         %                25064	12; ...
-         %                25074	13; ...
-         %                25084	14; ...
-         %                25094	15; ...
-         %                25104	16; ...
-         %                25114	17; ...
-         %                25124	18; ...
-         %                25134	19; ...
-         %                25144	20; ...
-         %                25153	21; ...
-         %                25163	22; ...
-         %                25173	23; ...
-         %                25183	24; ...
-         %                25193	25; ...
-         %                25203	26; ...
-         %                25213	27; ...
-         %                25223	28; ...
-         %                25233	29; ...
-         %                25243	30; ...
-         %                25253	31; ...
-         %                25263	32; ...
-         %                25273	33; ...
-         %                25283	34; ...
-         %                25293	35; ...
-         %                25303	36; ...
-         %                25313	37; ...
-         %                25322	38; ...
-         %                25333	39; ...
-         %                25342	40; ...
-         %                25352	41; ...
-         %                25362	42; ...
-         %                25372	43; ...
-         %                25382	44; ...
-         %                25392	45; ...
-         %                25402	46; ...
-         %                25411	47; ...
-         %                25421	48 ...
-         %                ];
-         %
-         %             idF = find(fix(firstArgosMsgDate) == tabInfo_3901663(:, 1));
-         %             if (~isempty(idF))
-         %                cycleNumber = tabInfo_3901663(idF, 2);
-         %                cycleNumberCount = 2;
-         %             else
-         %                if (cycleNumber ~= -1)
-         %                   cycleNumber = cycleNumber + 41;
-         %                end
-         %             end
-         %          end
-         
          if (cycleNumberCount > 1)
             
             % manage possible roll over of profile number counter
@@ -784,7 +579,7 @@ elseif ((floatDecId > 1000) && (floatDecId < 2000))
             
             if (g_decArgo_processModeAll == 1)
                if (move_argos_input_file(floatArgosId, firstArgosMsgDate, floatNum, cycleNumber) ~= 1)
-                  return
+                  return;
                else
                   if ((length(subFileNameList) == 1) || ...
                         ((length(subFileNameList) == 2) && (idFile == 2)))
@@ -894,7 +689,7 @@ elseif ((floatDecId > 1000) && (floatDecId < 2000))
             
             if (g_decArgo_processModeAll == 1)
                if (move_argos_input_file(floatArgosId, firstArgosMsgDate, floatNum, cycleNumber) ~= 1)
-                  return
+                  return;
                else
                   if ((length(subFileNameList) == 1) || ...
                         ((length(subFileNameList) == 2) && (idFile == 2)))
@@ -913,91 +708,81 @@ elseif ((floatDecId > 1000) && (floatDecId < 2000))
          
          %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
          % clean last message ghosts from renamed files
-         if (~ismember(floatDecId, [1021 1022])) % not possible for APF11 floats
-            if (~isempty(tabCycleNumber))
+         if (~isempty(tabCycleNumber))
+            
+            if (~ismember(floatDpfFlag, [0 1]))
+               fprintf('DEC_WARNING: Float #%d: Inconsistent DPF float flag value (= %d) => set to 1\n', ...
+                  floatNum, floatDpfFlag);
                
-               if (~ismember(floatDpfFlag, [0 1]))
-                  fprintf('DEC_WARNING: Float #%d: Inconsistent DPF float flag value (= %d) - set to 1\n', ...
-                     floatNum, floatDpfFlag);
-                  
-                  floatDpfFlag = 1;
-               end
-               
-               idUsed = find(tabCycleNumber >= floatDpfFlag);
-               tabCycleNumberBis = tabCycleNumber(idUsed);
-               tabLastMsgDateBis = tabLastMsgDate(idUsed);
-               
-               if (~isempty(tabCycleNumberBis))
-                  
-                  tabLastMsgDateBis = tabLastMsgDateBis-compute_duration(tabCycleNumberBis, tabCycleNumberBis(1), ones(max(tabCycleNumberBis), 1)*floatCycleTime)';
-                  lastArgosMsgDateBis = lastArgosMsgDate-compute_duration(cycleNumber, tabCycleNumberBis(1), ones(max(cycleNumber), 1)*floatCycleTime)';
-                  
-                  %                if ((lastArgosMsgDateBis-mean(tabLastMsgDateBis))*24 > 0)
-                  %                   fprintf('Cycle #%3d: LAST %s\n', ...
-                  %                      cycleNumber, ...
-                  %                      format_time_dec_argo((lastArgosMsgDateBis-mean(tabLastMsgDateBis))*24));
-                  %                end
-                  
-                  if ((lastArgosMsgDateBis-mean(tabLastMsgDateBis))*24 > MIN_NON_TRANS_DURATION_FOR_GHOST)
-                     argosDate = [argosLocDate; argosDataDate];
-                     argosDate = sort(argosDate);
-                     argosDate = argosDate-compute_duration(cycleNumber, tabCycleNumberBis(1), ones(max(cycleNumber), 1)*floatCycleTime)';
-                     
-                     if (g_decArgo_processModeAll == 1)
-                        argosDirName = [g_decArgo_dirInputHexArgosFileFormat1 '/' sprintf('%06d', floatArgosId) '/'];
-                     else
-                        argosDirName = [g_decArgo_dirInputHexArgosFileFormat1 '/' sprintf('%06d', floatArgosId) '/tmp/'];
-                     end
-                     argosPathFileName = dir([argosDirName sprintf('%06d_*_%03d.txt', floatArgosId, cycleNumber)]);
-                     argosPathFileName = [argosDirName argosPathFileName(1).name];
-                     stop = 0;
-                     while (~stop && ~isempty(argosDate) && ((argosDate(end)-mean(tabLastMsgDateBis))*24 > MIN_NON_TRANS_DURATION_FOR_GHOST))
-                        
-                        % a ghost message is detected, move it to a dedicated file
-                        [subFileNameList] = split_argos_file_ghost(argosPathFileName, floatNum, floatArgosId);
-                        if (~isempty(subFileNameList))
-                           argosPathFileName = subFileNameList{1};
-                           
-                           argosDate(end) = [];
-                           if (~isempty(argosDate))
-                              lastArgosMsgDate = argosDate(end);
-                              fprintf('DEC_INFO: Float #%d: Ghost detected in LMT: stored in %s\n', ...
-                                 floatNum, subFileNameList{2});
-                           end
-                        else
-                           % this is not a real ghost message
-                           stop = 1;
-                        end
-                     end
-                  end
-                  
-               end
+               floatDpfFlag = 1;
             end
             
-            tabCycleNumber = [tabCycleNumber; cycleNumber];
-            tabFirstMsgDate = [tabFirstMsgDate; firstArgosMsgDate];
-            tabLastMsgDate = [tabLastMsgDate; lastArgosMsgDate];
-            [tabCycleNumber, idSort] = sort(tabCycleNumber);
-            tabFirstMsgDate = tabFirstMsgDate(idSort);
-            tabLastMsgDate = tabLastMsgDate(idSort);
+            idUsed = find(tabCycleNumber >= floatDpfFlag);
+            tabCycleNumberBis = tabCycleNumber(idUsed);
+            tabLastMsgDateBis = tabLastMsgDate(idUsed);
+            
+            if (~isempty(tabCycleNumberBis))
+               
+               tabLastMsgDateBis = tabLastMsgDateBis-compute_duration(tabCycleNumberBis, tabCycleNumberBis(1), ones(max(tabCycleNumberBis), 1)*floatCycleTime)';
+               lastArgosMsgDateBis = lastArgosMsgDate-compute_duration(cycleNumber, tabCycleNumberBis(1), ones(max(cycleNumber), 1)*floatCycleTime)';
+               
+               %                if ((lastArgosMsgDateBis-mean(tabLastMsgDateBis))*24 > 0)
+               %                   fprintf('Cycle #%3d: LAST %s\n', ...
+               %                      cycleNumber, ...
+               %                      format_time_dec_argo((lastArgosMsgDateBis-mean(tabLastMsgDateBis))*24));
+               %                end
+               
+               if ((lastArgosMsgDateBis-mean(tabLastMsgDateBis))*24 > MIN_NON_TRANS_DURATION_FOR_GHOST)
+                  argosDate = [argosLocDate; argosDataDate];
+                  argosDate = sort(argosDate);
+                  argosDate = argosDate-compute_duration(cycleNumber, tabCycleNumberBis(1), ones(max(cycleNumber), 1)*floatCycleTime)';
+                  
+                  if (g_decArgo_processModeAll == 1)
+                     argosDirName = [g_decArgo_dirInputHexArgosFileFormat1 '/' sprintf('%06d', floatArgosId) '/'];
+                  else
+                     argosDirName = [g_decArgo_dirInputHexArgosFileFormat1 '/' sprintf('%06d', floatArgosId) '/tmp/'];
+                  end
+                  argosPathFileName = dir([argosDirName sprintf('%d_*_%03d.txt', floatArgosId, cycleNumber)]);
+                  argosPathFileName = [argosDirName argosPathFileName(1).name];
+                  while (~isempty(argosDate) && ((argosDate(end)-mean(tabLastMsgDateBis))*24 > MIN_NON_TRANS_DURATION_FOR_GHOST))
+                     
+                     % a ghost message is detected, move it to a dedicated file
+                     [subFileNameList] = split_argos_file_ghost(argosPathFileName, floatNum, floatArgosId);
+                     argosPathFileName = subFileNameList{1};
+                     
+                     argosDate(end) = [];
+                     lastArgosMsgDate = argosDate(end);
+                     fprintf('DEC_INFO: Float #%d: Ghost detected in LMT: stored in %s\n', ...
+                        floatNum, subFileNameList{2});
+                  end
+               end
+               
+            end
          end
+         
+         tabCycleNumber = [tabCycleNumber; cycleNumber];
+         tabFirstMsgDate = [tabFirstMsgDate; firstArgosMsgDate];
+         tabLastMsgDate = [tabLastMsgDate; lastArgosMsgDate];
+         [tabCycleNumber, idSort] = sort(tabCycleNumber);
+         tabFirstMsgDate = tabFirstMsgDate(idSort);
+         tabLastMsgDate = tabLastMsgDate(idSort);
       end
    else
       
       if (g_decArgo_processModeAll == 1)
          move_argos_input_file(floatArgosId, firstArgosMsgDate, floatNum, [], 'TTT');
          
-         fprintf('DEC_INFO: Float #%d: Last date of input file (%s) is before float launch date (%s) - stored but not decoded\n', ...
+         fprintf('DEC_INFO: Float #%d: Last date of input file (%s) is before float launch date (%s) => stored but not decoded\n', ...
             floatNum, ...
             julian_2_gregorian_dec_argo(lastArgosMsgDate), ...
             julian_2_gregorian_dec_argo(launchDate));
       else
-         fprintf('DEC_INFO: Float #%d: Last date of input file (%s) is before float launch date (%s) - not decoded\n', ...
+         fprintf('DEC_INFO: Float #%d: Last date of input file (%s) is before float launch date (%s) => not decoded\n', ...
             floatNum, ...
             julian_2_gregorian_dec_argo(lastArgosMsgDate), ...
             julian_2_gregorian_dec_argo(launchDate));
       end
-      return
+      return;
    end
    
    % delete the temporary sub-directory
@@ -1013,7 +798,7 @@ else
    fprintf('ERROR: Decoder Id #%d not managed in rename_argos_input_file\n', floatDecId);
 end
 
-return
+return;
 
 % ------------------------------------------------------------------------------
 % Compute durations between cycles.
@@ -1054,7 +839,7 @@ end
 
 o_duration = o_duration/24;
 
-return
+return;
 
 % ------------------------------------------------------------------------------
 % Correction of the Argos HEX data.
@@ -1089,7 +874,7 @@ if (exist(a_inputArgosFile, 'file') == 2)
    fIdIn = fopen(a_inputArgosFile, 'r');
    if (fIdIn == -1)
       fprintf('ERROR: Error while opening file : %s\n', a_inputArgosFile);
-      return
+      return;
    end
    
    % first step: looking for satellite pass header and storing the number of
@@ -1104,7 +889,7 @@ if (exist(a_inputArgosFile, 'file') == 2)
          if (startLine ~= -1)
             tabNbLinesToReadCor = [tabNbLinesToReadCor; lineNum-startLine+1];
          end
-         break
+         break;
       end
       lineNum = lineNum + 1;
       
@@ -1150,14 +935,14 @@ if (exist(a_inputArgosFile, 'file') == 2)
          fIdIn = fopen(a_inputArgosFile, 'r');
          if (fIdIn == -1)
             fprintf('ERROR: Error while opening file : %s\n', a_inputArgosFile);
-            return
+            return;
          end
          
          % output file
          fIdOut = fopen(outputArgosFile, 'wt');
          if (fIdOut == -1)
             fprintf('ERROR: Error while creating file : %s\n', outputArgosFile);
-            return
+            return;
          end
          
          lineNum = 0;
@@ -1167,7 +952,7 @@ if (exist(a_inputArgosFile, 'file') == 2)
             while (nbLinesToCopy > 0)
                line = fgetl(fIdIn);
                if (line == -1)
-                  break
+                  break;
                end
                lineNum = lineNum + 1;
                
@@ -1232,4 +1017,4 @@ end
 
 o_ok = 1;
 
-return
+return;

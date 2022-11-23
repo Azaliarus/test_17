@@ -21,45 +21,19 @@
 % ------------------------------------------------------------------------------
 function generate_json_float_info()
 
-% to switch between Coriolis and JPR configurations
-CORIOLIS_CONFIGURATION_FLAG = 1;
+% common float information file
+floatInfoFileName = 'C:\Users\jprannou\_RNU\DecArgo_soft\work\floats_info_NOVA.txt';
+% floatInfoFileName = 'C:\Users\jprannou\_RNU\DecArgo_soft\work\floats_info_APX.txt';
+% floatInfoFileName = 'C:\Users\jprannou\_RNU\DecArgo_soft\work\floats_info_PRV.txt';
+% floatInfoFileName = 'C:\Users\jprannou\_RNU\DecArgo_soft\work\floats_info_REM_sbd.txt';
+floatInfoFileName = 'C:\Users\jprannou\_RNU\DecArgo_soft\work\tmp.txt';
 
-if (CORIOLIS_CONFIGURATION_FLAG)
-
-   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-   % CORIOLIS CONFIGURATION - START
-
-   % common float information file
-   % floatInfoFileName = '/home/idmtmp7/vincent/matlab/new_rem_meta_tempo.txt';
-   floatInfoFileName = '/home/idmtmp7/vincent/matlab/_provor_float_info.txt';
-   % floatInfoFileName = '/home/idmtmp7/vincent/matlab/_apex_float_info.txt';
-   % floatInfoFileName = '/home/idmtmp7/vincent/matlab/_nova_floats_info.txt';
-
-   % directory of individual json float information files
-   outputDirName = ['/home/idmtmp7/vincent/matlab/json_float_info_' datestr(now, 'yyyymmddTHHMMSS')];
-
-   % CORIOLIS CONFIGURATION - END
-   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-else
-
-   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-   % JPR CONFIGURATION - START
-
-   % common float information file
-   floatInfoFileName = 'C:\Users\jprannou\_RNU\DecArgo_soft\work\floats_info_tmp.txt';
-
-   % directory of individual json float information files
-   outputDirName = ['C:\Users\jprannou\_RNU\DecArgo_soft\work\json_float_info_files_' datestr(now, 'yyyymmddTHHMMSS')];
-
-   % JPR CONFIGURATION - END
-   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-end
+% directory of individual json float information files
+outputDirName = ['C:\Users\jprannou\_RNU\DecArgo_soft\work\json_float_info_files_' datestr(now, 'yyyymmddTHHMMSS')];
 
 if ~(exist(floatInfoFileName, 'file') == 2)
    fprintf('ERROR: Float information file not found: %s\n', floatInfoFileName);
-   return
+   return;
 end
 
 fId = fopen(floatInfoFileName, 'r');
@@ -94,7 +68,7 @@ for id = 1:length(listWmoNum)
    fidOut = fopen(outputFileName, 'wt');
    if (fidOut == -1)
       fprintf('ERROR: Unable to create json output file: %s\n', outputFileName);
-      return
+      return;
    end
 
    floatType = 'UNKNOWN';
@@ -102,10 +76,8 @@ for id = 1:length(listWmoNum)
       floatType = 'PROVOR';
    elseif ((listDecId(id) > 1000) && (listDecId(id) < 2000))
       floatType = 'APEX';
-   elseif ((listDecId(id) > 2000) && (listDecId(id) < 3000))
+   elseif (listDecId(id) > 2000)
       floatType = 'NOVA';
-   elseif (listDecId(id) > 3000)
-      floatType = 'NEMO';
    end
    
    fprintf(fidOut, '{\n');
@@ -121,12 +93,12 @@ for id = 1:length(listWmoNum)
    fprintf(fidOut, '   "LAUNCH_DATE" : "%s",\n', listLaunchDate{id});
    fprintf(fidOut, '   "LAUNCH_LON" : "%s",\n', listLaunchLon{id});
    fprintf(fidOut, '   "LAUNCH_LAT" : "%s",\n', listLaunchLat{id});
-   %    fprintf(fidOut, '   "END_DECODING_DATE" : "%s",\n', listEndDate{id});
+   fprintf(fidOut, '   "END_DECODING_DATE" : "%s",\n', listEndDate{id});
    fprintf(fidOut, '   "REFERENCE_DAY" : "%s",\n', listRefDay{id});
    fprintf(fidOut, '   "DM_FLAG" : "%d"\n', listDmFlag(id));
    fprintf(fidOut, '}\n');
-
+   
    fclose(fidOut);
 end
 
-return
+return;

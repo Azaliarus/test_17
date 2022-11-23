@@ -25,9 +25,6 @@ function [o_unusedVarargin, o_inputError] = init_config_values(a_varargin)
 o_unusedVarargin = [];
 o_inputError = 0;
 
-% mode processing flags
-global g_decArgo_realtimeFlag;
-
 % global configuration values
 global g_decArgo_floatListFileName;
 global g_decArgo_expectedCycleList;
@@ -56,20 +53,11 @@ global g_decArgo_dirOutputCsvFile;
 global g_decArgo_dirOutputXmlFile;
 global g_decArgo_dirOutputNetcdfFile;
 
-global g_decArgo_processRemainingBuffers;
-
 global g_decArgo_generateNcTraj;
 global g_decArgo_generateNcMultiProf;
 global g_decArgo_generateNcMonoProf;
 global g_decArgo_generateNcTech;
 global g_decArgo_generateNcMeta;
-
-global g_decArgo_generateNcTraj32;
-global g_decArgo_dirOutputTraj32NetcdfFile;
-
-global g_decArgo_addErrorEllipses;
-global g_decArgo_dirInputErrorEllipsesMail;
-global g_decArgo_dirInputErrorEllipsesWs;
 
 global g_decArgo_applyRtqc;
 
@@ -94,15 +82,10 @@ global g_decArgo_rtqcTest20;
 global g_decArgo_rtqcTest21;
 global g_decArgo_rtqcTest22;
 global g_decArgo_rtqcTest23;
-global g_decArgo_rtqcTest24;
-global g_decArgo_rtqcTest25;
-global g_decArgo_rtqcTest26;
 global g_decArgo_rtqcTest57;
-global g_decArgo_rtqcTest59;
-global g_decArgo_rtqcTest62;
 global g_decArgo_rtqcTest63;
 
-global g_decArgo_rtqcGebcoFile;
+global g_decArgo_rtqcEtopoFile;
 global g_decArgo_rtqcGreyList;
 
 global g_decArgo_add3Min;
@@ -139,22 +122,11 @@ configVar{end+1} = 'DIR_OUTPUT_CSV_FILE';
 configVar{end+1} = 'DIR_OUTPUT_XML_FILE';
 configVar{end+1} = 'DIR_OUTPUT_NETCDF_FILE';
 
-if (g_decArgo_realtimeFlag)
-   configVar{end+1} = 'PROCESS_REMAINING_BUFFERS';
-end
-
 configVar{end+1} = 'GENERATE_NC_TRAJ';
 configVar{end+1} = 'GENERATE_NC_MULTI_PROF';
 configVar{end+1} = 'GENERATE_NC_MONO_PROF';
 configVar{end+1} = 'GENERATE_NC_TECH';
 configVar{end+1} = 'GENERATE_NC_META';
-
-configVar{end+1} = 'GENERATE_NC_TRAJ_3_2';
-configVar{end+1} = 'DIR_OUTPUT_NETCDF_TRAJ_3_2_FILE';
-
-configVar{end+1} = 'ADD_ARGOS_ERROR_ELLIPSES';
-configVar{end+1} = 'DIR_INPUT_ARGOS_ERROR_ELLIPSES_MAIL';
-configVar{end+1} = 'DIR_INPUT_ARGOS_ERROR_ELLIPSES_WS';
 
 configVar{end+1} = 'APPLY_RTQC';
 
@@ -179,15 +151,10 @@ configVar{end+1} = 'TEST020_QUESTIONABLE_ARGOS_POSITION';
 configVar{end+1} = 'TEST021_NS_UNPUMPED_SALINITY';
 configVar{end+1} = 'TEST022_NS_MIXED_AIR_WATER';
 configVar{end+1} = 'TEST023_DEEP_FLOAT';
-configVar{end+1} = 'TEST024_RBR_FLOAT';
-configVar{end+1} = 'TEST025_MEDD';
-configVar{end+1} = 'TEST026_TEMP_CNDC';
 configVar{end+1} = 'TEST057_DOXY';
-configVar{end+1} = 'TEST059_NITRATE';
-configVar{end+1} = 'TEST062_BBP';
 configVar{end+1} = 'TEST063_CHLA';
 
-configVar{end+1} = 'TEST004_GEBCO_FILE';
+configVar{end+1} = 'TEST004_ETOPO2_FILE';
 configVar{end+1} = 'TEST015_GREY_LIST_FILE';
 
 configVar{end+1} = 'ADD_THREE_MINUTES';
@@ -250,11 +217,6 @@ if (o_inputError == 0)
    g_decArgo_dirOutputNetcdfFile = configVal{1};
    configVal(1) = [];
    
-   if (g_decArgo_realtimeFlag)
-      g_decArgo_processRemainingBuffers = str2num(configVal{1});
-      configVal(1) = [];
-   end
-   
    g_decArgo_generateNcTraj = str2num(configVal{1});
    configVal(1) = [];
    g_decArgo_generateNcMultiProf = str2num(configVal{1});
@@ -265,29 +227,7 @@ if (o_inputError == 0)
    configVal(1) = [];
    g_decArgo_generateNcMeta = str2num(configVal{1});
    configVal(1) = [];
-
-   g_decArgo_generateNcTraj32 = str2num(configVal{1});
-   configVal(1) = [];
-   g_decArgo_dirOutputTraj32NetcdfFile = configVal{1};
-   configVal(1) = [];
    
-   % if TRAJ 3.1 and TRAJ 3.2 files should be generated on the same output
-   % directory, we generate only the TRAJ 3.2 file
-   if ((g_decArgo_generateNcTraj ~= 0) && (g_decArgo_generateNcTraj32 ~= 0))
-      [dirOutputNetcdfFile, ~, ~] = fileparts(g_decArgo_dirOutputNetcdfFile);
-      [dirOutputTraj32NetcdfFile, ~, ~] = fileparts(g_decArgo_dirOutputTraj32NetcdfFile);
-      if (strcmp(dirOutputNetcdfFile, dirOutputTraj32NetcdfFile))
-         g_decArgo_generateNcTraj = 0;
-      end
-   end
-   
-   g_decArgo_addErrorEllipses = str2num(configVal{1});
-   configVal(1) = [];
-   g_decArgo_dirInputErrorEllipsesMail = configVal{1};
-   configVal(1) = [];
-   g_decArgo_dirInputErrorEllipsesWs = configVal{1};
-   configVal(1) = [];
-
    g_decArgo_applyRtqc = str2num(configVal{1});
    configVal(1) = [];
    
@@ -333,22 +273,12 @@ if (o_inputError == 0)
    configVal(1) = [];
    g_decArgo_rtqcTest23 = str2num(configVal{1});
    configVal(1) = [];
-   g_decArgo_rtqcTest24 = str2num(configVal{1});
-   configVal(1) = [];
-   g_decArgo_rtqcTest25 = str2num(configVal{1});
-   configVal(1) = [];
-   g_decArgo_rtqcTest26 = str2num(configVal{1});
-   configVal(1) = [];
    g_decArgo_rtqcTest57 = str2num(configVal{1});
-   configVal(1) = [];
-   g_decArgo_rtqcTest59 = str2num(configVal{1});
-   configVal(1) = [];
-   g_decArgo_rtqcTest62 = str2num(configVal{1});
    configVal(1) = [];
    g_decArgo_rtqcTest63 = str2num(configVal{1});
    configVal(1) = [];
    
-   g_decArgo_rtqcGebcoFile = configVal{1};
+   g_decArgo_rtqcEtopoFile = configVal{1};
    configVal(1) = [];
    g_decArgo_rtqcGreyList = configVal{1};
    configVal(1) = [];
@@ -358,4 +288,4 @@ if (o_inputError == 0)
    
 end
 
-return
+return;

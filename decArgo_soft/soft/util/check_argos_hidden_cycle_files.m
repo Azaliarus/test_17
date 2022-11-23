@@ -22,10 +22,10 @@
 function check_argos_hidden_cycle_files(varargin)
 
 % directory of the argos files to check
-DIR_INPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\IN\ARGOS\cycle\';
+DIR_INPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\IN\archive_cycle_co_20150409\';
 
 % directory to store the log and CSV files
-DIR_LOG_FILE = 'C:\Users\jprannou\_RNU\DecArgo_soft\work\log\';
+DIR_LOG_FILE = 'C:\Users\jprannou\_RNU\DecArgo_soft\work\';
 
 % mode processing flags
 global g_decArgo_realtimeFlag;
@@ -54,7 +54,7 @@ if (nargin == 0)
    % floats to process come from floatListFileName
    if ~(exist(floatListFileName, 'file') == 2)
       fprintf('File not found: %s\n', floatListFileName);
-      return
+      return;
    end
    
    fprintf('Floats from list: %s\n', floatListFileName);
@@ -80,7 +80,7 @@ tic;
 outputFileName = [DIR_LOG_FILE '/' 'check_argos_hidden_cycle_files' name '_' datestr(now, 'yyyymmddTHHMMSS') '.csv'];
 fidOut = fopen(outputFileName, 'wt');
 if (fidOut == -1)
-   return
+   return;
 end
 header = ['Hidden; Line; WMO; File name; File date'];
 fprintf(fidOut, '%s\n', header);
@@ -105,13 +105,13 @@ for idFloat = 1:nbFloats
    if (isempty(idF))
       fprintf('ERROR: No information on float #%d\n', floatNum);
       fprintf('(nothing done)\n');
-      continue
+      continue;
    end
    floatArgosId = str2num(listArgosId{idF});
    
    % look for 'WWW' in file names
    dirFloat = [DIR_INPUT_ARGOS_FILES '/' sprintf('%06d', floatArgosId) '/'];
-   hiddenFiles = [dir([dirFloat '/*WWW*']); dir([dirFloat '/*MMM*'])] ;
+   hiddenFiles = dir([dirFloat '/*WWW*']);
    if (isempty(hiddenFiles))
       fprintf('=> OK\n');
    else
@@ -125,7 +125,7 @@ for idFloat = 1:nbFloats
          argosFileName = argosFiles(idFile).name;
          
          hidden = 0;
-         if ~(isempty(strfind(argosFileName, 'WWW')) && isempty(strfind(argosFileName, 'MMM')))
+         if (~isempty(strfind(argosFileName, 'WWW')))
             hidden = 1;
          end
          
@@ -149,4 +149,4 @@ fprintf('done (Elapsed time is %.1f seconds)\n', ellapsedTime);
 
 diary off;
 
-return
+return;

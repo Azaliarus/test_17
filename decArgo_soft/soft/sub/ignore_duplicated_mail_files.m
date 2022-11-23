@@ -3,9 +3,12 @@
 % preserve only one such SBD.
 %
 % SYNTAX :
-%  ignore_duplicated_mail_files
+%  ignore_duplicated_mail_files(a_spoolDir, a_archiveDir)
 %
 % INPUT PARAMETERS :
+%   a_spoolDir   : directory to check
+%   a_archiveDir : directory to move the mail files associated with the deleted
+%                  SBD files
 %
 % OUTPUT PARAMETERS :
 %
@@ -17,31 +20,20 @@
 % RELEASES :
 %   12/01/2014 - RNU - creation
 % ------------------------------------------------------------------------------
-function ignore_duplicated_mail_files
-
-% to use virtual buffers instead of directories
-global g_decArgo_spoolFileList;
-
-% SBD sub-directories
-global g_decArgo_archiveDirectory;
+function ignore_duplicated_mail_files(a_spoolDir, a_archiveDir)
 
 
-% mail files can be duplicated (i.e. same (IMEI, MOMSN, MTMSN)) when:
-% - we received multiple mails with data (EX: 69001632, MOMSN=988)
-%   => select the one with the best CEPradius
-% - the tranfert failed (EX: 2902170, MOMSN=321) => select the one with the
-%   message size > 0
-
-% check the files of the spool list
+% check the files of the directory
+dirFiles = dir([a_spoolDir '/*.txt']);
 tabFileName = [];
 tabFileNameTrunc = [];
-for idFile = 1:length(g_decArgo_spoolFileList)
+for idFile = 1:length(dirFiles)
    
-   dirFileName = g_decArgo_spoolFileList{idFile};
+   dirFileName = dirFiles(idFile).name;
    idFUs = strfind(dirFileName, '_');
    if (length(idFUs) == 5)
       tabFileName = [tabFileName; {dirFileName}];
-      tabFileNameTrunc = [tabFileNameTrunc; {dirFileName(idFUs(2)+1:idFUs(5)-1)}];
+      tabFileNameTrunc = [tabFileNameTrunc; {dirFileName(1:idFUs(5)-1)}];
    else
       fprintf('WARNING: Inconsistent mail file name: %s\n', dirFileName);
    end
@@ -52,36 +44,16 @@ if (length(uTabFileNameTrunc) ~= length(tabFileNameTrunc))
    for id = 1:length(uTabFileNameTrunc)
       idF = find(strcmp(uTabFileNameTrunc{id}, tabFileNameTrunc) == 1);
       if (length(idF) > 1)
-         msgSize = [];
-         cepRadius = [];
-         for idD = 1:length(idF)
-            [mailContents] = read_mail(tabFileName{idF(idD)}, g_decArgo_archiveDirectory);
-            msgSize(idD) = mailContents.messageSize;
-            if (~isempty(mailContents.cepRadius))
-               cepRadius(idD) = mailContents.cepRadius;
-            else
-               cepRadius(idD) = intmax;
-            end
-         end
-         idF2 = find(msgSize > 0);
-         if (length(idF2) > 1)
-            [~, idMin] = min(cepRadius(idF2));
-            idToKeep = idF(idF2(idMin));
-         elseif (length(idF2) == 1)
-            idToKeep = idF(idF2);
-         else
-            [~, idMin] = min(cepRadius);
-            idToKeep = idF(idMin);
-         end
-         idToDel = setdiff(idF, idToKeep);
-         for idD = 1:length(idToDel)
+         for idD = 2:length(idF)
             % move the mail file to the archive directory
-            mailFileName = tabFileName{idToDel(idD)};
+            mailFileName = tabFileName{idF(idD)};
             fprintf('DEC_INFO: Ignoring duplicated mail file: %s\n', mailFileName);
-            remove_from_list_ir_sbd(mailFileName, 'spool', 0, 0);
+            fileNameIn = [a_spoolDir '/' mailFileName];
+            fileNamOut = [a_archiveDir '/' mailFileName];
+            move_file(fileNameIn, fileNamOut);
          end
       end
    end
 end
 
-return
+return;

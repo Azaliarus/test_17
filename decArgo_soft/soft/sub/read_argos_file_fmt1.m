@@ -45,24 +45,19 @@ o_argosDataData = [];
 argosLocNbLines = [];
 argosDataSat = [];
 argosDataOcc = [];
-nbVal = 1;
-argosDataDateTmp = [];
-argosDataDataTmp = [];
-argosDataSatTmp = [];
-argosDataOccTmp = [];
 for id = 1:length(a_fileName)
 
    fileName = a_fileName{id};
 
    if ~(exist(fileName, 'file') == 2)
       fprintf('ERROR: Argos file not found: %s\n', fileName);
-      return
+      return;
    end
 
    fId = fopen(fileName, 'r');
    if (fId == -1)
       fprintf('ERROR: Error while opening Argos file: %s\n', fileName);
-      return
+      return;
    end
 
    % parse Argos file contents
@@ -71,19 +66,19 @@ for id = 1:length(a_fileName)
       line = fgetl(fId);
       lineNum = lineNum + 1;
       if (line == -1)
-         break
+         break;
       end
 
       % empty line
       if (strcmp(deblank(line), ''))
-         continue
+         continue;
       end
 
       % look for satellite pass header
       [val, count, errmsg, nextindex] = sscanf(line, '%d %d %d %d %c %c %d-%d-%d %d:%d:%d %f %f %f %d');
       if (~isempty(errmsg) || (count < 5) || (val(2) ~= a_argosId))
          fprintf('ERROR: Error in line #%d: %s (file %s)\n', lineNum, line, fileName);
-         break
+         break;
       end
       satellite = char(val(5));
       
@@ -109,7 +104,7 @@ for id = 1:length(a_fileName)
          lineNum = lineNum + 1;
          if (line == -1)
             fprintf('ERROR: Unexpected error in line #%d (file %s)\n', lineNum, fileName);
-            break
+            break;
          end
 
          % look for message header
@@ -162,31 +157,13 @@ for id = 1:length(a_fileName)
                nbSensor = length(sensor);
                sensor(1+nbSensor:count+nbSensor) = val(1:count);
 
-%                if (length(sensor) == a_frameLength)
-%                   % store date and data Argos message
-%                   o_argosDataDate = [o_argosDataDate; date];
-%                   o_argosDataData = [o_argosDataData; [sensor(1:end)]];
-%                   argosDataSat = [argosDataSat satellite];
-%                   argosDataOcc = [argosDataOcc dataOcc];
-%                   date = [];
-%                   sensor = [];
-%                end
-               
                if (length(sensor) == a_frameLength)
                   % store date and data Argos message
-                  if (nbVal > size(argosDataDataTmp, 1))
-                     argosDataDateTmp = cat(1, argosDataDateTmp, nan(1000, 1));
-                     argosDataDataTmp = cat(1, argosDataDataTmp, nan(1000, length(sensor)));
-                     argosDataSatTmp = cat(1, argosDataSatTmp, repmat('', 1000, 1));
-                     argosDataOccTmp = cat(1, argosDataOccTmp, nan(1000, 1));
-                  end
-                  argosDataDateTmp(nbVal) = date;
-                  argosDataDataTmp(nbVal, :) = sensor(1:end);
-                  argosDataSatTmp(nbVal) = satellite;
-                  argosDataOccTmp(nbVal) = dataOcc;
-                  nbVal = nbVal + 1;
+                  o_argosDataDate = [o_argosDataDate; date];
+                  o_argosDataData = [o_argosDataData; [sensor(1:end)]];
+                  argosDataSat = [argosDataSat satellite];
+                  argosDataOcc = [argosDataOcc dataOcc];
                   date = [];
-                  clear sensor;
                   sensor = [];
                end
             end
@@ -198,19 +175,11 @@ for id = 1:length(a_fileName)
 
    fclose(fId);
 end
-o_argosDataDate = argosDataDateTmp(1:nbVal-1);
-o_argosDataData = argosDataDataTmp(1:nbVal-1, :);
-argosDataSat = argosDataSatTmp(1:nbVal-1);
-argosDataOcc = argosDataOccTmp(1:nbVal-1);
-clear argosDataDateTmp;
-clear argosDataDataTmp;
-clear argosDataSatTmp;
-clear argosDataOccTmp;
 
 % locations post-processing
 
 % longitudes must be in the [-180, 180[ interval
-id = find(o_argosLocLon >= 180);
+id = find(o_argosLocLon > 180);
 o_argosLocLon(id) = o_argosLocLon(id) - 360;
 
 % sort output data
@@ -276,7 +245,7 @@ while (~isempty(tabDate))
             end
          end
          if (length(idSelect) > 1)
-            [~, idMax] = max(argosDataOcc(idSelect));
+            [unused, idMax] = max(argosDataOcc(idSelect));
             idSelect(idMax) = [];
             idDel = [idDel; idSelect];
          end
@@ -312,7 +281,7 @@ while (~isempty(tabDate))
    idEq = find(o_argosDataDate == tabDate(1));
    if (length(idEq) > 1)
 
-      [~, idSorted] = sort(argosDataSat(idEq));
+      [unused, idSorted] = sort(argosDataSat(idEq));
       o_argosDataDate(idEq) = o_argosDataDate(idEq(idSorted));
       o_argosDataData(idEq, :) = o_argosDataData(idEq(idSorted), :);
       argosDataSat(idEq) = argosDataSat(idEq(idSorted));
@@ -321,7 +290,7 @@ while (~isempty(tabDate))
    tabDate(1) = [];
 end
 
-return
+return;
 
 % ------------------------------------------------------------------------------
 % Select Argos locations to delete (only one location is preserved for a given
@@ -364,7 +333,7 @@ for id = 1:length(uSatellite)
       idEqQc = find(posQc == posQc(idSortedPosQc(1)));
       if (length(idEqQc) > 1)
          % select satellite pass according to the amount of received data
-         [~, idSortedPos] = sort(nbLines(idEqQc), 'descend');
+         [unused, idSortedPos] = sort(nbLines(idEqQc), 'descend');
          select = [select; idEqSat(idEqQc(idSortedPos(1)))];
       else
          select = [select; idEqSat(idEqQc)];
@@ -376,7 +345,7 @@ end
 
 o_notSelected = setdiff([1:length(a_posQc)], select);
 
-return
+return;
 
 % ------------------------------------------------------------------------------
 % Sort Argos locations according to their classes.
@@ -406,11 +375,11 @@ o_idSorted = [];
 idGps = find(a_posQc == 'G');
 a_posQc(idGps) = ones(1, length(idGps))*4;
 idDigit = find(isstrprop(a_posQc, 'digit') == 1);
-[~, idSorted] = sort(a_posQc(idDigit), 'descend');
+[unused, idSorted] = sort(a_posQc(idDigit), 'descend');
 o_idSorted = idDigit(idSorted);
 idLetter = setdiff([1:length(a_posQc)], idDigit);
-[~, idSorted] = sort(a_posQc(idLetter));
+[unused, idSorted] = sort(a_posQc(idLetter));
 o_idSorted = [o_idSorted idLetter(idSorted)];
 
-return
+return;
 

@@ -20,42 +20,23 @@
 % ------------------------------------------------------------------------------
 function generate_csv_meta(varargin)
 
-% to switch between Coriolis and JPR configurations
-CORIOLIS_CONFIGURATION_FLAG = 1;
+% meta-data file exported from Coriolis data base
+% dataBaseFileName = 'C:\Users\jprannou\_RNU\DecPrv_info\_configParamNames\meta_PRV_from_VB_REFERENCE_20150217.txt';
+dataBaseFileName = 'C:\Users\jprannou\_RNU\DecPrv_info\ArvorARN\meta_provor_4.52_20150416.txt';
+dataBaseFileName = 'C:\Users\jprannou\_RNU\DecPrv_info\_configParamNames\export_JPR_2DO_20150630.txt';
+% dataBaseFileName = 'C:\Users\jprannou\_RNU\DecPrv_info\_configParamNames\export_JPR_ArvorDeep_v2_20150707.txt';
 
-if (CORIOLIS_CONFIGURATION_FLAG)
+% dataBaseFileName = 'C:\Users\jprannou\_RNU\DecArgo_soft\work\new_iridium_meta.txt';
+% dataBaseFileName = 'C:\Users\jprannou\_RNU\DecArgo_soft\work\new_iridium_meta_updated.txt';
+% dataBaseFileName = 'C:\Users\jprannou\_RNU\DecApx_info\_configParamNames\export_meta_APEX_from_VB_20150703.txt';
 
-   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-   % CORIOLIS CONFIGURATION - START
+% dataBaseFileName = 'C:\Users\jprannou\_RNU\DecPrv_info\ASFAR\DBexport_ASFAR_fromVB20151029.txt';
 
-   % meta-data file exported from Coriolis data base
-   dataBaseFileName = '/home/idmtmp7/vincent/matlab/DB_export/new_iridium_meta.txt';
-   % dataBaseFileName = '/home/idmtmp7/vincent/matlab/DB_export/new_argos_meta.txt';
-   % dataBaseFileName = '/home/idmtmp7/vincent/matlab/DB_export/new_arvorcm_meta.txt';
-   % dataBaseFileName = '/home/idmtmp7/vincent/matlab/DB_export/new_apex_meta.txt';
+dataBaseFileName = 'C:\Users\jprannou\_RNU\DecPrv_info\_configParamNames\export_DOXY_from_VB_20160518.txt';
+dataBaseFileName = 'C:\Users\jprannou\_RNU\DecPrv_info\_configParamNames\export_4-54_20160701.txt';
 
-   % directory to store the log and csv files
-   DIR_LOG_CSV_FILE = '/home/coriolis_exp/binlx/co04/co0414/co041402/data/log';
-
-   % CORIOLIS CONFIGURATION - END
-   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-else
-
-   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-   % JPR CONFIGURATION - START
-
-   % meta-data file exported from Coriolis data base
-   dataBaseFileName = 'C:\Users\jprannou\_RNU\DecApx_info\_configParamNames\DB_Export\DB_export_APF9i_6903708_6903711.txt';
-   dataBaseFileName = 'C:\Users\jprannou\Contacts\Desktop\SOS_VB\new_argos_meta.txt';
-
-   % directory to store the log and csv files
-   DIR_LOG_CSV_FILE = 'C:\Users\jprannou\_RNU\DecArgo_soft\work\csv\';
-
-   % JPR CONFIGURATION - END
-   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-end
+% directory to store the log and csv files
+DIR_LOG_CSV_FILE = 'C:\Users\jprannou\_RNU\DecArgo_soft\work\';
 
 % mode processing flags
 global g_decArgo_realtimeFlag;
@@ -82,7 +63,7 @@ if (nargin == 0)
    % floats to process come from floatListFileName
    if ~(exist(floatListFileName, 'file') == 2)
       fprintf('ERROR: File not found: %s\n', floatListFileName);
-      return
+      return;
    end
    
    fprintf('Floats from list: %s\n', floatListFileName);
@@ -108,7 +89,7 @@ tic;
 outputFileName = [DIR_LOG_CSV_FILE '/' 'generate_csv_meta' name '_' datestr(now, 'yyyymmddTHHMMSS') '.csv'];
 fidOut = fopen(outputFileName, 'wt');
 if (fidOut == -1)
-   return
+   return;
 end
 header = ['PLATFORM_CODE;TECH_PARAMETER_ID;DIM_LEVEL;CORIOLIS_TECH_METADATA.PARAMETER_VALUE;TECH_PARAMETER_CODE'];
 fprintf(fidOut, '%s\n', header);
@@ -124,7 +105,7 @@ fprintf('Processing file: %s\n', dataBaseFileName);
 fId = fopen(dataBaseFileName, 'r');
 if (fId == -1)
    fprintf('ERROR: Unable to open file: %s\n', dataBaseFileName);
-   return
+   return;
 end
 metaFileContents = textscan(fId, '%s', 'delimiter', '\t');
 metaFileContents = metaFileContents{:};
@@ -138,7 +119,7 @@ metaWmoList = metaData(:, 1);
 % for id = 1:length(metaWmoList)
 %    if (isempty(str2num(metaWmoList{id})))
 %       fprintf('%s is not a valid WMO number\n', metaWmoList{id});
-%       return
+%       return;
 %    end
 % end
 S = sprintf('%s*', metaWmoList{:});
@@ -154,8 +135,8 @@ for idFloat = 1:nbFloats
    % find decoder Id
    idF = find(listWmoNum == floatNum, 1);
    if (isempty(idF))
-      fprintf('ERROR: No information on float #%d - nothing done for this float\n', floatNum);
-      continue
+      fprintf('ERROR: No information on float #%d => nothing done for this float\n', floatNum);
+      continue;
    end
    floatDecId = listDecId(idF);
    
@@ -172,9 +153,9 @@ for idFloat = 1:nbFloats
    fprintf(fidOut, '%d;13;1;%s;PR_PROBE_CODE;%s\n', floatNum, wmoInstType, floatVersion);
    
    % get the list of sensors for this float
-   [sensorList] = get_sensor_list_from_decoder_id(floatDecId);
+   [sensorList] = get_sensor_list(floatDecId);
    if (isempty(sensorList))
-      continue
+      continue;
    end
    
    % sensor information
@@ -201,9 +182,9 @@ for idFloat = 1:nbFloats
          fprintf(fidOut, '%d;2207;%d;%s;PARAMETER_ACCURACY;%s\n', floatNum, paramDimLevel(idP), paramAccuracy{idP}, floatVersion);
          fprintf(fidOut, '%d;2208;%d;%s;PARAMETER_RESOLUTION;%s\n', floatNum, paramDimLevel(idP), paramResolution{idP}, floatVersion);
 
-         %          fprintf(fidOut, '%d;416;%d;%s;PREDEPLOYMENT_CALIB_EQUATION;%s\n', floatNum, paramDimLevel(idP), calibEquation{idP}, floatVersion);
-         %          fprintf(fidOut, '%d;417;%d;%s;PREDEPLOYMENT_CALIB_COEFFICIENT;%s\n', floatNum, paramDimLevel(idP), calibCoef{idP}, floatVersion);
-         %          fprintf(fidOut, '%d;418;%d;%s;PREDEPLOYMENT_CALIB_COMMENT;%s\n', floatNum, paramDimLevel(idP), calibComment{idP}, floatVersion);
+         fprintf(fidOut, '%d;416;%d;%s;PREDEPLOYMENT_CALIB_EQUATION;%s\n', floatNum, paramDimLevel(idP), calibEquation{idP}, floatVersion);
+         fprintf(fidOut, '%d;417;%d;%s;PREDEPLOYMENT_CALIB_COEFFICIENT;%s\n', floatNum, paramDimLevel(idP), calibCoef{idP}, floatVersion);
+         fprintf(fidOut, '%d;418;%d;%s;PREDEPLOYMENT_CALIB_COMMENT;%s\n', floatNum, paramDimLevel(idP), calibComment{idP}, floatVersion);
       end
    end
 end
@@ -215,7 +196,7 @@ fprintf('done (Elapsed time is %.1f seconds)\n', ellapsedTime);
 
 diary off;
 
-return
+return;
 
 % ------------------------------------------------------------------------------
 function [o_floatVersion] = get_float_version(a_floatNum, a_metaWmoList, a_metaData)
@@ -232,8 +213,8 @@ else
       a_floatNum);
 end
 
-return
-platform fa
+return;
+
 % ------------------------------------------------------------------------------
 function [o_platformFamily] = get_platform_family_db(a_floatNum, a_decId, a_metaWmoList, a_metaData)
    
@@ -256,19 +237,19 @@ end
 
 if (~isempty(o_platformFamily))
    if (~strcmp(o_platformFamily, defaultPlatformFamily))
-      fprintf('WARNING: Float #%d decid #%d: DB platform family (%s) differs from default value (%s) - set to default value\n', ...
+      fprintf('WARNING: Float #%d decid #%d: DB platform family (%s) differs from default value (%s) => set to default value\n', ...
          a_floatNum, a_decId, ...
          o_platformFamily, defaultPlatformFamily);
       o_platformFamily = defaultPlatformFamily;
    end
 else
    o_platformFamily = defaultPlatformFamily;
-   fprintf('INFO: Float #%d decid #%d: DB platform family is missing - set to default value (%s)\n', ...
+   fprintf('INFO: Float #%d decid #%d: DB platform family is missing => set to default value (%s)\n', ...
       a_floatNum, a_decId, ...
       o_platformFamily);
 end
 
-return
+return;
 
 % ------------------------------------------------------------------------------
 function [o_platformType] = get_platform_type_db(a_floatNum, a_decId, a_metaWmoList, a_metaData)
@@ -292,19 +273,19 @@ end
 
 if (~isempty(o_platformType))
    if (~strcmp(o_platformType, defaultPlatformType))
-      fprintf('WARNING: Float #%d decid #%d: DB platform type (%s) differs from default value (%s) - set to default value\n', ...
+      fprintf('WARNING: Float #%d decid #%d: DB platform type (%s) differs from default value (%s) => set to default value\n', ...
          a_floatNum, a_decId, ...
          o_platformType, defaultPlatformType);
       o_platformType = defaultPlatformType;
    end
 else
    o_platformType = defaultPlatformType;
-   fprintf('INFO: Float #%d decid #%d: DB platform type is missing - set to default value (%s)\n', ...
+   fprintf('INFO: Float #%d decid #%d: DB platform type is missing => set to default value (%s)\n', ...
       a_floatNum, a_decId, ...
       o_platformType);
 end
 
-return
+return;
 
 % ------------------------------------------------------------------------------
 function [o_wmoInstType] = get_wmo_inst_type_db(a_floatNum, a_decId, a_metaWmoList, a_metaData)
@@ -328,33 +309,33 @@ end
 
 if (~isempty(o_wmoInstType))
    if (~strcmp(o_wmoInstType, defaultWmoInstType))
-      fprintf('WARNING: Float #%d decid #%d: DB WMO instrument type (%s) differs from default value (%s) - set to default value\n', ...
+      fprintf('WARNING: Float #%d decid #%d: DB WMO instrument type (%s) differs from default value (%s) => set to default value\n', ...
          a_floatNum, a_decId, ...
          o_wmoInstType, defaultWmoInstType);
       o_wmoInstType = defaultWmoInstType;
    end
 else
    o_wmoInstType = defaultWmoInstType;
-   fprintf('INFO: Float #%d decid #%d: DB WMO instrument type is missing - set to default value (%s)\n', ...
+   fprintf('INFO: Float #%d decid #%d: DB WMO instrument type is missing => set to default value (%s)\n', ...
       a_floatNum, a_decId, ...
       o_wmoInstType);
 end
 
-return
+return;
 
 % ------------------------------------------------------------------------------
-function [o_sensorList] = get_sensor_list_from_decoder_id(a_decId)
+function [o_sensorList] = get_sensor_list(a_decId)
 
 o_sensorList = [];
 
 % get the list of sensors for this float
 switch a_decId
    
-   case {1, 3, 11, 12, 17, 24, 30, 31, 204, 205, 210, 211, 212, 222, 224, 1010}
+   case {1, 3, 11, 12, 17, 24, 30, 31, 204, 205, 210, 211}
       % CTD floats
       o_sensorList = [{'CTD'}];
       
-   case {4, 19, 25, 27, 28, 29, 32, 201, 202, 203, 206, 207, 208, 213, 214, 215, 216, 217, 218, 221, 223, 225}
+   case {4, 19, 25, 27, 28, 29, 32, 201, 202, 203, 206, 207, 208}
       % CTDO floats
       o_sensorList = [{'CTD'}; {'OPTODE'}];
       
@@ -363,10 +344,10 @@ switch a_decId
       o_sensorList = [{'CTD'}; {'OPTODE'}; {'OPTODE2'}];
       
    otherwise
-      fprintf('ERROR: Unknown sensor list for decId #%d - nothing done for this float\n', a_decId);
+      fprintf('ERROR: Unknown sensor list for decId #%d => nothing done for this float\n', a_decId);
 end
 
-return
+return;
 
 % ------------------------------------------------------------------------------
 function [o_sensorName, o_sensorDimLevel, o_sensorMaker, o_sensorModel, o_sensorSn] = ...
@@ -428,7 +409,7 @@ end
 [o_sensorMaker, o_sensorModel, o_sensorSn] = ...
    get_sensor_data(o_sensorName, ifEmptySensorMakerList, ifEmptySensorModelList, a_floatNum, a_metaWmoList, a_metaData);
 
-return
+return;
 
 % ------------------------------------------------------------------------------
 function [o_sensorMaker, o_sensorModel, o_sensorSn] = ...
@@ -455,7 +436,7 @@ for idC = 1:length(o_sensorName)
       else
          o_sensorMaker{end+1} = ifEmptySensorMakerList{idC};
          
-         fprintf('INFO: SENSOR_MAKER is missing for sensor ''%s'' of float #%d - value set to ''%s''\n', ...
+         fprintf('INFO: SENSOR_MAKER is missing for sensor ''%s'' of float #%d => value set to ''%s''\n', ...
             o_sensorName{idC}, a_floatNum, o_sensorMaker{end});
       end
    
@@ -467,7 +448,7 @@ for idC = 1:length(o_sensorName)
       else
          o_sensorModel{end+1} = ifEmptySensorModelList{idC};
          
-         fprintf('INFO: SENSOR_MODEL is missing for sensor ''%s'' of float #%d - value set to ''%s''\n', ...
+         fprintf('INFO: SENSOR_MODEL is missing for sensor ''%s'' of float #%d => value set to ''%s''\n', ...
             o_sensorName{idC}, a_floatNum, o_sensorModel{end});
       end
       
@@ -479,7 +460,7 @@ for idC = 1:length(o_sensorName)
       else
          o_sensorSn{end+1} = 'n/a';
          
-         fprintf('INFO: SENSOR_SERIAL_NO is missing for sensor ''%s'' of float #%d - value set to ''%s''\n', ...
+         fprintf('INFO: SENSOR_SERIAL_NO is missing for sensor ''%s'' of float #%d => value set to ''%s''\n', ...
             o_sensorName{idC}, a_floatNum, o_sensorSn{end});
       end
    else      
@@ -487,13 +468,13 @@ for idC = 1:length(o_sensorName)
       o_sensorModel{end+1} = ifEmptySensorModelList{idC};
       o_sensorSn{end+1} = 'n/a';
       
-      fprintf('INFO: SENSOR ''%s'' is missing for float #%d - sensor created with default values (''%s'', ''%s'', ''%s'')\n', ...
+      fprintf('INFO: SENSOR ''%s'' is missing for float #%d => sensor created with default values (''%s'', ''%s'', ''%s'')\n', ...
          o_sensorName{idC}, a_floatNum, ...
          o_sensorMaker{end}, o_sensorModel{end}, o_sensorSn{end});
    end
 end
 
-return
+return;
 
 % ------------------------------------------------------------------------------
 function [o_paramName, o_paramDimLevel, o_paramSensor, ...
@@ -511,36 +492,18 @@ o_predCalibEquation = [];
 o_predCalibCoefficient = [];
 o_predCalibComment = [];
 
-% lists of managed decoders
-global g_decArgo_decoderIdListNkeIridiumRbr;
-
-
 switch a_inputSensorName
    case  'CTD'
-      if (~ismember(a_decId, g_decArgo_decoderIdListNkeIridiumRbr))
-         o_paramName = [ ...
-            {'PRES'} {'TEMP'} {'PSAL'} ...
-            ];
-         o_paramDimLevel = [1 2 3];
-         o_paramSensor = [ ...
-            {'CTD_PRES'} {'CTD_TEMP'} {'CTD_CNDC'} ...
-            ];
-         o_paramUnits = [ ...
-            {'decibar'} {'degree_Celsius'} {'psu'} ...
-            ];
-      else
-         % RBR
-         o_paramName = [ ...
-            {'PRES'} {'TEMP'} {'PSAL'} {'TEMP_CNDC'} ...
-            ];
-         o_paramDimLevel = [1 2 3 4];
-         o_paramSensor = [ ...
-            {'CTD_PRES'} {'CTD_TEMP'} {'CTD_CNDC'} {'CTD_CNDC'} ...
-            ];
-         o_paramUnits = [ ...
-            {'decibar'} {'degree_Celsius'} {'psu'}  {'degree_Celsius'} ...
-            ];
-      end
+      o_paramName = [ ...
+         {'PRES'} {'TEMP'} {'PSAL'} ...
+         ];
+      o_paramDimLevel = [1 2 3];
+      o_paramSensor = [ ...
+         {'CTD_PRES'} {'CTD_TEMP'} {'CTD_CNDC'} ...
+         ];
+      o_paramUnits = [ ...
+         {'decibar'} {'degree_Celsius'} {'psu'} ...
+         ];
       
    case 'OPTODE'
       
@@ -549,43 +512,30 @@ switch a_inputSensorName
          case {4, 19, 25}
             
             o_paramName = [ ...
-               {'MOLAR_DOXY'} {'DOXY'} ...
+               {'MOLAR_DOXY'} {'DOXY'} {'PPOX_DOXY'} ...
                ];
-            o_paramDimLevel = [105 104];
+            o_paramDimLevel = [105 104 109];
             o_paramSensor = [ ...
-               {'OPTODE_DOXY'} {'OPTODE_DOXY'} ...
+               {'OPTODE_DOXY'} {'OPTODE_DOXY'} {'OPTODE_DOXY'} ...
                ];
             o_paramUnits = [ ...
-               {'micromole/l'} {'micromole/kg'} ...
+               {'micromole/l'} {'micromole/kg'} {'millibar'} ...
                ];
             
          case {27, 28, 29, 32}
             
             o_paramName = [ ...
-               {'TPHASE_DOXY'} {'DOXY'} ...
+               {'TPHASE_DOXY'} {'DOXY'} {'PPOX_DOXY'} ...
                ];
-            o_paramDimLevel = [106 104];
+            o_paramDimLevel = [106 104 109];
             o_paramSensor = [ ...
-               {'OPTODE_DOXY'} {'OPTODE_DOXY'} ...
+               {'OPTODE_DOXY'} {'OPTODE_DOXY'} {'OPTODE_DOXY'} ...
                ];
             o_paramUnits = [ ...
-               {'degree'} {'micromole/kg'} ...
+               {'degree'} {'micromole/kg'} {'millibar'} ...
                ];
             
          case {201, 202, 203, 206, 207, 208}
-            
-            o_paramName = [ ...
-               {'C1PHASE_DOXY'} {'C2PHASE_DOXY'} {'TEMP_DOXY'} {'DOXY'} ...
-               ];
-            o_paramDimLevel = [101 102 103 104];
-            o_paramSensor = [ ...
-               {'OPTODE_DOXY'} {'OPTODE_DOXY'} {'OPTODE_DOXY'} {'OPTODE_DOXY'} ...
-               ];
-            o_paramUnits = [ ...
-               {'degree'} {'degree'} {'degree_Celsius'} {'micromole/kg'} ...
-               ];
-            
-         case {213, 214, 215, 216, 217, 218, 221, 223, 225}
             
             o_paramName = [ ...
                {'C1PHASE_DOXY'} {'C2PHASE_DOXY'} {'TEMP_DOXY'} {'DOXY'} {'PPOX_DOXY'} ...
@@ -601,18 +551,18 @@ switch a_inputSensorName
          case {209}
             
             o_paramName = [ ...
-               {'C1PHASE_DOXY'} {'C2PHASE_DOXY'} {'TEMP_DOXY'} {'DOXY'} ...
+               {'C1PHASE_DOXY'} {'C2PHASE_DOXY'} {'TEMP_DOXY'} {'DOXY'} {'PPOX_DOXY'} ...
                ];
-            o_paramDimLevel = [101 102 103 104];
+            o_paramDimLevel = [101 102 103 104 109];
             o_paramSensor = [ ...
-               {'OPTODE_DOXY'} {'OPTODE_DOXY'} {'OPTODE_DOXY'} {'OPTODE_DOXY'} ...
+               {'OPTODE_DOXY'} {'OPTODE_DOXY'} {'OPTODE_DOXY'} {'OPTODE_DOXY'} {'OPTODE_DOXY'} ...
                ];
             o_paramUnits = [ ...
-               {'degree'} {'degree'} {'degree_Celsius'} {'micromole/kg'} ...
+               {'degree'} {'degree'} {'degree_Celsius'} {'micromole/kg'} {'millibar'} ...
                ];
             
          otherwise
-            fprintf('ERROR: Unknown OPTODE sensor parameter list for decId #%d - nothing done for this float\n', a_decId);
+            fprintf('ERROR: Unknown OPTODE sensor parameter list for decId #%d => nothing done for this float\n', a_decId);
       end
 
    case 'OPTODE2'
@@ -622,18 +572,18 @@ switch a_inputSensorName
          case {209}
             
             o_paramName = [ ...
-               {'PHASE_DELAY_DOXY'} {'TEMP_DOXY2'} {'DOXY2'} ...
+               {'PHASE_DELAY_DOXY'} {'TEMP_DOXY2'} {'DOXY2'} {'PPOX_DOXY2'} ...
                ];
-            o_paramDimLevel = [101 102 103];
+            o_paramDimLevel = [101 102 103 110];
             o_paramSensor = [ ...
-               {'OPTODE_DOXY'} {'OPTODE_DOXY'} {'OPTODE_DOXY'} ...
+               {'OPTODE_DOXY'} {'OPTODE_DOXY'} {'OPTODE_DOXY'} {'OPTODE_DOXY'} ...
                ];
             o_paramUnits = [ ...
-               {'microsecond'} {'degree_Celsius'} {'micromole/kg'} ...
+               {'microsecond'} {'degree_Celsius'} {'micromole/kg'} {'millibar'} ...
                ];
             
          otherwise
-            fprintf('ERROR: Unknown OPTODE2 sensor parameter list for decId #%d - nothing done for this float\n', a_decId);
+            fprintf('ERROR: Unknown OPTODE sensor parameter list for decId #%d => nothing done for this float\n', a_decId);
       end
       
    otherwise
@@ -653,7 +603,7 @@ o_predCalibEquation = o_predCalibEquation';
 o_predCalibCoefficient = o_predCalibCoefficient';
 o_predCalibComment = o_predCalibComment';
 
-return
+return;
 
 % ------------------------------------------------------------------------------
 function [o_paramAccuracy, o_paramResolution, ...
@@ -681,16 +631,16 @@ if (~isempty(idF1))
    if (isempty(o_paramAccuracy))
       if (strcmp(a_paramName, 'PRES'))
          o_paramAccuracy = '2.4';
-         fprintf('INFO: ''%s'' PARAMETER_ACCURACY is missing - set to ''%s''\n', a_paramName, o_paramAccuracy);
+         fprintf('INFO: ''%s'' PARAMETER_ACCURACY is missing => set to ''%s''\n', a_paramName, o_paramAccuracy);
       elseif (strcmp(a_paramName, 'TEMP'))
          o_paramAccuracy = '0.002';
-         fprintf('INFO: ''%s'' PARAMETER_ACCURACY is missing - set to ''%s''\n', a_paramName, o_paramAccuracy);
+         fprintf('INFO: ''%s'' PARAMETER_ACCURACY is missing => set to ''%s''\n', a_paramName, o_paramAccuracy);
       elseif (strcmp(a_paramName, 'PSAL'))
          o_paramAccuracy = '0.005';
-         fprintf('INFO: ''%s'' PARAMETER_ACCURACY is missing - set to ''%s''\n', a_paramName, o_paramAccuracy);
+         fprintf('INFO: ''%s'' PARAMETER_ACCURACY is missing => set to ''%s''\n', a_paramName, o_paramAccuracy);
       elseif (strcmp(a_paramName, 'DOXY'))
          o_paramAccuracy = '10%';
-         fprintf('INFO: ''%s'' PARAMETER_ACCURACY is missing - set to ''%s''\n', a_paramName, o_paramAccuracy);
+         fprintf('INFO: ''%s'' PARAMETER_ACCURACY is missing => set to ''%s''\n', a_paramName, o_paramAccuracy);
       end
    end
    
@@ -702,16 +652,16 @@ if (~isempty(idF1))
    if (isempty(o_paramResolution))
       if (strcmp(a_paramName, 'PRES'))
          o_paramResolution = '1';
-         fprintf('INFO: ''%s'' PARAMETER_RESOLUTION is missing - set to ''%s''\n', a_paramName, o_paramResolution);
+         fprintf('INFO: ''%s'' PARAMETER_RESOLUTION is missing => set to ''%s''\n', a_paramName, o_paramResolution);
       elseif (strcmp(a_paramName, 'TEMP'))
          o_paramResolution = '0.001';
-         fprintf('INFO: ''%s'' PARAMETER_RESOLUTION is missing - set to ''%s''\n', a_paramName, o_paramResolution);
+         fprintf('INFO: ''%s'' PARAMETER_RESOLUTION is missing => set to ''%s''\n', a_paramName, o_paramResolution);
       elseif (strcmp(a_paramName, 'PSAL'))
          o_paramResolution = '0.001';
-         fprintf('INFO: ''%s'' PARAMETER_RESOLUTION is missing - set to ''%s''\n', a_paramName, o_paramResolution);
+         fprintf('INFO: ''%s'' PARAMETER_RESOLUTION is missing => set to ''%s''\n', a_paramName, o_paramResolution);
       elseif (strcmp(a_paramName, 'DOXY'))
          o_paramResolution = '0.001';
-         fprintf('INFO: ''%s'' PARAMETER_RESOLUTION is missing - set to ''%s''\n', a_paramName, o_paramResolution);
+         fprintf('INFO: ''%s'' PARAMETER_RESOLUTION is missing => set to ''%s''\n', a_paramName, o_paramResolution);
       end
    end
    
@@ -740,5 +690,5 @@ if (~isempty(idF1))
    end
 end
 
-return
+return;
 

@@ -39,7 +39,7 @@ global g_decArgo_julD2FloatDayOffset;
 
 
 if (isempty(a_tabTech1) && isempty(a_tabTech2))
-   return
+   return;
 end
 
 ID_OFFSET = 1;
@@ -47,10 +47,7 @@ ID_OFFSET = 1;
 cycleStartDateDay = g_decArgo_dateDef;
 
 % technical message #1
-idF1 = [];
-if (~isempty(a_tabTech1))
-   idF1 = find(a_tabTech1(:, 1) == 0);
-end
+idF1 = find(a_tabTech1(:, 1) == 0);
 if (length(idF1) > 1)
    fprintf('ERROR: Float #%d cycle #%d: BUFFER anomaly (%d tech message #1 in the buffer)\n', ...
       g_decArgo_floatNum, g_decArgo_cycleNum, ...
@@ -190,7 +187,7 @@ elseif (length(idF1) == 1)
       g_decArgo_floatNum, g_decArgo_cycleNum, a_tabTech1(id, 2+ID_OFFSET), a_tabTech1(id, 46+ID_OFFSET));
    fprintf(g_decArgo_outputCsvFileId, '%d; %d; Tech #1_%d; => Float time; %s\n', ...
       g_decArgo_floatNum, g_decArgo_cycleNum, a_tabTech1(id, 2+ID_OFFSET), julian_2_gregorian_dec_argo(a_tabTech1(id, end-3)));
-   fprintf(g_decArgo_outputCsvFileId, '%d; %d; Tech #1_%d; Pressure offset; %.1f; dbar\n', ...
+   fprintf(g_decArgo_outputCsvFileId, '%d; %d; Tech #1_%d; Pressure offset; %d; cbar\n', ...
       g_decArgo_floatNum, g_decArgo_cycleNum, a_tabTech1(id, 2+ID_OFFSET), a_tabTech1(id, 47+ID_OFFSET));
    fprintf(g_decArgo_outputCsvFileId, '%d; %d; Tech #1_%d; Internal vacuum (5 mbar resolution); %d; => %d mbar\n', ...
       g_decArgo_floatNum, g_decArgo_cycleNum, a_tabTech1(id, 2+ID_OFFSET), a_tabTech1(id, 48+ID_OFFSET), a_tabTech1(id, 48+ID_OFFSET)*5);
@@ -221,9 +218,8 @@ elseif (length(idF1) == 1)
       g_decArgo_floatNum, g_decArgo_cycleNum, a_tabTech1(id, 2+ID_OFFSET), a_tabTech1(id, 59+ID_OFFSET));
    fprintf(g_decArgo_outputCsvFileId, '%d; %d; Tech #1_%d; GPS longitude direction (0=East 1=West); %d\n', ...
       g_decArgo_floatNum, g_decArgo_cycleNum, a_tabTech1(id, 2+ID_OFFSET), a_tabTech1(id, 60+ID_OFFSET));
-   [lonStr, latStr] = format_position(a_tabTech1(id, end-2), a_tabTech1(id, end-1));
-   fprintf(g_decArgo_outputCsvFileId, '%d; %d; Tech #1_%d; => GPS position (lon, lat); %.4f; %.4f; =>; %s; %s\n', ...
-      g_decArgo_floatNum, g_decArgo_cycleNum, a_tabTech1(id, 2+ID_OFFSET), a_tabTech1(id, end-2), a_tabTech1(id, end-1), lonStr, latStr);
+   fprintf(g_decArgo_outputCsvFileId, '%d; %d; Tech #1_%d; => GPS position (lon, lat); %.4f; %.4f\n', ...
+      g_decArgo_floatNum, g_decArgo_cycleNum, a_tabTech1(id, 2+ID_OFFSET), a_tabTech1(id, end-2), a_tabTech1(id, end-1));
    fprintf(g_decArgo_outputCsvFileId, '%d; %d; Tech #1_%d; GPS valid fix (1=valid, 0=not valid); %d\n', ...
       g_decArgo_floatNum, g_decArgo_cycleNum, a_tabTech1(id, 2+ID_OFFSET), a_tabTech1(id, 61+ID_OFFSET));
    fprintf(g_decArgo_outputCsvFileId, '%d; %d; Tech #1_%d; GPS session duration; %d; seconds\n', ...
@@ -259,10 +255,7 @@ elseif (length(idF1) == 1)
 end
 
 % technical message #2
-idF2 = [];
-if (~isempty(a_tabTech2))
-   idF2 = find(a_tabTech2(:, 1) == 4);
-end
+idF2 = find(a_tabTech2(:, 1) == 4);
 if (length(idF2) > 1)
    fprintf('ERROR: Float #%d cycle #%d: BUFFER anomaly (%d tech message #2 in the buffer)\n', ...
       g_decArgo_floatNum, g_decArgo_cycleNum, ...
@@ -282,11 +275,11 @@ elseif (length(idF2) == 1)
       g_decArgo_floatNum, g_decArgo_cycleNum, a_tabTech2(id, 2+ID_OFFSET), a_tabTech2(id, 1+ID_OFFSET));
    fprintf(g_decArgo_outputCsvFileId, '%d; %d; Tech #2_%d; Iridium session indicator (0=first session, 1=second session); %d\n', ...
       g_decArgo_floatNum, g_decArgo_cycleNum, a_tabTech2(id, 2+ID_OFFSET), a_tabTech2(id, 2+ID_OFFSET));
-   fprintf(g_decArgo_outputCsvFileId, '%d; %d; Tech #2_%d; TECH: INFORMATION ON COLLECTED DATA\n', ...
-      g_decArgo_floatNum, g_decArgo_cycleNum, a_tabTech2(id, 2+ID_OFFSET));
-      
+   
    if (a_deepCycle == 1)
       
+      fprintf(g_decArgo_outputCsvFileId, '%d; %d; Tech #2_%d; TECH: INFORMATION ON COLLECTED DATA\n', ...
+         g_decArgo_floatNum, g_decArgo_cycleNum, a_tabTech2(id, 2+ID_OFFSET));
       fprintf(g_decArgo_outputCsvFileId, '%d; %d; Tech #2_%d; Nb CTD packets for descent; %d\n', ...
          g_decArgo_floatNum, g_decArgo_cycleNum, a_tabTech2(id, 2+ID_OFFSET), a_tabTech2(id, 3+ID_OFFSET));
       fprintf(g_decArgo_outputCsvFileId, '%d; %d; Tech #2_%d; Nb CTD packets for drift; %d\n', ...
@@ -315,11 +308,11 @@ elseif (length(idF2) == 1)
       fprintf(g_decArgo_outputCsvFileId, '%d; %d; Tech #2_%d; TECH: LAST PUMPED ASCENT RAW MEAS\n', ...
          g_decArgo_floatNum, g_decArgo_cycleNum, a_tabTech2(id, 2+ID_OFFSET));
       fprintf(g_decArgo_outputCsvFileId, '%d; %d; Tech #2_%d; "Subsurface" meas PRES; %d; => %.1f; dbar\n', ...
-         g_decArgo_floatNum, g_decArgo_cycleNum, a_tabTech2(id, 2+ID_OFFSET), a_tabTech2(id, 15+ID_OFFSET), sensor_2_value_for_pressure_202_210_to_214_217_222_to_225(a_tabTech2(id, 15+ID_OFFSET)));
-      fprintf(g_decArgo_outputCsvFileId, '%d; %d; Tech #2_%d; "Subsurface" meas TEMP; %d; => %.3f; degC\n', ...
-         g_decArgo_floatNum, g_decArgo_cycleNum, a_tabTech2(id, 2+ID_OFFSET), a_tabTech2(id, 16+ID_OFFSET), sensor_2_value_for_temp_204_to_214_217_219_220_222_to_225(a_tabTech2(id, 16+ID_OFFSET)));
+         g_decArgo_floatNum, g_decArgo_cycleNum, a_tabTech2(id, 2+ID_OFFSET), a_tabTech2(id, 15+ID_OFFSET), sensor_2_value_for_pressure_202_210_211(a_tabTech2(id, 15+ID_OFFSET)));
+      fprintf(g_decArgo_outputCsvFileId, '%d; %d; Tech #2_%d; "Subsurface" meas TEMP; %d; => %.3f; °C\n', ...
+         g_decArgo_floatNum, g_decArgo_cycleNum, a_tabTech2(id, 2+ID_OFFSET), a_tabTech2(id, 16+ID_OFFSET), sensor_2_value_for_temperature_204_to_211(a_tabTech2(id, 16+ID_OFFSET)));
       fprintf(g_decArgo_outputCsvFileId, '%d; %d; Tech #2_%d; "Subsurface" meas PSAL; %d; => %.3f; PSU\n', ...
-         g_decArgo_floatNum, g_decArgo_cycleNum, a_tabTech2(id, 2+ID_OFFSET), a_tabTech2(id, 17+ID_OFFSET), sensor_2_value_for_salinity_210_to_214_217_220_222_to_225(a_tabTech2(id, 17+ID_OFFSET)));
+         g_decArgo_floatNum, g_decArgo_cycleNum, a_tabTech2(id, 2+ID_OFFSET), a_tabTech2(id, 17+ID_OFFSET), sensor_2_value_for_salinity_210_211(a_tabTech2(id, 17+ID_OFFSET)));
       fprintf(g_decArgo_outputCsvFileId, '%d; %d; Tech #2_%d; "Subsurface" meas C1PHASE_DOXY; %d\n', ...
          g_decArgo_floatNum, g_decArgo_cycleNum, a_tabTech2(id, 2+ID_OFFSET), a_tabTech2(id, 18+ID_OFFSET));
       fprintf(g_decArgo_outputCsvFileId, '%d; %d; Tech #2_%d; "Subsurface" meas C2PHASE_DOXY; %d\n', ...
@@ -339,10 +332,8 @@ elseif (length(idF2) == 1)
          fprintf(g_decArgo_outputCsvFileId, '%d; %d; Tech #2_%d; First grounding minute; %d; => %s\n', ...
             g_decArgo_floatNum, g_decArgo_cycleNum, a_tabTech2(id, 2+ID_OFFSET), a_tabTech2(id, 24+ID_OFFSET), format_time_dec_argo(a_tabTech2(id, 24+ID_OFFSET)/60));
          firstGroundingTime = a_tabTech2(id, 23+ID_OFFSET) + a_tabTech2(id, 24+ID_OFFSET)/1440;
-         if (cycleStartDateDay ~= g_decArgo_dateDef)
-            fprintf(g_decArgo_outputCsvFileId, '%d; %d; Tech #2_%d; => first grounding date; %s\n', ...
-               g_decArgo_floatNum, g_decArgo_cycleNum, a_tabTech2(id, 2+ID_OFFSET), julian_2_gregorian_dec_argo(firstGroundingTime + cycleStartDateDay));
-         end
+         fprintf(g_decArgo_outputCsvFileId, '%d; %d; Tech #2_%d; => first grounding date; %s\n', ...
+            g_decArgo_floatNum, g_decArgo_cycleNum, a_tabTech2(id, 2+ID_OFFSET), julian_2_gregorian_dec_argo(firstGroundingTime + g_decArgo_julD2FloatDayOffset));
          fprintf(g_decArgo_outputCsvFileId, '%d; %d; Tech #2_%d; First grounding phase; %d\n', ...
             g_decArgo_floatNum, g_decArgo_cycleNum, a_tabTech2(id, 2+ID_OFFSET), a_tabTech2(id, 25+ID_OFFSET));
          fprintf(g_decArgo_outputCsvFileId, '%d; %d; Tech #2_%d; Nb EV actions to set first grounding; %d\n', ...
@@ -356,10 +347,8 @@ elseif (length(idF2) == 1)
          fprintf(g_decArgo_outputCsvFileId, '%d; %d; Tech #2_%d; Second grounding minute; %d; => %s\n', ...
             g_decArgo_floatNum, g_decArgo_cycleNum, a_tabTech2(id, 2+ID_OFFSET), a_tabTech2(id, 29+ID_OFFSET), format_time_dec_argo(a_tabTech2(id, 29+ID_OFFSET)/60));
          secondGroundingTime = a_tabTech2(id, 28+ID_OFFSET) + a_tabTech2(id, 29+ID_OFFSET)/1440;
-         if (cycleStartDateDay ~= g_decArgo_dateDef)
-            fprintf(g_decArgo_outputCsvFileId, '%d; %d; Tech #2_%d; => second grounding date; %s\n', ...
-               g_decArgo_floatNum, g_decArgo_cycleNum, a_tabTech2(id, 2+ID_OFFSET), julian_2_gregorian_dec_argo(secondGroundingTime + cycleStartDateDay));
-         end
+         fprintf(g_decArgo_outputCsvFileId, '%d; %d; Tech #2_%d; => second grounding date; %s\n', ...
+            g_decArgo_floatNum, g_decArgo_cycleNum, a_tabTech2(id, 2+ID_OFFSET), julian_2_gregorian_dec_argo(secondGroundingTime + g_decArgo_julD2FloatDayOffset));
          fprintf(g_decArgo_outputCsvFileId, '%d; %d; Tech #2_%d; Second grounding phase; %d\n', ...
             g_decArgo_floatNum, g_decArgo_cycleNum, a_tabTech2(id, 2+ID_OFFSET), a_tabTech2(id, 30+ID_OFFSET));
          fprintf(g_decArgo_outputCsvFileId, '%d; %d; Tech #2_%d; Nb EV actions to set second grounding; %d\n', ...
@@ -385,11 +374,7 @@ elseif (length(idF2) == 1)
          fprintf(g_decArgo_outputCsvFileId, '%d; %d; Tech #2_%d; Nb pump actions for first emergency ascent; %d\n', ...
             g_decArgo_floatNum, g_decArgo_cycleNum, a_tabTech2(id, 2+ID_OFFSET), a_tabTech2(id, 35+ID_OFFSET));
       end
-   else
-      fprintf(g_decArgo_outputCsvFileId, '%d; %d; Tech #2_%d; Nb CTD packets for "in air"; %d\n', ...
-         g_decArgo_floatNum, g_decArgo_cycleNum, a_tabTech2(id, 2+ID_OFFSET), a_tabTech2(id, 7+ID_OFFSET));
-      fprintf(g_decArgo_outputCsvFileId, '%d; %d; Tech #2_%d; Nb meas during during "in air" phase; %d\n', ...
-         g_decArgo_floatNum, g_decArgo_cycleNum, a_tabTech2(id, 2+ID_OFFSET), a_tabTech2(id, 14+ID_OFFSET));
+      
    end
    
    fprintf(g_decArgo_outputCsvFileId, '%d; %d; Tech #2_%d; TECH: IRIDIUM REMOTE CONTROL\n', ...
@@ -449,4 +434,4 @@ elseif (length(idF2) == 1)
       g_decArgo_floatNum, g_decArgo_cycleNum, a_tabTech2(id, 2+ID_OFFSET), a_tabTech2(id, 58+ID_OFFSET));
 end
 
-return
+return;

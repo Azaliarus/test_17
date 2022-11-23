@@ -22,12 +22,12 @@
 %   o_ascProfTemp       : ascending profile TEMP
 %   o_ascProfSal        : ascending profile PSAL
 %   o_nearSurfDate      : "near surface" profile dates
-%   o_nearSurfTransDate : "near surface" profile transmitted date flags
+%   o_nearSurfTransDate : "near surface" profile transmitted date falgs
 %   o_nearSurfPres      : "near surface" profile PRES
 %   o_nearSurfTemp      : "near surface" profile TEMP
 %   o_nearSurfSal       : "near surface" profile PSAL
 %   o_inAirDate         : "in air" profile dates
-%   o_inAirTransDate    : "in air" profile transmitted date flags
+%   o_inAirTransDate    : "in air" profile transmitted date falgs
 %   o_inAirPres         : "in air" profile PRES
 %   o_inAirTemp         : "in air" profile TEMP
 %   o_inAirSal          : "in air" profile PSAL
@@ -77,17 +77,17 @@ global g_decArgo_cycleNum;
 
 
 if (isempty(a_dataCTD))
-   return
+   return;
 end
 
-% retrieve the "Near Surface" or "In Air" sampling period from the configuration
+% retrieve the drift sampling period from the configuration
 [configNames, configValues] = get_float_config_ir_sbd(g_decArgo_cycleNum);
 inAirSampPeriodSeconds = get_config_value('CONFIG_MC30', configNames, configValues);
 
-for type = [1 3 13 14]
-   idForType = find(a_dataCTD(:, 1) == type);
-   for idP = 1:length(idForType)
-      data = a_dataCTD(idForType(idP), 2:end);
+for idT = [1 3 13 14]
+   idDesc = find(a_dataCTD(:, 1) == idT);
+   for idP = 1:length(idDesc)
+      data = a_dataCTD(idDesc(idP), 2:end);
       for idMeas = 1:15
          date = g_decArgo_dateDef;
          dateTrans = 0;
@@ -98,30 +98,31 @@ for type = [1 3 13 14]
             if ((data(idMeas+15*2) == g_decArgo_presDef) && ...
                   (data(idMeas+15*3) == g_decArgo_tempDef) && ...
                   (data(idMeas+15*4) == g_decArgo_salDef))
-               break
+               break;
             end
-            if (type > 3)
+            if (idT > 3)
                date = data(1) + a_refDay + (idMeas-1)*inAirSampPeriodSeconds/86400;
+               dateTrans = 0;
             end
          end
          
-         if (type == 1)
+         if (idT == 1)
             o_descProfDate = [o_descProfDate; date];
             o_descProfPres = [o_descProfPres; data(idMeas+15*2)];
             o_descProfTemp = [o_descProfTemp; data(idMeas+15*3)];
             o_descProfSal = [o_descProfSal; data(idMeas+15*4)];
-         elseif (type == 3)
+         elseif (idT == 3)
             o_ascProfDate = [o_ascProfDate; date];
             o_ascProfPres = [o_ascProfPres; data(idMeas+15*2)];
             o_ascProfTemp = [o_ascProfTemp; data(idMeas+15*3)];
             o_ascProfSal = [o_ascProfSal; data(idMeas+15*4)];
-         elseif (type == 13)
+         elseif (idT == 13)
             o_nearSurfDate = [o_nearSurfDate; date];
             o_nearSurfTransDate = [o_nearSurfTransDate; dateTrans];
             o_nearSurfPres = [o_nearSurfPres; data(idMeas+15*2)];
             o_nearSurfTemp = [o_nearSurfTemp; data(idMeas+15*3)];
             o_nearSurfSal = [o_nearSurfSal; data(idMeas+15*4)];
-         elseif (type == 14)
+         elseif (idT == 3)
             o_inAirDate = [o_inAirDate; date];
             o_inAirTransDate = [o_inAirTransDate; dateTrans];
             o_inAirPres = [o_inAirPres; data(idMeas+15*2)];
@@ -143,4 +144,4 @@ o_ascProfDate = o_ascProfDate(idSorted);
 o_ascProfTemp = o_ascProfTemp(idSorted);
 o_ascProfSal = o_ascProfSal(idSorted);
 
-return
+return;

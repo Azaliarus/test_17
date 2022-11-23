@@ -84,12 +84,8 @@ PRINT_FROZEN_BYTES = 0;
 
 
 if (isempty(a_sensorData))
-   return
+   return;
 end
-
-% information on hydrographic data storage
-NB_PARAM = 3;
-NB_PARAM_BYTE = 6;
 
 % profile data storage variables
 lastMsgNum = max(a_sensorData(:, 2));
@@ -586,7 +582,7 @@ for idL = 1:size(a_sensorData, 1)
       o_miscInfo{end+1} = dataStruct;
       
       dataStruct = get_apx_misc_data_init_struct('Data msg', msgNum, msgRed, msgDate);
-      dataStruct.label = '- transmission start time';
+      dataStruct.label = '=> transmission start time';
       dataStruct.value = julian_2_gregorian_dec_argo(rtcTime + timeDelay/1440);
       dataStruct.format = ' %s';
       dataStruct.unit = 'RTC time';
@@ -686,22 +682,6 @@ for idL = 1:size(a_sensorData, 1)
       o_trajData = [o_trajData; dataStruct];
 
       dataStruct = get_apx_misc_data_init_struct('Data msg', msgNum, msgRed, msgDate);
-      dataStruct.label = 'Minimum pressure of park-level PT samples';
-      dataStruct.raw = decData(13);
-      dataStruct.rawFormat = '%d';
-      dataStruct.value = sensor_2_value_for_apex_apf9_pressure(decData(13), g_decArgo_presDef);
-      dataStruct.format = '%.1f';
-      dataStruct.unit = 'dbar';
-      o_miscInfo{end+1} = dataStruct;
-
-      dataStruct = get_apx_traj_data_init_struct(msgRed);
-      dataStruct.label = 'Minimum pressure of park-level PT samples';
-      dataStruct.paramName = 'PRES';
-      dataStruct.measCode = g_MC_MinPresInDriftAtPark;
-      dataStruct.value = sensor_2_value_for_apex_apf9_pressure(decData(13), g_decArgo_presDef);
-      o_trajData = [o_trajData; dataStruct];
-      
-      dataStruct = get_apx_misc_data_init_struct('Data msg', msgNum, msgRed, msgDate);
       dataStruct.label = 'Minimum temperature of park-level PT samples';
       dataStruct.raw = decData(9);
       dataStruct.rawFormat = '%d';
@@ -736,22 +716,6 @@ for idL = 1:size(a_sensorData, 1)
       o_trajData = [o_trajData; dataStruct];
 
       dataStruct = get_apx_misc_data_init_struct('Data msg', msgNum, msgRed, msgDate);
-      dataStruct.label = 'Maximum pressure of park-level PT samples';
-      dataStruct.raw = decData(14);
-      dataStruct.rawFormat = '%d';
-      dataStruct.value = sensor_2_value_for_apex_apf9_pressure(decData(14), g_decArgo_presDef);
-      dataStruct.format = '%.1f';
-      dataStruct.unit = 'dbar';
-      o_miscInfo{end+1} = dataStruct;
-
-      dataStruct = get_apx_traj_data_init_struct(msgRed);
-      dataStruct.label = 'Maximum pressure of park-level PT samples';
-      dataStruct.paramName = 'PRES';
-      dataStruct.measCode = g_MC_MaxPresInDriftAtPark;
-      dataStruct.value = sensor_2_value_for_apex_apf9_pressure(decData(14), g_decArgo_presDef);
-      o_trajData = [o_trajData; dataStruct];
-      
-      dataStruct = get_apx_misc_data_init_struct('Data msg', msgNum, msgRed, msgDate);
       dataStruct.label = 'Maximum temperature of park-level PT samples';
       dataStruct.raw = decData(11);
       dataStruct.rawFormat = '%d';
@@ -785,6 +749,38 @@ for idL = 1:size(a_sensorData, 1)
       dataStruct.value = sensor_2_value_for_apex_apf9_pressure(decData(12), g_decArgo_presDef);
       o_trajData = [o_trajData; dataStruct];
 
+      dataStruct = get_apx_misc_data_init_struct('Data msg', msgNum, msgRed, msgDate);
+      dataStruct.label = 'Minimum pressure of park-level PT samples';
+      dataStruct.raw = decData(13);
+      dataStruct.rawFormat = '%d';
+      dataStruct.value = sensor_2_value_for_apex_apf9_pressure(decData(13), g_decArgo_presDef);
+      dataStruct.format = '%.1f';
+      dataStruct.unit = 'dbar';
+      o_miscInfo{end+1} = dataStruct;
+
+      dataStruct = get_apx_traj_data_init_struct(msgRed);
+      dataStruct.label = 'Minimum pressure of park-level PT samples';
+      dataStruct.paramName = 'PRES';
+      dataStruct.measCode = g_MC_MinPresInDriftAtPark;
+      dataStruct.value = sensor_2_value_for_apex_apf9_pressure(decData(13), g_decArgo_presDef);
+      o_trajData = [o_trajData; dataStruct];
+      
+      dataStruct = get_apx_misc_data_init_struct('Data msg', msgNum, msgRed, msgDate);
+      dataStruct.label = 'Maximum pressure of park-level PT samples';
+      dataStruct.raw = decData(14);
+      dataStruct.rawFormat = '%d';
+      dataStruct.value = sensor_2_value_for_apex_apf9_pressure(decData(14), g_decArgo_presDef);
+      dataStruct.format = '%.1f';
+      dataStruct.unit = 'dbar';
+      o_miscInfo{end+1} = dataStruct;
+
+      dataStruct = get_apx_traj_data_init_struct(msgRed);
+      dataStruct.label = 'Maximum pressure of park-level PT samples';
+      dataStruct.paramName = 'PRES';
+      dataStruct.measCode = g_MC_MaxPresInDriftAtPark;
+      dataStruct.value = sensor_2_value_for_apex_apf9_pressure(decData(14), g_decArgo_presDef);
+      o_trajData = [o_trajData; dataStruct];
+      
    elseif (msgNum == 3)
       
       % first item bit number
@@ -895,7 +891,10 @@ for idL = 1:size(a_sensorData, 1)
       parkTemp = sensor_2_value_for_apex_apf9_temperature(decData(7), g_decArgo_tempDef);
       parkSal = sensor_2_value_for_apex_apf9_salinity(decData(8), g_decArgo_salDef);
       parkPres = sensor_2_value_for_apex_apf9_pressure(decData(9), g_decArgo_presDef);
-
+      
+      % store park data
+      o_parkData = get_apx_profile_data_init_struct;
+      
       % create the parameters
       paramPres = get_netcdf_param_attributes('PRES');
       paramTemp = get_netcdf_param_attributes('TEMP');
@@ -905,9 +904,6 @@ for idL = 1:size(a_sensorData, 1)
       parkPres(find(parkPres == g_decArgo_presDef)) = paramPres.fillValue;
       parkTemp(find(parkTemp == g_decArgo_tempDef)) = paramTemp.fillValue;
       parkSal(find(parkSal == g_decArgo_salDef)) = paramSal.fillValue;
-      
-      % store park data
-      o_parkData = get_apx_profile_data_init_struct;
       
       % add parameter variables to the data structure
       o_parkData.paramList = [paramPres paramTemp paramSal];
@@ -941,14 +937,14 @@ end
 
 % adjust the amount of received data according to profile length
 if (profileLength ~= -1)
-   [expectedLastMsgNum, ~] = compute_last_apx_argos_msg_number(profileLength, a_decoderId);
+   nbMsg = compute_number_of_apx_argos_msg(profileLength, a_decoderId);
    % sometimes the auxiliary engineering data cause an additional message to be
    % generated (ex: 6900743 #5, #6) => we remove only messages with a low
    % reduncdancy (= 1)
-   if (lastMsgNum > expectedLastMsgNum)
-      idList = find(profRedundancy(end-(lastMsgNum-(expectedLastMsgNum+1))*29+1:end) > 1);
+   if (lastMsgNum > nbMsg)
+      idList = find(profRedundancy(end-(lastMsgNum-(nbMsg+1))*29+1:end) > 1);
       if (isempty(idList))
-         idList = length(profRedundancy) - (lastMsgNum-(expectedLastMsgNum+1))*29;
+         idList = length(profRedundancy) - (lastMsgNum-(nbMsg+1))*29;
       end
       profData(max(idList)+1:end) = [];
       profReceived(max(idList)+1:end) = [];
@@ -957,7 +953,7 @@ if (profileLength ~= -1)
 end
 
 % decode profile data
-nbLev = floor(length(profData)/NB_PARAM_BYTE);
+nbLev = floor(length(profData)/6);
 if ((profileLength >= 0) && (nbLev > profileLength))
    nbLev = profileLength;
 end
@@ -971,7 +967,7 @@ if (nbLev > 0)
    % first item bit number
    firstBit = 1;
    % item bit lengths
-   tabNbBits = repmat(2, 1, nbLev*NB_PARAM)*8;
+   tabNbBits = repmat(2, 1, nbLev*3)*8;
    % get item bits
    decData = get_bits(firstBit, tabNbBits, profData);
    receivedData = get_bits(firstBit, tabNbBits, profReceived);
@@ -981,7 +977,7 @@ if (nbLev > 0)
    profTemp = [];
    profSal = [];
    for idLev = 1:nbLev
-      id = (idLev-1)*NB_PARAM;
+      id = (idLev-1)*3;
       if ((receivedData(id+1) == 65535) && (decData(id+1) ~= 65535))
          temp = sensor_2_value_for_apex_apf9_temperature(decData(id+1), g_decArgo_tempDef);
       else
@@ -999,20 +995,20 @@ if (nbLev > 0)
       end
       
       profPres = [profPres; pres];
-      profPresRaw = [profPresRaw; profData((idLev-1)*NB_PARAM_BYTE+5) profData((idLev-1)*NB_PARAM_BYTE+6)];
+      profPresRaw = [profPresRaw; profData((idLev-1)*6+5) profData((idLev-1)*6+6)];
       profTemp = [profTemp; temp];
       profSal = [profSal; sal];
       
    end
    
    % manage data redundancy
-   redData = ones(nbLev*NB_PARAM, 1)*-1;
+   redData = ones(nbLev*3, 1)*-1;
    for id = 1:length(redData)
       redData(id) = min(profRedundancy((id-1)*2+1), profRedundancy((id-1)*2+2));
    end
-   profTempRed = redData(1:NB_PARAM:end);
-   profSalRed = redData(2:NB_PARAM:end);
-   profPresRed = redData(3:NB_PARAM:end);
+   profTempRed = redData(1:3:end);
+   profSalRed = redData(2:3:end);
+   profPresRed = redData(3:3:end);
 
    % clean profile data
    if (profileLength >= 0)
@@ -1045,7 +1041,7 @@ if (nbLev > 0)
          profSalRed(profileLength2+1:end) = [];
       end
       
-      % try to identify auxiliary engineering data start byte
+      % try to identify auxiliary engeneering data start byte
       % according to the depth table if the last pressure is < 6 dbar, the last
       % transmitted message has been received
       if (profPres(end) <= 6)
@@ -1054,10 +1050,10 @@ if (nbLev > 0)
          profData2 = profData(2:end);
          idLastPres = find((profData1 == profPresRaw(end, 1)) & (profData2 == profPresRaw(end, 2)));
          if (~isempty(idLastPres))
-            idOk = find(rem(idLastPres-5, NB_PARAM_BYTE) == 0);
+            idOk = find(rem(idLastPres-5, 6) == 0);
             if (~isempty(idOk))
                idLastPres = idLastPres(idOk);
-               firstAuxByte = idLastPres(1) + NB_PARAM_BYTE - 4;
+               firstAuxByte = idLastPres(1) + 2;
             end
          end
       end
@@ -1101,13 +1097,13 @@ if (nbLev > 0)
 end
 
 % decode auxiliary engineering data
-if (((profileLength >= 0) && (length(profData) > profileLength*NB_PARAM_BYTE)) || ...
+if (((profileLength >= 0) && (length(profData) > profileLength*6)) || ...
       ((firstAuxByte ~= -1) && (length(profData) >= firstAuxByte)))
    
    if (profileLength >= 0)
-      auxData = profData(nbLev*NB_PARAM_BYTE+1:end);
-      msgRed = max(profRedundancy(nbLev*NB_PARAM_BYTE+1:end)); % because we have only one useful redundancy (with -1 if the first bytes have not been received, see 3901080 #145)
-      auxReceived = profReceived(nbLev*NB_PARAM_BYTE+1:end);
+      auxData = profData(nbLev*6+1:end);
+      msgRed = max(profRedundancy(nbLev*6+1:end)); % because we have only one useful redundancy (with -1 if the first bytes have not been received, see 3901080 #145)
+      auxReceived = profReceived(nbLev*6+1:end);
    else
       auxData = profData(firstAuxByte:end);
       msgRed = max(profRedundancy(firstAuxByte:end)); % because we have only one useful redundancy (with -1 if the first bytes have not been received, see 3901080 #145)
@@ -1133,7 +1129,7 @@ if (((profileLength >= 0) && (length(profData) > profileLength*NB_PARAM_BYTE)) |
             (receivedData(3) == 255) && (decData(3) ~= 255) && (decData(3) > nbPresMarkMax))
          
          dataStruct = get_apx_misc_data_init_struct('Aux data', lastMsgNum, msgRed, a_sensorDate(end));
-         dataStruct.label = 'AUXILIARY ENGINEERING DATA';
+         dataStruct.label = 'AUXILIARY ENGENEERING DATA';
          o_auxInfo{end+1} = dataStruct;
          
          dataStruct = get_apx_misc_data_init_struct('Aux data', lastMsgNum, msgRed, a_sensorDate(end));
@@ -1213,7 +1209,7 @@ if (((profileLength >= 0) && (length(profData) > profileLength*NB_PARAM_BYTE)) |
                      if (length(presMark) < nbPresMark)
                         presMark = [presMark; decData(idL)];
                      else
-                        break
+                        break;
                      end
                   else
                      % we store all data that may content P marks
@@ -1294,4 +1290,4 @@ if (((profileLength >= 0) && (length(profData) > profileLength*NB_PARAM_BYTE)) |
    end
 end
 
-return
+return;

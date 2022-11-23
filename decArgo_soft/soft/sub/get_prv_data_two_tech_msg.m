@@ -85,7 +85,7 @@ NUMBER_OF_SUCCESSIVE_TECH_MSG = 15;
 for id = 1:length(a_argosFileName)
    if ~(exist(char(a_argosFileName{id}), 'file') == 2)
       fprintf('ERROR: Argos file not found: %s\n', char(a_argosFileName{id}));
-      return
+      return;
    end
 end
 
@@ -231,7 +231,7 @@ if (~isempty(tabSensors))
          
          % don't take NULL data message into account
          if (unique(currentData) == 0)
-            continue
+            continue;
          end
          
          % compute the redundancy of the messages
@@ -243,7 +243,7 @@ if (~isempty(tabSensors))
                % counter
                tabOcc(idData) = tabOcc(idData) + 1;
                ok = 1;
-               break
+               break;
             end
          end
          
@@ -347,7 +347,7 @@ if (eol_detected == 0)
                % store the data
                o_sensors = [o_sensors; msgType 0 combinedMsg];
                o_sensorDates = [o_sensorDates; tabDate(id)];
-               break
+               break;
             end
          end
       end
@@ -359,21 +359,13 @@ end
 % 2 - we compute an Id for each message
 % 3 - we try to select at most one message for each Id
 
-% retrieve the types of all the received messages (only the types 4, 5, 6 for
-% CTD floats and 7, 8, 9 for CTDO floats will be processed)
+% retrieve the types of all the received messages (only the types 4, 5, 6, 7, 8
+% and 9 will be processed)
 tabType = get_message_type(o_argosDataData, a_decoderId);
 
 % process all the received data messages
 tabArgosCtdMsgDates = [];
-switch (a_decoderId)
-   case {30}
-      typeNum = [4 5 6];
-   case {32}
-      typeNum = [7 8 9];
-   otherwise
-      fprintf('WARNING: Nothing done yet in get_prv_data_one_tech_msg for decoderId #%d\n', ...
-         a_decoderId);
-end
+typeNum = [4 5 6 7 8 9];
 for idType = 1:length(typeNum)
    
    idForType = find(tabType == typeNum(idType));
@@ -448,7 +440,7 @@ for idType = 1:length(typeNum)
                
                % don't take NULL data message into account
                if (unique(currentData) == 0)
-                  continue
+                  continue;
                end
                
                % compute the redundancy of the messages
@@ -460,7 +452,7 @@ for idType = 1:length(typeNum)
                      % counter
                      tabOcc(idData) = tabOcc(idData) + 1;
                      ok = 1;
-                     break
+                     break;
                   end
                end
                
@@ -537,7 +529,7 @@ for idType = 1:length(typeNum)
                      o_sensors = [o_sensors; typeNum(idType) 0 combinedMsg];
                      o_sensorDates = [o_sensorDates; tabDate(id)];
                      tabArgosCtdMsgDates = [tabArgosCtdMsgDates; tabDate(id)];
-                     break
+                     break;
                   end
                end
             end
@@ -647,27 +639,18 @@ if (g_decArgo_generateNcTech ~= 0)
       g_decArgo_cycleNum 21];
    g_decArgo_outputNcParamValue{end+1} = nbMesTot-nbMesCrcKo;
    
-   if (~isempty(o_sensors))
-      idTech1 = find(o_sensors(:, 1) == 0);
-      idTech2 = find(o_sensors(:, 1) == 1);
-      if (~isempty(idTech1) && ~isempty(idTech2))
-         g_decArgo_outputNcParamIndex = [g_decArgo_outputNcParamIndex;
-            g_decArgo_cycleNum 22];
-         g_decArgo_outputNcParamValue{end+1} = min(o_sensors(idTech1, 2), o_sensors(idTech2, 2));
-      else
-         g_decArgo_outputNcParamIndex = [g_decArgo_outputNcParamIndex;
-            g_decArgo_cycleNum 22];
-         g_decArgo_outputNcParamValue{end+1} = 0;
-      end
+   idTech1 = find(o_sensors(:, 1) == 0);
+   idTech2 = find(o_sensors(:, 1) == 1);
+   if (~isempty(idTech1) && ~isempty(idTech2))
+      g_decArgo_outputNcParamIndex = [g_decArgo_outputNcParamIndex;
+         g_decArgo_cycleNum 22];
+      g_decArgo_outputNcParamValue{end+1} = min(o_sensors(idTech1, 2), o_sensors(idTech2, 2));
    else
       g_decArgo_outputNcParamIndex = [g_decArgo_outputNcParamIndex;
          g_decArgo_cycleNum 22];
       g_decArgo_outputNcParamValue{end+1} = 0;
    end
    
-   g_decArgo_outputNcParamIndex = [g_decArgo_outputNcParamIndex;
-      g_decArgo_cycleNum 1003];
-   g_decArgo_outputNcParamValue{end+1} = format_time_hhmmss_dec_argo((lastArgosMsgDate-firstArgosMsgDate)*24);
 end
 
-return
+return;

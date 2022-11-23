@@ -19,39 +19,15 @@
 function create_nc_meta_file_3_1_from_json_float_meta()
 
 % list of concerned floats
-floatListFileName = 'C:\Users\jprannou\_RNU\Argo\ActionsCoriolis\ConvertApexOldVersionsTo3.1\list\Apex_all.txt';
-% floatListFileName = 'C:\Users\jprannou\_RNU\Argo\ActionsCoriolis\ConvertApexOldVersionsTo3.1\list\Apex_pts_all.txt';
-% floatListFileName = 'C:\Users\jprannou\_RNU\Argo\ActionsCoriolis\ConvertApexOldVersionsTo3.1\list\Apex_bgc_all.txt';
-% floatListFileName = 'C:\Users\jprannou\_RNU\Argo\ActionsCoriolis\ConvertApexOldVersionsTo3.1\list\Apex_36.txt';
-% floatListFileName = 'C:\Users\jprannou\_RNU\Argo\ActionsCoriolis\ConvertApexOldVersionsTo3.1\list\tmp.txt';
-floatListFileName = 'C:\Users\jprannou\_RNU\Argo\ActionsCoriolis\ConvertApexOldVersionsTo3.1\list\Apex_11_a_refaire_20200103.txt';
-floatListFileName = 'C:\Users\jprannou\_RNU\Argo\ActionsCoriolis\ConvertNkeOldVersionsTo3.1_20210913\list\provor_4.6_4.61.txt';
-floatListFileName = 'C:\Users\jprannou\_RNU\Argo\ActionsCoriolis\GenerateMeta3.1WhenNoData_20210920\list\float list.txt';
-floatListFileName = 'C:\Users\jprannou\_RNU\DecArgo_soft\lists\tmp.txt';
-floatListFileName = 'C:\Users\jprannou\_RNU\Argo\ActionsCoriolis\ConvertApexOldVersionsTo3.1\list\nemo_1900518.txt';
-floatListFileName = 'C:\Users\jprannou\_RNU\Argo\ActionsCoriolis\ConvertApexOldVersionsTo3.1\list\nemo_6900588.txt';
-floatListFileName = 'C:\Users\jprannou\_RNU\Argo\ActionsCoriolis\ConvertApexOldVersionsTo3.1\list\nemo_6902042.txt';
-floatListFileName = 'C:\Users\jprannou\_RNU\Argo\ActionsCoriolis\ConvertApexOldVersionsTo3.1\list\nemo_list_20220829.txt';
+% floatListFileName = 'C:\Users\jprannou\_RNU\Argo\ActionsCoriolis\ConvertNkeOldVersionsTo3.1\list\nke_old_all_argos.txt';
+% floatListFileName = 'C:\Users\jprannou\_RNU\Argo\ActionsCoriolis\ConvertNkeOldVersionsTo3.1\list\nke_old_all_iridium.txt';
+floatListFileName = 'C:\Users\jprannou\_RNU\Argo\ActionsCoriolis\ConvertNkeOldVersionsTo3.1\list\nke_old_all.txt';
 
 % json meta-data file directory
-jsonFloatMetaDatafileDir = 'C:\Users\jprannou\_RNU\Argo\ActionsCoriolis\ConvertApexOldVersionsTo3.1\json_float_meta\';
-jsonFloatMetaDatafileDir = 'C:\Users\jprannou\_RNU\Argo\ActionsCoriolis\ConvertNkeOldVersionsTo3.1_20210913\generate_json_float_meta_argos_provor_4.6_4.61\';
-jsonFloatMetaDatafileDir = 'C:\Users\jprannou\_RNU\Argo\ActionsCoriolis\GenerateMeta3.1WhenNoData_20210920\generate_json_float_meta_no_data_float\';
-jsonFloatMetaDatafileDir = 'C:\Users\jprannou\_RNU\DecArgo_soft\work\TMP\';
-jsonFloatMetaDatafileDir = 'C:\Users\jprannou\_RNU\Argo\ActionsCoriolis\ConvertApexOldVersionsTo3.1\json_float_meta_nemo\';
+jsonFloatMetaDatafileDir = 'C:\Users\jprannou\_RNU\Argo\ActionsCoriolis\ConvertNkeOldVersionsTo3.1\generate_json_float_meta_argos_nke_old_versions\';
 
 % NetCDF meta-data file output directory
-% ncMetaDatafileDir = 'C:\Users\jprannou\_DATA\OUT\NC_CONVERTION_TO_3.1\nke_old_versions_nc\';
-ncMetaDatafileDir = 'C:\Users\jprannou\_DATA\Conversion_en_3.1\OUT\';
-ncMetaDatafileDir = 'C:\Users\jprannou\_DATA\Conversion_en_3.1_20200103\OUT\';
-% ncMetaDatafileDir = 'C:\Users\jprannou\_DATA\Conversion_en_3.1\OUT_from_DEP\';
-ncMetaDatafileDir = 'C:\Users\jprannou\_DATA\Conversion_en_3.1_20210913\OUT\';
-ncMetaDatafileDir = 'C:\Users\jprannou\_DATA\Meta_en_3.1_when_no_data\OUT\';
-ncMetaDatafileDir = 'C:\Users\jprannou\_DATA\OUT\nc_output_decArgo\';
-ncMetaDatafileDir = 'C:\Users\jprannou\_DATA\Conversion_en_3.1_20220608\OUT\';
-ncMetaDatafileDir = 'C:\Users\jprannou\_DATA\Conversion_en_3.1_20220707\OUT\';
-ncMetaDatafileDir = 'C:\Users\jprannou\_DATA\Conversion_en_3.1_20220822\OUT\';
-ncMetaDatafileDir = 'C:\Users\jprannou\_DATA\Conversion_en_3.1_20220829\OUT\';
+ncMetaDatafileDir = 'C:\Users\jprannou\_DATA\OUT\NC_CONVERTION_TO_3.1\nke_old_versions_nc\';
 
 fprintf('Generating json meta-data files for floats of the list: %s\n', floatListFileName);
 
@@ -61,7 +37,7 @@ VERBOSE_MODE = 1;
 
 if ~(exist(floatListFileName, 'file') == 2)
    fprintf('File not found: %s\n', floatListFileName);
-   return
+   return;
 end
 floatList = load(floatListFileName);
 % floatList = [6901854];
@@ -75,22 +51,15 @@ for idFloat = 1:length(floatList)
    jsonInputFileName = [jsonFloatMetaDatafileDir '/' sprintf('%d_meta.json', floatNum)];
    
    if ~(exist(jsonInputFileName, 'file') == 2)
-      fprintf('ERROR: Float #%d: Json meta-data file not found: %s - nothing done for this float\n', ...
+      fprintf('ERROR: Float #%d: Json meta-data file not found: %s => nothing done for this float\n', ...
          floatNum, ...
          jsonInputFileName);
-      return
+      return;
    end
-      
+   
    % read meta-data file
    metaData = loadjson(jsonInputFileName);
    
-   % specific
-   if (floatNum == 6900131)
-      % launch date and position was not available for this float => arbitrarily
-      % set
-      metaData.LAUNCH_QC = '4';
-   end
-
    % collect dimensions in input meta-data
    nbSensor = 0;
    if (~isempty(metaData.SENSOR))
@@ -108,7 +77,7 @@ for idFloat = 1:length(floatList)
       {'CONFIG_ParkPressure_dbar'}; ...
       {'CONFIG_ProfilePressure_dbar'}; ...
       ];
-
+   
    % retrieve the configuration
    configNames = [];
    configValues = [];
@@ -120,20 +89,11 @@ for idFloat = 1:length(floatList)
       cellConfigValues = metaData.CONFIG_PARAMETER_VALUE;
       configValues = nan(size(configNames, 1), size(cellConfigValues, 2));
       configNumbers = 1:length(cellConfigValues);
-      if (length(cellConfigValues) == 1)
-         cellConfigVals = struct2cell(cellConfigValues);
+      for idConf = 1:length(cellConfigValues)
+         cellConfigVals = struct2cell(cellConfigValues{idConf});
          for idVal = 1:length(cellConfigVals)
             if (~isempty(cellConfigVals{idVal}))
-               configValues(idVal) = str2num(cellConfigVals{idVal});
-            end
-         end
-      else
-         for idConf = 1:length(cellConfigValues)
-            cellConfigVals = struct2cell(cellConfigValues{idConf});
-            for idVal = 1:length(cellConfigVals)
-               if (~isempty(cellConfigVals{idVal}))
-                  configValues(idVal, idConf) = str2num(cellConfigVals{idVal});
-               end
+               configValues(idVal, idConf) = str2num(cellConfigVals{idVal});
             end
          end
       end
@@ -145,7 +105,7 @@ for idFloat = 1:length(floatList)
          if (~isempty(strfind(configNames{idC}, mandatoryConfigNames{idL})))
             mandatoryList = [mandatoryList idC];
             if (idL < length(mandatoryConfigNames))
-               break
+               break;
             end
          end
       end
@@ -208,7 +168,7 @@ for idFloat = 1:length(floatList)
    fCdf = netcdf.create(ncPathFileName, 'NC_CLOBBER');
    if (isempty(fCdf))
       fprintf('ERROR: Unable to create NetCDF output file: %s\n', ncPathFileName);
-      return
+      return;
    end
    
    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -279,7 +239,7 @@ for idFloat = 1:length(floatList)
    inputElt = getfield(metaData, 'DATA_CENTRE');
    if (~isempty(inputElt))
       dataCentre = getfield(metaData, 'DATA_CENTRE');
-      [institution] = get_institution_from_data_centre(dataCentre, 1);
+      [institution] = get_institution_from_data_centre(dataCentre);
    end
    netcdf.putAtt(fCdf, globalVarId, 'institution', institution);
    netcdf.putAtt(fCdf, globalVarId, 'source', 'Argo float');
@@ -757,7 +717,7 @@ for idFloat = 1:length(floatList)
       % corresponding nc varId
       idMeta = find(strcmp(floatNcVarName, fieldName) == 1);
       if (isempty(idMeta))
-         continue
+         continue;
       end
       
       % CONFIG_* information have been used in the configuration processing
@@ -766,7 +726,7 @@ for idFloat = 1:length(floatList)
             (strcmp(fieldName, 'CONFIG_PARAMETER_VALUE') == 1) || ...
             (strcmp(fieldName, 'CONFIG_MISSION_NUMBER') == 1) || ...
             (strcmp(fieldName, 'CONFIG_MISSION_COMMENT') == 1))
-         continue
+         continue;
       end
       
       % TEMPORARY START
@@ -783,7 +743,7 @@ for idFloat = 1:length(floatList)
       %          for id = nbSensor+1:length(fNames)
       %             metaData.(fieldName) = rmfield(metaData.(fieldName), fNames{id});
       %          end
-      %          fprintf('INFO: %s file generation: too many fields for the %s structure in the Json meta-data file - considering only the %d first ones\n', ...
+      %          fprintf('INFO: %s file generation: too many fields for the %s structure in the Json meta-data file => considering only the %d first ones\n', ...
       %             ncFileName, fieldName, nbSensor);
       %       end
       %    end
@@ -796,14 +756,14 @@ for idFloat = 1:length(floatList)
       %          for id = nbParam+1:length(fNames)
       %             metaData.(fieldName) = rmfield(metaData.(fieldName), fNames{id});
       %          end
-      %          fprintf('INFO: %s file generation: too many fields for the %s structure in the Json meta-data file - considering only the %d first ones\n', ...
+      %          fprintf('INFO: %s file generation: too many fields for the %s structure in the Json meta-data file => considering only the %d first ones\n', ...
       %             ncFileName, fieldName, nbParam);
       %       end
       %    end
       % TEMPORARY END
       
       % field values are to be stored in the nc META file
-      inputElt = metaData.(fieldName);
+      inputElt = getfield(metaData, fieldName);
       if (~isempty(inputElt))
          
          if (isa(inputElt, 'char'))
@@ -840,7 +800,7 @@ for idFloat = 1:length(floatList)
             % meta-data with one dimension
             fieldNames = fieldnames(inputElt);
             for id = 1:length(fieldNames)
-               valueStr = inputElt.(fieldNames{id});
+               valueStr = getfield(inputElt, fieldNames{id});
                if (~isempty(valueStr))
                   [varName, xType, dimIds, nAtts] = netcdf.inqVar(fCdf, floatNcVarId(idMeta));
                   if (xType == netcdf.getConstant('NC_CHAR'))
@@ -868,7 +828,7 @@ for idFloat = 1:length(floatList)
             %             inputSubElt = inputElt{id1};
             %             fieldNames = fieldnames(inputSubElt);
             %             for id2 = 1:length(fieldNames)
-            %                valueStr = inputSubElt.(fieldNames{id2});
+            %                valueStr = getfield(inputSubElt, fieldNames{id2});
             %                if (~isempty(valueStr))
             %                   % we only manage values of type double because only
             %                   % CONFIG_PARAMETER_VALUE variable has two dimensions
@@ -893,7 +853,6 @@ for idFloat = 1:length(floatList)
          fliplr([idConfName-1  0]), fliplr([1 length(valueStr)]), valueStr');
    end
    
-   launchConfigValue(isnan(launchConfigValue)) = double(99999);
    netcdf.putVar(fCdf, launchConfigParameterValueVarId, 0, length(launchConfigValue), launchConfigValue);
    
    % store mission configuration data
@@ -903,10 +862,6 @@ for idFloat = 1:length(floatList)
          fliplr([idConfName-1  0]), fliplr([1 length(valueStr)]), valueStr');
    end
    
-   if (~isempty(missionConfigValue))
-      missionConfigValue(isnan(missionConfigValue)) = double(99999);
-   else
-   end
    netcdf.putVar(fCdf, configParameterValueVarId, [0 0], size(missionConfigValue), missionConfigValue);
    
    % store mission configuration numbers
@@ -916,4 +871,4 @@ for idFloat = 1:length(floatList)
    
 end
 
-return
+return;

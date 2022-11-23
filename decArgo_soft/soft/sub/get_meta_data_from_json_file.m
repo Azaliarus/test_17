@@ -24,16 +24,27 @@ function [o_metaData] = get_meta_data_from_json_file(a_floatNum, a_wantedMetaNam
 % output parameters initialization
 o_metaData = [];
 
-% json meta-data
-global g_decArgo_jsonMetaData;
+% directory of json meta-data files
+global g_decArgo_dirInputJsonFloatMetaDataFile;
 
+
+% json meta-data file for this float
+jsonInputFileName = [g_decArgo_dirInputJsonFloatMetaDataFile '/' sprintf('%d_meta.json', a_floatNum)];
+
+if ~(exist(jsonInputFileName, 'file') == 2)
+   fprintf('ERROR: Json meta-data file not found: %s\n', jsonInputFileName);
+   return;
+end
+
+% read meta-data file
+metaData = loadjson(jsonInputFileName);
 
 % retrieve variables from json structure
 for idField = 1:length(a_wantedMetaNames)
    fieldName = char(a_wantedMetaNames(idField));
    
-   if (isfield(g_decArgo_jsonMetaData, fieldName))
-      fieldValue = g_decArgo_jsonMetaData.(fieldName);
+   if (isfield(metaData, fieldName))
+      fieldValue = getfield(metaData, fieldName);
       if (~isempty(fieldValue))
          o_metaData = [o_metaData {fieldName} {fieldValue}];
       else
@@ -48,4 +59,4 @@ for idField = 1:length(a_wantedMetaNames)
    end
 end
 
-return
+return;

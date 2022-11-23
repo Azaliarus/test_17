@@ -68,7 +68,7 @@ o_doxyValues = ones(length(a_tPhaseDoxyValues), 1)*g_decArgo_doxyDef;
 
 
 if (isempty(a_tPhaseDoxyValues))
-   return
+   return;
 end
 
 % get calibration information
@@ -76,7 +76,7 @@ if (isempty(g_decArgo_calibInfo))
    fprintf('WARNING: Float #%d Cycle #%d: DOXY calibration coefficients are missing\n', ...
       g_decArgo_floatNum, ...
       g_decArgo_cycleNum);
-   return
+   return;
 elseif ((isfield(g_decArgo_calibInfo, 'OPTODE')) && (isfield(g_decArgo_calibInfo.OPTODE, 'TabDoxyCoef')))
    tabDoxyCoef = g_decArgo_calibInfo.OPTODE.TabDoxyCoef;
    % the size of the tabDoxyCoef should be: size(tabDoxyCoef) = 5 28 for the
@@ -85,13 +85,13 @@ elseif ((isfield(g_decArgo_calibInfo, 'OPTODE')) && (isfield(g_decArgo_calibInfo
       fprintf('ERROR: Float #%d Cycle #%d: DOXY calibration coefficients are inconsistent\n', ...
          g_decArgo_floatNum, ...
          g_decArgo_cycleNum);
-      return
+      return;
    end
 else
-   fprintf('ERROR: Float #%d Cycle #%d: inconsistent DOXY calibration coefficients\n', ...
+   fprintf('WARNING: Float #%d Cycle #%d: inconsistent DOXY calibration coefficients\n', ...
       g_decArgo_floatNum, ...
       g_decArgo_cycleNum);
-   return
+   return;
 end
 
 idDef = find( ...
@@ -141,14 +141,10 @@ if (~isempty(idNoDef))
       );
    
    % units convertion (micromol/L to micromol/kg)
-   [measLon, measLat] = get_meas_location(g_decArgo_cycleNum, -1, '');
-   rho = potential_density_gsw(presValues, tempValues, psalValues, 0, measLon, measLat);
-   rho = rho/1000;
-   
+   rho = potential_density(presValues, tempValues, psalValues);
    oxyValues = oxygenPresComp ./ rho;
-   idNoNan = find(~isnan(oxyValues));
    
-   o_doxyValues(idNoDef(idNoNan)) = oxyValues(idNoNan);
+   o_doxyValues(idNoDef) = oxyValues;
 end
 
-return
+return;

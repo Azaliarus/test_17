@@ -51,7 +51,7 @@ if (~isempty(g_decArgo_koSensorState))
             
             dataQc = prof.dataQc;
             if (isempty(dataQc))
-               dataQc = ones(size(prof.data, 1), length(prof.paramList))*g_decArgo_qcDef;
+               dataQc = ones(size(prof.data))*g_decArgo_qcDef;
             end
             
             if (isempty(prof.paramNumberWithSubLevels))
@@ -63,11 +63,11 @@ if (~isempty(g_decArgo_koSensorState))
                   profParam = parameterList(idParam);
                   if (strcmp(profParam.name, 'PRES') && (prof.sensorNumber ~= 0))
                      % PRES_QC is not modified (except if it is the CTD sensor)
-                     continue
+                     continue;
                   end
                   param = get_netcdf_param_attributes(profParam.name);
                   paramData = prof.data(:, idParam);
-                  paramDataQc = ones(size(paramData, 1), 1)*g_decArgo_qcDef;
+                  paramDataQc = ones(length(paramData), 1)*g_decArgo_qcDef;
                   paramDataQc(find(paramData ~= param.fillValue)) = g_decArgo_qcCorrectable;
                   dataQc(:, idParam) = paramDataQc;
                end
@@ -81,21 +81,29 @@ if (~isempty(g_decArgo_koSensorState))
                   profParam = parameterList(idParam);
                   if (strcmp(profParam.name, 'PRES') && (prof.sensorNumber ~= 0))
                      % PRES_QC is not modified (except if it is the CTD sensor
-                     continue
+                     continue;
                   end
                   
                   % retrieve the column(s) associated with the parameter data
-                  [~, firstCol, lastCol] = get_param_data_index(prof, profParam.name);
+                  idF = find(prof.paramNumberWithSubLevels < idParam);
+                  if (isempty(idF))
+                     firstCol = idParam;
+                  else
+                     firstCol = idParam + sum(prof.paramNumberOfSubLevels(idF)) - length(idF);
+                  end
+                  
+                  idF = find(prof.paramNumberWithSubLevels == idParam);
+                  if (isempty(idF))
+                     lastCol = firstCol;
+                  else
+                     lastCol = firstCol + prof.paramNumberOfSubLevels(idF) - 1;
+                  end
                   
                   param = get_netcdf_param_attributes(profParam.name);
                   paramData = prof.data(:, firstCol:lastCol);
-                  paramDataQc = ones(size(paramData, 1), 1)*g_decArgo_qcDef;
-                  for idL = 1:size(paramData, 1)
-                     if (any(paramData(idL, :) ~= param.fillValue))
-                        paramDataQc(idL) = g_decArgo_qcCorrectable;
-                     end
-                  end
-                  dataQc(:, idParam) = paramDataQc;
+                  paramDataQc = ones(size(paramData))*g_decArgo_qcDef;
+                  paramDataQc(find(paramData ~= param.fillValue)) = g_decArgo_qcCorrectable;
+                  dataQc(:, firstCol:lastCol) = paramDataQc;
                end
             end
                
@@ -120,7 +128,7 @@ if (~isempty(g_decArgo_koSensorState))
                   
                   paramDataQc = tabMeasOne.paramDataQc;
                   if (isempty(paramDataQc))
-                     paramDataQc = ones(size(tabMeasOne.paramData, 1), length(tabMeasOne.paramList))*g_decArgo_qcDef;
+                     paramDataQc = ones(size(tabMeasOne.paramData))*g_decArgo_qcDef;
                   end
                   
                   if (isempty(tabMeasOne.paramNumberWithSubLevels))
@@ -134,7 +142,7 @@ if (~isempty(g_decArgo_koSensorState))
                         if (strcmp(measParam.name, 'PRES') && (tabMeasOne.sensorNumber ~= 0))
                            % PRES_QC is not modified (except if it is the CTD
                            % sensor)
-                           continue
+                           continue;
                         end
                         
                         param = get_netcdf_param_attributes(measParam.name);
@@ -154,21 +162,29 @@ if (~isempty(g_decArgo_koSensorState))
                         if (strcmp(measParam.name, 'PRES') && (tabMeasOne.sensorNumber ~= 0))
                            % PRES_QC is not modified (except if it is the CTD
                            % sensor)
-                           continue
+                           continue;
                         end
                         
                         % retrieve the column(s) associated with the parameter data
-                        [~, firstCol, lastCol] = get_param_data_index(tabMeasOne, measParam.name);
+                        idF = find(tabMeasOne.paramNumberWithSubLevels < idParam);
+                        if (isempty(idF))
+                           firstCol = idParam;
+                        else
+                           firstCol = idParam + sum(tabMeasOne.paramNumberOfSubLevels(idF)) - length(idF);
+                        end
+                        
+                        idF = find(tabMeasOne.paramNumberWithSubLevels == idParam);
+                        if (isempty(idF))
+                           lastCol = firstCol;
+                        else
+                           lastCol = firstCol + tabMeasOne.paramNumberOfSubLevels(idF) - 1;
+                        end
                         
                         param = get_netcdf_param_attributes(measParam.name);
                         measData = tabMeasOne.paramData(:, firstCol:lastCol);
-                        measDataQc = ones(size(measData, 1), 1)*g_decArgo_qcDef;
-                        for idL = 1:size(measData, 1)
-                           if (any(measData(idL, :) ~= param.fillValue))
-                              measDataQc(idL) = g_decArgo_qcCorrectable;
-                           end
-                        end
-                        paramDataQc(:, idParam) = measDataQc;
+                        measDataQc = ones(size(measData))*g_decArgo_qcDef;
+                        measDataQc(find(measData ~= param.fillValue)) = g_decArgo_qcCorrectable;
+                        paramDataQc(:, firstCol:lastCol) = measDataQc;
                      end
                   end
                   
@@ -186,4 +202,4 @@ end
 o_tabProfiles = a_tabProfiles;
 o_tabTrajNMeas = a_tabTrajNMeas;
 
-return
+return;

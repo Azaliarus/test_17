@@ -43,13 +43,10 @@ switch (a_dataTypeNumber)
       o_dataTypeName = 'OXY raw';
       
    case 6
-      o_dataTypeName = 'ECO2 mean';
-
+      o_dataTypeName = 'FLBB mean';
+      
    case 7
-      o_dataTypeName = 'ECO2 stDev & med';
-
-   case 8
-      o_dataTypeName = 'ECO2 raw';
+      o_dataTypeName = 'FLBB stDev & med';
       
    case 9
       o_dataTypeName = 'ECO3 mean';
@@ -99,9 +96,6 @@ switch (a_dataTypeNumber)
    case 24
       o_dataTypeName = 'SUNA APF frame';
       
-   case 25
-      o_dataTypeName = 'SUNA APF2 frame';
-      
    case 37
       o_dataTypeName = 'CYCLOPS mean';
       
@@ -120,17 +114,8 @@ switch (a_dataTypeNumber)
    case 42
       o_dataTypeName = 'SEAPOINT raw';
 
-   case 46
-      o_dataTypeName = 'SEAFET mean';
-
-   case 47
-      o_dataTypeName = 'SEAFET stDev & med';
-
-   case 48
-      o_dataTypeName = 'SEAFET raw';
-
    otherwise
       o_dataTypeName = 'UNKNOWN data type';
 end
 
-return
+return;

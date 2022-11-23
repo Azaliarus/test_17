@@ -28,9 +28,6 @@ global g_decArgo_xmlReportDOMNode;
 % report information structure
 global g_decArgo_reportData;
 
-% current float WMO number
-global g_decArgo_floatNum;
-
 
 % initalize final status
 o_status = 'ok';
@@ -73,13 +70,6 @@ for idFloat = 1:length(g_decArgo_reportData)
       newChild.appendChild(newChildBis);
    end
    
-   for idFile = 1:length(reportStruct.outputMetaAuxFiles)
-      newChildBis = docNode.createElement('output_meta_aux_file');
-      textNode = char(reportStruct.outputMetaAuxFiles(idFile));
-      newChildBis.appendChild(docNode.createTextNode(textNode));
-      newChild.appendChild(newChildBis);
-   end
-   
    fileList = reportStruct.outputMonoProfFiles;
    while (~isempty(fileList))
       filePathName = fileList{1};
@@ -103,20 +93,13 @@ for idFloat = 1:length(g_decArgo_reportData)
       end
    end
    
-   for idFile = 1:length(reportStruct.outputMonoProfAuxFiles)
-      newChildBis = docNode.createElement('output_mono-profile_aux_file');
-      textNode = char(reportStruct.outputMonoProfAuxFiles(idFile));
-      newChildBis.appendChild(docNode.createTextNode(textNode));
-      newChild.appendChild(newChildBis);
-   end
-   
    for idFile = 1:length(reportStruct.outputMultiProfFiles)
       newChildBis = docNode.createElement('output_multi-profile_file');
       textNode = char(reportStruct.outputMultiProfFiles(idFile));
       newChildBis.appendChild(docNode.createTextNode(textNode));
       newChild.appendChild(newChildBis);
    end
-      
+   
    for idFile = 1:length(reportStruct.outputTrajFiles)
       newChildBis = docNode.createElement('output_trajectory_file');
       textNode = char(reportStruct.outputTrajFiles(idFile));
@@ -124,23 +107,9 @@ for idFloat = 1:length(g_decArgo_reportData)
       newChild.appendChild(newChildBis);
    end
    
-   for idFile = 1:length(reportStruct.outputTrajAuxFiles)
-      newChildBis = docNode.createElement('output_trajectory_aux_file');
-      textNode = char(reportStruct.outputTrajAuxFiles(idFile));
-      newChildBis.appendChild(docNode.createTextNode(textNode));
-      newChild.appendChild(newChildBis);
-   end
-   
    for idFile = 1:length(reportStruct.outputTechFiles)
       newChildBis = docNode.createElement('output_technical_file');
       textNode = char(reportStruct.outputTechFiles(idFile));
-      newChildBis.appendChild(docNode.createTextNode(textNode));
-      newChild.appendChild(newChildBis);
-   end
-
-   for idFile = 1:length(reportStruct.outputTechAuxFiles)
-      newChildBis = docNode.createElement('output_technical_aux_file');
-      textNode = char(reportStruct.outputTechAuxFiles(idFile));
       newChildBis.appendChild(docNode.createTextNode(textNode));
       newChild.appendChild(newChildBis);
    end
@@ -237,12 +206,6 @@ if (~isempty(a_error))
    
    newChild = docNode.createElement('matlab_error');
    
-   if (~isempty(g_decArgo_floatNum))
-      newChildBis = docNode.createElement('float_wmo');
-      newChildBis.appendChild(docNode.createTextNode(num2str(g_decArgo_floatNum)));
-      newChild.appendChild(newChildBis);
-   end
-   
    newChildBis = docNode.createElement('error_message');
    textNode = regexprep(a_error.message, char(10), ': ');
    newChildBis.appendChild(docNode.createTextNode(textNode));
@@ -269,7 +232,7 @@ newChild = docNode.createElement('status');
 newChild.appendChild(docNode.createTextNode(o_status));
 docRootNode.appendChild(newChild);
 
-return
+return;
 
 % ------------------------------------------------------------------------------
 % Retrieve INFO, WARNING and ERROR messages from the log file.
@@ -322,7 +285,7 @@ if (~isempty(a_logFileName))
    if (fId == -1)
       errorLine = sprintf('ERROR: Unable to open file: %s\n', a_logFileName);
       o_errorMsg = [o_errorMsg {errorLine}];
-      return
+      return;
    end
    fileContents = textscan(fId, '%s', 'delimiter', '\n');
    fclose(fId);
@@ -333,31 +296,31 @@ if (~isempty(a_logFileName))
       idLine = 1;
       while (1)
          line = fileContents{idLine};
-         if (strncmpi(line, 'INFO:', length('INFO:')))
+         if (strncmp(upper(line), 'INFO:', length('INFO:')))
             o_decInfoMsg = [o_decInfoMsg {strtrim(line(length('INFO:')+1:end))}];
-         elseif (strncmpi(line, 'WARNING:', length('WARNING:')))
+         elseif (strncmp(upper(line), 'WARNING:', length('WARNING:')))
             o_decWarningMsg = [o_decWarningMsg {strtrim(line(length('WARNING:')+1:end))}];
-         elseif (strncmpi(line, 'ERROR:', length('ERROR:')))
+         elseif (strncmp(upper(line), 'ERROR:', length('ERROR:')))
             o_decErrorMsg = [o_decErrorMsg {strtrim(line(length('ERROR:')+1:end))}];
-         elseif (strncmpi(line, 'RTQC_INFO:', length('RTQC_INFO:')))
+         elseif (strncmp(upper(line), 'RTQC_INFO:', length('RTQC_INFO:')))
             o_rtQcInfoMsg = [o_rtQcInfoMsg {strtrim(line(length('RTQC_INFO:')+1:end))}];
-         elseif (strncmpi(line, 'RTQC_WARNING:', length('RTQC_WARNING:')))
+         elseif (strncmp(upper(line), 'RTQC_WARNING:', length('RTQC_WARNING:')))
             o_rtQcWarningMsg = [o_rtQcWarningMsg {strtrim(line(length('RTQC_WARNING:')+1:end))}];
-         elseif (strncmpi(line, 'RTQC_ERROR:', length('RTQC_ERROR:')))
+         elseif (strncmp(upper(line), 'RTQC_ERROR:', length('RTQC_ERROR:')))
             o_rtQcErrorMsg = [o_rtQcErrorMsg {strtrim(line(length('RTQC_ERROR:')+1:end))}];
-         elseif (strncmpi(line, 'RTADJ_INFO:', length('RTADJ_INFO:')))
+         elseif (strncmp(upper(line), 'RTADJ_INFO:', length('RTADJ_INFO:')))
             o_rtAdjInfoMsg = [o_rtAdjInfoMsg {strtrim(line(length('RTADJ_INFO:')+1:end))}];
-         elseif (strncmpi(line, 'RTADJ_WARNING:', length('RTADJ_WARNING:')))
+         elseif (strncmp(upper(line), 'RTADJ_WARNING:', length('RTADJ_WARNING:')))
             o_rtAdjWarningMsg = [o_rtAdjWarningMsg {strtrim(line(length('RTADJ_WARNING:')+1:end))}];
-         elseif (strncmpi(line, 'RTADJ_ERROR:', length('RTADJ_ERROR:')))
+         elseif (strncmp(upper(line), 'RTADJ_ERROR:', length('RTADJ_ERROR:')))
             o_rtAdjErrorMsg = [o_rtAdjErrorMsg {strtrim(line(length('RTADJ_ERROR:')+1:end))}];
          end
          idLine = idLine + 1;
          if (idLine > length(fileContents))
-            break
+            break;
          end
       end
    end
 end
 
-return
+return;

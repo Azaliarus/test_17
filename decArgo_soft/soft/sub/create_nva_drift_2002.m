@@ -57,7 +57,7 @@ global g_decArgo_dateDef;
 
 
 if (isempty(a_dataCTDO))
-   return
+   return;
 end
 
 % retrieve the drift sampling period from the configuration
@@ -109,7 +109,7 @@ for idP = 1:length(idForType)
                end
                
                o_parkDate = [o_parkDate; measDate];
-               o_parkDateAdj = [o_parkDateAdj; measDateAdj];
+               o_parkDateAdj = [o_parkDate; measDateAdj];
                o_parkTransDate = [o_parkTransDate; 1];
             else
                
@@ -163,4 +163,4 @@ for idP = 1:length(idForType)
    end
 end
 
-return
+return;

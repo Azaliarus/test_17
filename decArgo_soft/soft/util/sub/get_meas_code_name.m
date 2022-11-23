@@ -23,24 +23,22 @@ function [o_measCodeName] = get_meas_code_name(a_measCode)
 o_measCodeName = '';
 
 % global measurement codes
-global g_MC_FillValue;
 global g_MC_Launch;
 global g_MC_CycleStart;
-global g_MC_DST;
 global g_MC_PressureOffset
+global g_MC_DST;
 global g_MC_MinPresInDriftAtParkSupportMeas;
 global g_MC_MaxPresInDriftAtParkSupportMeas;
 global g_MC_FST;
 global g_MC_SpyInDescToPark;
 global g_MC_DescProf;
 global g_MC_MaxPresInDescToPark;
-global g_MC_DET;
 global g_MC_DescProfDeepestBin;
+global g_MC_DET;
 global g_MC_PST;
 global g_MC_SpyAtPark;
 global g_MC_DriftAtPark;
 global g_MC_DriftAtParkStd;
-global g_MC_DriftAtParkMeanOfDiff;
 global g_MC_DriftAtParkMean;
 global g_MC_MinPresInDriftAtPark;
 global g_MC_MaxPresInDriftAtPark;
@@ -61,10 +59,9 @@ global g_MC_SpyInAscProf;
 global g_MC_AscProf;
 global g_MC_MedianValueInAscProf;
 global g_MC_LastAscPumpedCtd;
-global g_MC_ContinuousProfileStartOrStop;
 global g_MC_AET;
 global g_MC_AET_Float;
-global g_MC_SpyAtSurface;
+global g_MC_InAirSingleMeas;
 global g_MC_TST;
 global g_MC_TST_Float;
 global g_MC_FMT;
@@ -73,20 +70,9 @@ global g_MC_LMT;
 global g_MC_TET;
 global g_MC_Grounded;
 
-global g_MC_InWaterSeriesOfMeasPartOfSurfaceSequenceRelativeToDST;
-global g_MC_InAirSeriesOfMeasPartOfSurfaceSequenceRelativeToDST;
-global g_MC_InWaterSeriesOfMeasPartOfEndOfProfileRelativeToTST;
-global g_MC_InAirSingleMeasRelativeToTST;
-global g_MC_InWaterSeriesOfMeasPartOfSurfaceSequenceRelativeToTST;
-global g_MC_InAirSeriesOfMeasPartOfSurfaceSequenceRelativeToTST;
-global g_MC_InAirSingleMeasRelativeToTET;
-
 
 switch (a_measCode)
-
-   case g_MC_FillValue
-      o_measCodeName = sprintf('%03d: DEFAULT_MC', a_measCode);
-      
+   
    case g_MC_Launch
       o_measCodeName = sprintf('%03d: FLOAT_LAUNCH', a_measCode);
       
@@ -95,12 +81,6 @@ switch (a_measCode)
       
    case g_MC_PressureOffset
       o_measCodeName = sprintf('%03d: PRESSURE_OFFSET', a_measCode);
-      
-   case g_MC_InWaterSeriesOfMeasPartOfSurfaceSequenceRelativeToDST % 110
-      o_measCodeName = sprintf('%03d: IN_WATER_SURF_MEAS', a_measCode);
-
-   case g_MC_InAirSeriesOfMeasPartOfSurfaceSequenceRelativeToDST % 111
-      o_measCodeName = sprintf('%03d: IN_AIR_SURF_MEAS', a_measCode);
       
    case g_MC_DST
       o_measCodeName = sprintf('%03d: DESCENT_START', a_measCode);
@@ -140,9 +120,6 @@ switch (a_measCode)
       
    case g_MC_DriftAtParkStd
       o_measCodeName = sprintf('%03d: DRIFT_AT_PARK_STD', a_measCode);
-      
-   case g_MC_DriftAtParkMeanOfDiff
-      o_measCodeName = sprintf('%03d: DRIFT_AT_PARK_MEAN_OF_DIFF', a_measCode);
       
    case g_MC_DriftAtParkMean
       o_measCodeName = sprintf('%03d: DRIFT_AT_PARK_MEAN', a_measCode);
@@ -210,8 +187,8 @@ switch (a_measCode)
    case g_MC_AET_Float
       o_measCodeName = sprintf('%03d: ASCENT_END_FROM_FLOAT', a_measCode);
       
-   case g_MC_SpyAtSurface
-      o_measCodeName = sprintf('%03d: BUOY_ACTION_AFTER_AED', a_measCode);
+   case g_MC_InAirSingleMeas
+      o_measCodeName = sprintf('%03d: IN_AIR_MEAS', a_measCode);
 
    case g_MC_TST
       o_measCodeName = sprintf('%03d: TRANSMISSION_START', a_measCode);
@@ -227,34 +204,13 @@ switch (a_measCode)
 
    case g_MC_LMT
       o_measCodeName = sprintf('%03d: LAST_MESSAGE', a_measCode);
-      
+
    case g_MC_TET
       o_measCodeName = sprintf('%03d: TRANSMISSION_END', a_measCode);
 
    case g_MC_Grounded
       o_measCodeName = sprintf('%03d: GROUNDED', a_measCode);
    
-   case g_MC_InWaterSeriesOfMeasPartOfEndOfProfileRelativeToTST % 690
-      o_measCodeName = sprintf('%03d: SHALLOW_SURF_MEAS', a_measCode);
-
-   case g_MC_InAirSingleMeasRelativeToTST %699
-      o_measCodeName = sprintf('%03d: SINGLE_MEAS_TO_TST', a_measCode);
-      
-   case g_MC_InWaterSeriesOfMeasPartOfSurfaceSequenceRelativeToTST % 710
-      o_measCodeName = sprintf('%03d: IN_WATER_SURF_MEAS', a_measCode);
-
-   case g_MC_InAirSeriesOfMeasPartOfSurfaceSequenceRelativeToTST % 711
-      o_measCodeName = sprintf('%03d: IN_AIR_SURF_MEAS', a_measCode);
-
-   case g_MC_InAirSingleMeasRelativeToTET %799
-      o_measCodeName = sprintf('%03d: SINGLE_MEAS_TO_TET', a_measCode);
-      
-   case {g_MC_DET-11, g_MC_PST-11, g_MC_PET-11, g_MC_DDET-11, g_MC_AST-11, g_MC_AET-11}
-      o_measCodeName = sprintf('%03d: BUOYANCY_ACTION', a_measCode);
-      
-   case {g_MC_TET-10, g_MC_DST-10, g_MC_DET-10, g_MC_PST-10, g_MC_PET-10, g_MC_DDET-10, g_MC_AST-10, g_MC_AET-10}
-      o_measCodeName = sprintf('%03d: SERIES_OF_MEAS', a_measCode);
-      
    otherwise
       o_measCodeName = num2str(a_measCode);
       fprintf('WARNING: no meas code name for meas code #%d\n', ...
@@ -262,4 +218,4 @@ switch (a_measCode)
 
 end
 
-return
+return;

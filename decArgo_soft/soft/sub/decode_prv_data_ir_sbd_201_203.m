@@ -5,17 +5,14 @@
 %  [o_tabTech, ...
 %    o_dataCTD, o_dataCTDO, ...
 %    o_evAct, o_pumpAct, o_floatParam, o_deepCycle] = ...
-%    decode_prv_data_ir_sbd_201_203(a_tabData, a_tabDataDates, ...
-%    a_procLevel, a_firstDeepCycleDone, a_decoderId)
+%    decode_prv_data_ir_sbd_201_203(a_tabData, a_tabDataDates, a_procLevel, a_decoderId)
 %
 % INPUT PARAMETERS :
-%   a_tabData            : data frame to decode
-%   a_tabDataDates       : corresponding dates of Iridium SBD
-%   a_procLevel          : processing level (0: collect only rough information,
-%                          1: decode the data)
-%   a_firstDeepCycleDone : first deep cycle done flag (1 if the first deep cycle
-%                          has been done)
-%   a_decoderId          : float decoder Id
+%   a_tabData      : data frame to decode
+%   a_tabDataDates : corresponding dates of Iridium SBD
+%   a_procLevel    : processing level (0: collect only rough information, 1:
+%                    decode the data)
+%   a_decoderId    : float decoder Id
 %
 % OUTPUT PARAMETERS :
 %   o_tabTech     : decoded technical data
@@ -24,7 +21,7 @@
 %   o_evAct       : decoded hydraulic (EV) data
 %   o_pumpAct     : decoded hydraulic (pump) data
 %   o_floatParam  : decoded parameter data
-%   o_deepCycle   : deep cycle flag (1 if it is a deep cycle 0 otherwise)
+%   o_deepCycle   : deep cycle flag (1 if it is a deep cycle 0 otherwise
 %
 % EXAMPLES :
 %
@@ -37,8 +34,7 @@
 function [o_tabTech, ...
    o_dataCTD, o_dataCTDO, ...
    o_evAct, o_pumpAct, o_floatParam, o_deepCycle] = ...
-   decode_prv_data_ir_sbd_201_203(a_tabData, a_tabDataDates, ...
-   a_procLevel, a_firstDeepCycleDone, a_decoderId)
+   decode_prv_data_ir_sbd_201_203(a_tabData, a_tabDataDates, a_procLevel, a_decoderId)
 
 % output parameters initialization
 o_tabTech = [];
@@ -55,9 +51,6 @@ global g_decArgo_floatNum;
 % current cycle number
 global g_decArgo_cycleNum;
 
-% shift to apply to transmitted cycle number (see 6901248)
-global g_decArgo_cycleNumShift;
-
 % default values
 global g_decArgo_janFirst1950InMatlab;
 global g_decArgo_dateDef;
@@ -72,13 +65,12 @@ global g_decArgo_durationDef;
 global g_decArgo_0TypePacketReceivedFlag;
 global g_decArgo_4TypePacketReceivedFlag;
 global g_decArgo_5TypePacketReceivedFlag;
-global g_decArgo_nbOf1Or8TypePacketExpected;
-global g_decArgo_nbOf1Or8TypePacketReceived;
-global g_decArgo_nbOf2Or9TypePacketExpected;
-global g_decArgo_nbOf2Or9TypePacketReceived;
-global g_decArgo_nbOf3Or10TypePacketExpected;
-global g_decArgo_nbOf3Or10TypePacketReceived;
-global g_decArgo_nbOf6TypePacketReceived;
+global g_decArgo_nbOf1Or8Or11Or14TypePacketExpected;
+global g_decArgo_nbOf1Or8Or11Or14TypePacketReceived;
+global g_decArgo_nbOf2Or9Or12Or15TypePacketExpected;
+global g_decArgo_nbOf2Or9Or12Or15TypePacketReceived;
+global g_decArgo_nbOf3Or10Or13Or16TypePacketExpected;
+global g_decArgo_nbOf3Or10Or13Or16TypePacketReceived;
 
 % offset between float days and julian days
 global g_decArgo_julD2FloatDayOffset;
@@ -87,11 +79,7 @@ global g_decArgo_julD2FloatDayOffset;
 global g_decArgo_generateNcTech;
 
 
-% initialize information arrays
-init_counts;
-
 % decode packet data
-floatCycleNumber = [];
 for idMes = 1:size(a_tabData, 1)
    % packet type
    packType = a_tabData(idMes, 1);
@@ -113,9 +101,9 @@ for idMes = 1:size(a_tabData, 1)
       case 0
          % float technical #1 packet
          
-         g_decArgo_0TypePacketReceivedFlag = 1;
          if (a_procLevel == 0)
-            continue
+            g_decArgo_0TypePacketReceivedFlag = 1;
+            continue;
          end
          
          % message data frame
@@ -142,36 +130,31 @@ for idMes = 1:size(a_tabData, 1)
          % get item bits
          tabTech = get_bits(firstBit, tabNbBits, msgData);
          
-         % set float cycle number
-         floatCycleNumber = tabTech(1);
-         if (a_firstDeepCycleDone == 0)
-            g_decArgo_cycleNumShift = floatCycleNumber - 1;
-         end
-         
+         % set cycle number
+         g_decArgo_cycleNum = tabTech(1);
+         fprintf('cyle #%d\n', g_decArgo_cycleNum);
+
          % compute the offset between float days and julian days
          startDateInfo = [tabTech(2:4); tabTech(6)];
-         if (any(startDateInfo ~= 0))
+         if ~((length(unique(startDateInfo)) == 1) && (unique(startDateInfo) == 0))
             cycleStartDateDay = datenum(sprintf('%02d%02d%02d', tabTech(2:4)), 'ddmmyy') - g_decArgo_janFirst1950InMatlab;
             if (~isempty(g_decArgo_julD2FloatDayOffset))
                if (g_decArgo_julD2FloatDayOffset ~= cycleStartDateDay - tabTech(5))
-                  prevOffsetGregDate = julian_2_gregorian_dec_argo(g_decArgo_julD2FloatDayOffset);
-                  prevOffsetGregDate = prevOffsetGregDate(1:10);
-                  newOffsetGregDate = julian_2_gregorian_dec_argo(cycleStartDateDay - tabTech(5));
-                  newOffsetGregDate = newOffsetGregDate(1:10);
-                  fprintf('ERROR: Float #%d Cycle #%d: Shift in float day (previous offset = %d (%s), new offset = %d (%s))\n', ...
+                  fprintf('ERROR: Float #%d: Shift in float day (previous offset = %d, new offset = %d)\n', ...
                      g_decArgo_floatNum, ...
-                     tabTech(1), ...
                      g_decArgo_julD2FloatDayOffset, ...
-                     prevOffsetGregDate, ...
-                     cycleStartDateDay - tabTech(5), ...
-                     newOffsetGregDate);
+                     cycleStartDateDay - tabTech(5));
                end
             end
             g_decArgo_julD2FloatDayOffset = cycleStartDateDay - tabTech(5);
+            
+            % if the cycle start time is present, it is a deep cycle
+            o_deepCycle = 1;
+         else
+            % if the cycle start time is not present, the transmission has been
+            % done during the prelude or a second Iridium session or in EOL mode
+            o_deepCycle = 0;
          end
-         
-         % pressure sensor offset
-         tabTech(44) = twos_complement_dec_argo(tabTech(44), 8)/10;
          
          % compute float time
          floatTime = datenum(sprintf('%02d%02d%02d%02d%02d%02d', tabTech(38:43)), 'HHMMSSddmmyy') - g_decArgo_janFirst1950InMatlab;
@@ -195,7 +178,12 @@ for idMes = 1:size(a_tabData, 1)
          tabTech = [packType tabTech(1:76)' ones(1, 4)*-1 floatTime gpsLocLon gpsLocLat sbdFileDate];
          
          o_tabTech = [o_tabTech; tabTech];
-                  
+         
+         % output NetCDF files
+         if (g_decArgo_generateNcTech ~= 0)
+            store_tech1_data_for_nc_201_202_203(o_tabTech, o_deepCycle);
+         end
+         
          %          fprintf('Packet type : %d\n', packType);
          
          %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -220,39 +208,23 @@ for idMes = 1:size(a_tabData, 1)
          % get item bits
          tabTech = get_bits(firstBit, tabNbBits, msgData);
          
-         g_decArgo_4TypePacketReceivedFlag = 1;
-         g_decArgo_nbOf1Or8TypePacketExpected = tabTech(1);
-         g_decArgo_nbOf2Or9TypePacketExpected = tabTech(2);
-         g_decArgo_nbOf3Or10TypePacketExpected = tabTech(3);
          if (a_procLevel == 0)
-            continue
+            g_decArgo_4TypePacketReceivedFlag = 1;
+            g_decArgo_nbOf1Or8Or11Or14TypePacketExpected = tabTech(1);
+            g_decArgo_nbOf2Or9Or12Or15TypePacketExpected = tabTech(2);
+            g_decArgo_nbOf3Or10Or13Or16TypePacketExpected = tabTech(3);
+            continue;
          end
-         
-         % message and measurement counts are set to 0 for a surface cycle
-         if ((length(unique(tabTech(1:8))) == 1) && (unique(tabTech(1:8)) == 0))
-            o_deepCycle = 0;
-         else
-            o_deepCycle = 1;
-         end
-         
-         % set cycle number
-         if (~isempty(floatCycleNumber))
-            if ((a_firstDeepCycleDone == 0) && (o_deepCycle == 0))
-               g_decArgo_cycleNum = 0;
-            else
-               g_decArgo_cycleNum = floatCycleNumber - g_decArgo_cycleNumShift;
-            end
-         else
-            fprintf('ERROR: Float #%d Cycle #%d: Msg tech#2 has been received before Msg tech#1\n', ...
-               g_decArgo_floatNum, ...
-               g_decArgo_cycleNum);
-         end
-         fprintf('Cycle #%d\n', g_decArgo_cycleNum);
          
          tabTech = [packType tabTech(1:83)' sbdFileDate];
          
          o_tabTech = [o_tabTech; tabTech];
-                  
+         
+         % output NetCDF files
+         if (g_decArgo_generateNcTech ~= 0)
+            store_tech2_data_for_nc_201_203(o_tabTech, o_deepCycle, a_decoderId);
+         end
+         
          %          fprintf('Packet type : %d\n', packType);
          %          fprintf('- nb packets CTDO desc. : %d\n', tabTech(2));
          %          fprintf('- nb packets CTDO drift : %d\n', tabTech(3));
@@ -265,17 +237,15 @@ for idMes = 1:size(a_tabData, 1)
       case {1, 2, 3}
          % CTD packets
          
-         o_deepCycle = 1;
-
-         if (packType == 1)
-            g_decArgo_nbOf1Or8TypePacketReceived = g_decArgo_nbOf1Or8TypePacketReceived + 1;
-         elseif (packType == 2)
-            g_decArgo_nbOf2Or9TypePacketReceived = g_decArgo_nbOf2Or9TypePacketReceived + 1;
-         elseif (packType == 3)
-            g_decArgo_nbOf3Or10TypePacketReceived = g_decArgo_nbOf3Or10TypePacketReceived + 1;
-         end
          if (a_procLevel == 0)
-            continue
+            if (packType == 1)
+               g_decArgo_nbOf1Or8Or11Or14TypePacketReceived = g_decArgo_nbOf1Or8Or11Or14TypePacketReceived + 1;
+            elseif (packType == 2)
+               g_decArgo_nbOf2Or9Or12Or15TypePacketReceived = g_decArgo_nbOf2Or9Or12Or15TypePacketReceived + 1;
+            elseif (packType == 3)
+               g_decArgo_nbOf3Or10Or13Or16TypePacketReceived = g_decArgo_nbOf3Or10Or13Or16TypePacketReceived + 1;
+            end
+            continue;
          end
          
          % message data frame
@@ -286,7 +256,7 @@ for idMes = 1:size(a_tabData, 1)
          % item bit lengths
          tabNbBits = [ ...
             16 8 8 ...
-            repmat(16, 1, 45) ...
+            repmat(16, 1, 48) ...
             repmat(8, 1, 5) ...
             ];
          % get item bits
@@ -332,17 +302,15 @@ for idMes = 1:size(a_tabData, 1)
       case {8, 9, 10}
          % CTDO packets
          
-         o_deepCycle = 1;
-         
-         if (packType == 8)
-            g_decArgo_nbOf1Or8TypePacketReceived = g_decArgo_nbOf1Or8TypePacketReceived + 1;
-         elseif (packType == 9)
-            g_decArgo_nbOf2Or9TypePacketReceived = g_decArgo_nbOf2Or9TypePacketReceived + 1;
-         elseif (packType == 10)
-            g_decArgo_nbOf3Or10TypePacketReceived = g_decArgo_nbOf3Or10TypePacketReceived + 1;
-         end
          if (a_procLevel == 0)
-            continue
+            if (packType == 8)
+               g_decArgo_nbOf1Or8Or11Or14TypePacketReceived = g_decArgo_nbOf1Or8Or11Or14TypePacketReceived + 1;
+            elseif (packType == 9)
+               g_decArgo_nbOf2Or9Or12Or15TypePacketReceived = g_decArgo_nbOf2Or9Or12Or15TypePacketReceived + 1;
+            elseif (packType == 10)
+               g_decArgo_nbOf3Or10Or13Or16TypePacketReceived = g_decArgo_nbOf3Or10Or13Or16TypePacketReceived + 1;
+            end
+            continue;
          end
          
          % message data frame
@@ -414,7 +382,7 @@ for idMes = 1:size(a_tabData, 1)
             tabPres = [tabPres; ones(8, 1)*g_decArgo_presCountsDef];
             tabTemp = [tabTemp; ones(8, 1)*g_decArgo_tempCountsDef];
             tabPsal = [tabPsal; ones(8, 1)*g_decArgo_salCountsDef];
-            
+
             o_dataCTD = [o_dataCTD; ...
                packType-7 tabDate' ones(1, length(tabDate))*-1 tabPres' tabTemp' tabPsal'];
             
@@ -431,10 +399,8 @@ for idMes = 1:size(a_tabData, 1)
          % EV or pump packet
          
          if (a_procLevel == 0)
-            continue
+            continue;
          end
-         
-         g_decArgo_nbOf6TypePacketReceived = g_decArgo_nbOf6TypePacketReceived + 1;
          
          % message data frame
          msgData = a_tabData(idMes, 2:end);
@@ -465,7 +431,7 @@ for idMes = 1:size(a_tabData, 1)
             
             if ~((refTime == 0) && (pres == 0) && (duration == 0))
                tabDate = [tabDate; refDate+refTime/1440];
-               tabPres = [tabPres; twos_complement_dec_argo(pres, 16)];
+               tabPres = [tabPres; pres];
                tabDuration = [tabDuration; duration];
                nbAct = nbAct + 1;
             else
@@ -490,9 +456,9 @@ for idMes = 1:size(a_tabData, 1)
       case 5
          % parameter packet
          
-         g_decArgo_5TypePacketReceivedFlag = 1;
          if (a_procLevel == 0)
-            continue
+            g_decArgo_5TypePacketReceivedFlag = 1;
+            continue;
          end
          
          % message data frame
@@ -515,18 +481,7 @@ for idMes = 1:size(a_tabData, 1)
          
          % calibration coefficients
          tabParam(55) = tabParam(55)/1000;
-         if (tabParam(56) < 32768) % 32768 = 65536/2
-            tabParam(56) = -tabParam(56);
-         else
-            tabParam(56) = 65536 - tabParam(56);
-         end
-         
-         % specific: for float 6901763 replace PT21=2 by PT21=0
-         if (g_decArgo_floatNum == 6901763)
-            if (tabParam(46) == 2)
-               tabParam(46) = 0;
-            end
-         end
+         tabParam(56) = -tabParam(56);
          
          o_floatParam = [o_floatParam; ...
             packType tabParam' floatTime sbdFileDate];
@@ -540,18 +495,6 @@ for idMes = 1:size(a_tabData, 1)
    end
 end
 
-% output NetCDF files
-if (a_procLevel ~= 0)
-   if (g_decArgo_generateNcTech ~= 0)
-      if (~isempty(o_tabTech))
-         idFTech1 = find(o_tabTech(:, 1) == 0);
-         store_tech1_data_for_nc_201_to_203_215_216_218(o_tabTech(idFTech1, :), o_deepCycle);
-         idFTech2 = find(o_tabTech(:, 1) == 4);
-         store_tech2_data_for_nc_201_203_215(o_tabTech(idFTech2, :), o_deepCycle, a_decoderId);
-      end
-   end
-end
-         
 % if the DO sensor failed during the profile some packets have CTD only and
 % others CTDO (Ex: 6901760 descending profile #1)
 % we should merge data so that only o_dataCTDO output array should be empty
@@ -575,150 +518,8 @@ if (~isempty(o_dataCTD) && ~isempty(o_dataCTDO))
    idDef = find(tempDoxy == 65535);
    tempDoxy(idDef) = g_decArgo_tempDoxyCountsDef;
    o_dataCTDO(:, 51:57) = tempDoxy;
-   
+
    o_dataCTD = [];
 end
 
-if (a_procLevel > 0)
-
-   % collect information on received packet types
-   collect_received_packet_type_info;
-end
-
-return
-
-% ------------------------------------------------------------------------------
-% Initialize global flags and counters used to decide if a buffer is completed
-% or not.
-%
-% SYNTAX :
-%  init_counts
-%
-% INPUT PARAMETERS :
-%
-% OUTPUT PARAMETERS :
-%
-% EXAMPLES :
-%
-% SEE ALSO :
-% AUTHORS  : Jean-Philippe Rannou (Altran)(jean-philippe.rannou@altran.com)
-% ------------------------------------------------------------------------------
-% RELEASES :
-%   03/03/2017 - RNU - creation
-% ------------------------------------------------------------------------------
-function init_counts
-
-% arrays to store rough information on received data
-global g_decArgo_0TypePacketReceivedFlag;
-global g_decArgo_4TypePacketReceivedFlag;
-global g_decArgo_5TypePacketReceivedFlag;
-global g_decArgo_7TypePacketReceivedFlag;
-global g_decArgo_nbOf1Or8Or11Or14TypePacketExpected;
-global g_decArgo_nbOf1Or8Or11Or14TypePacketReceived;
-global g_decArgo_nbOf2Or9Or12Or15TypePacketExpected;
-global g_decArgo_nbOf2Or9Or12Or15TypePacketReceived;
-global g_decArgo_nbOf3Or10Or13Or16TypePacketExpected;
-global g_decArgo_nbOf3Or10Or13Or16TypePacketReceived;
-global g_decArgo_nbOf1Or8TypePacketExpected;
-global g_decArgo_nbOf1Or8TypePacketReceived;
-global g_decArgo_nbOf2Or9TypePacketExpected;
-global g_decArgo_nbOf2Or9TypePacketReceived;
-global g_decArgo_nbOf3Or10TypePacketExpected;
-global g_decArgo_nbOf3Or10TypePacketReceived;
-global g_decArgo_nbOf13Or11TypePacketExpected;
-global g_decArgo_nbOf13Or11TypePacketReceived;
-global g_decArgo_nbOf14Or12TypePacketExpected;
-global g_decArgo_nbOf14Or12TypePacketReceived;
-global g_decArgo_nbOf6TypePacketReceived;
-
-% initialize information arrays
-g_decArgo_0TypePacketReceivedFlag = 0;
-g_decArgo_4TypePacketReceivedFlag = 0;
-g_decArgo_5TypePacketReceivedFlag = 0;
-g_decArgo_nbOf1Or8Or11Or14TypePacketExpected = -1;
-g_decArgo_nbOf1Or8Or11Or14TypePacketReceived = 0;
-g_decArgo_nbOf2Or9Or12Or15TypePacketExpected = -1;
-g_decArgo_nbOf2Or9Or12Or15TypePacketReceived = 0;
-g_decArgo_nbOf3Or10Or13Or16TypePacketExpected = -1;
-g_decArgo_nbOf3Or10Or13Or16TypePacketReceived = 0;
-g_decArgo_nbOf1Or8TypePacketExpected = -1;
-g_decArgo_nbOf1Or8TypePacketReceived = 0;
-g_decArgo_nbOf2Or9TypePacketExpected = -1;
-g_decArgo_nbOf2Or9TypePacketReceived = 0;
-g_decArgo_nbOf3Or10TypePacketExpected = -1;
-g_decArgo_nbOf3Or10TypePacketReceived = 0;
-g_decArgo_nbOf13Or11TypePacketExpected = -1;
-g_decArgo_nbOf13Or11TypePacketReceived = 0;
-g_decArgo_nbOf14Or12TypePacketExpected = -1;
-g_decArgo_nbOf14Or12TypePacketReceived = 0;
-g_decArgo_nbOf6TypePacketReceived = 0;
-
-% items not concerned by this decoder
-g_decArgo_7TypePacketReceivedFlag = 1;
-
-g_decArgo_nbOf1Or8Or11Or14TypePacketExpected = 0;
-g_decArgo_nbOf2Or9Or12Or15TypePacketExpected = 0;
-g_decArgo_nbOf3Or10Or13Or16TypePacketExpected = 0;
-g_decArgo_nbOf13Or11TypePacketExpected = 0;
-g_decArgo_nbOf14Or12TypePacketExpected = 0;
-
-return
-
-% ------------------------------------------------------------------------------
-% Collect information on received packet types
-%
-% SYNTAX :
-%  collect_received_packet_type_info
-%
-% INPUT PARAMETERS :
-%
-% OUTPUT PARAMETERS :
-%
-% EXAMPLES :
-%
-% SEE ALSO :
-% AUTHORS  : Jean-Philippe Rannou (Altran)(jean-philippe.rannou@altran.com)
-% ------------------------------------------------------------------------------
-% RELEASES :
-%   05/29/2017 - RNU - creation
-% ------------------------------------------------------------------------------
-function collect_received_packet_type_info
-
-% arrays to store rough information on received data
-global g_decArgo_0TypePacketReceivedFlag;
-global g_decArgo_4TypePacketReceivedFlag;
-global g_decArgo_5TypePacketReceivedFlag;
-global g_decArgo_7TypePacketReceivedFlag;
-global g_decArgo_nbOf1Or8Or11Or14TypePacketReceived;
-global g_decArgo_nbOf2Or9Or12Or15TypePacketReceived;
-global g_decArgo_nbOf3Or10Or13Or16TypePacketReceived;
-global g_decArgo_nbOf1Or8TypePacketReceived;
-global g_decArgo_nbOf2Or9TypePacketReceived;
-global g_decArgo_nbOf3Or10TypePacketReceived;
-global g_decArgo_nbOf13Or11TypePacketReceived;
-global g_decArgo_nbOf14Or12TypePacketReceived;
-global g_decArgo_nbOf6TypePacketReceived;
-
-% array ro store statistics on received packets
-global g_decArgo_nbDescentPacketsReceived;
-global g_decArgo_nbParkPacketsReceived;
-global g_decArgo_nbAscentPacketsReceived;
-global g_decArgo_nbNearSurfacePacketsReceived;
-global g_decArgo_nbInAirPacketsReceived;
-global g_decArgo_nbHydraulicPacketsReceived;
-global g_decArgo_nbTechPacketsReceived;
-global g_decArgo_nbTech1PacketsReceived;
-global g_decArgo_nbTech2PacketsReceived;
-global g_decArgo_nbParmPacketsReceived;
-global g_decArgo_nbParm1PacketsReceived;
-global g_decArgo_nbParm2PacketsReceived;
-
-g_decArgo_nbDescentPacketsReceived = g_decArgo_nbOf1Or8TypePacketReceived;
-g_decArgo_nbParkPacketsReceived = g_decArgo_nbOf2Or9TypePacketReceived;
-g_decArgo_nbAscentPacketsReceived = g_decArgo_nbOf3Or10TypePacketReceived;
-g_decArgo_nbHydraulicPacketsReceived = g_decArgo_nbOf6TypePacketReceived;
-g_decArgo_nbTech1PacketsReceived = g_decArgo_0TypePacketReceivedFlag;
-g_decArgo_nbTech2PacketsReceived = g_decArgo_4TypePacketReceivedFlag;
-g_decArgo_nbParmPacketsReceived = g_decArgo_5TypePacketReceivedFlag;
-
-return
+return;

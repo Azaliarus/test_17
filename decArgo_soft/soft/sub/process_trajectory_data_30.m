@@ -133,7 +133,7 @@ if (a_addLaunchData == 1)
       a_floatSurfData.launchDate, ...
       a_floatSurfData.launchLon, ...
       a_floatSurfData.launchLat, ...
-      ' ', ' ', '0', 0);
+      ' ', ' ', '0');
    
    trajNMeasStruct.surfOnly = 1;
    trajNMeasStruct.tabMeas = [trajNMeasStruct.tabMeas; measStruct];
@@ -158,7 +158,7 @@ cycleSurfData = a_floatSurfData.cycleData(end);
 if (cycleSurfData.firstMsgTime ~= g_decArgo_dateDef)
    measStruct = create_one_meas_surface(g_MC_FMT, ...
       cycleSurfData.firstMsgTime, ...
-      g_decArgo_argosLonDef, [], [], [], [], ~isempty(a_floatClockDrift));
+      g_decArgo_argosLonDef, [], [], [], []);
    trajNMeasStruct.tabMeas = [trajNMeasStruct.tabMeas; measStruct];
    
    trajNCycleStruct.juldFirstMessage = cycleSurfData.firstMsgTime;
@@ -173,8 +173,7 @@ for idpos = 1:length(cycleSurfData.argosLocDate)
       cycleSurfData.argosLocLat(idpos), ...
       cycleSurfData.argosLocAcc(idpos), ...
       cycleSurfData.argosLocSat(idpos), ...
-      cycleSurfData.argosLocQc(idpos), ...
-      ~isempty(a_floatClockDrift));
+      cycleSurfData.argosLocQc(idpos));
    trajNMeasStruct.tabMeas = [trajNMeasStruct.tabMeas; measStruct];
 end
 
@@ -190,7 +189,7 @@ end
 if (cycleSurfData.lastMsgTime ~= g_decArgo_dateDef)
    measStruct = create_one_meas_surface(g_MC_LMT, ...
       cycleSurfData.lastMsgTime, ...
-      g_decArgo_argosLonDef, [], [], [], [], ~isempty(a_floatClockDrift));
+      g_decArgo_argosLonDef, [], [], [], []);
    trajNMeasStruct.tabMeas = [trajNMeasStruct.tabMeas; measStruct];
    
    trajNCycleStruct.juldLastMessage = cycleSurfData.lastMsgTime;
@@ -298,7 +297,14 @@ if (a_deepCycle == 1)
       trajNCycleStruct.juldTransmissionStart = a_transStartDate;
       trajNCycleStruct.juldTransmissionStartStatus = g_JULD_STATUS_2;
    end
-      
+   
+   % Transmission End Time
+   measStruct = create_one_meas_float_time(g_MC_TET, -1, g_JULD_STATUS_9, floatClockDrift);
+   trajNMeasStruct.tabMeas = [trajNMeasStruct.tabMeas; measStruct];
+   
+   trajNCycleStruct.juldTransmissionEnd = g_decArgo_ncDateDef;
+   trajNCycleStruct.juldTransmissionEndStatus = g_JULD_STATUS_9;
+   
    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
    % PROFILE DATED BINS
    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -516,9 +522,6 @@ if (a_deepCycle == 1)
       
       % grounding information
       grounded = 'N';
-      if (a_tabTech1(18) > 0)
-         grounded = 'Y';
-      end      
       if (a_firstGroundingDate ~= g_decArgo_dateDef)
          measStruct = create_one_meas_float_time(g_MC_Grounded, a_firstGroundingDate, g_JULD_STATUS_2, floatClockDrift);
          paramPres = get_netcdf_param_attributes('PRES');
@@ -537,13 +540,6 @@ if (a_deepCycle == 1)
       
    end
 end
-
-% Transmission End Time
-measStruct = create_one_meas_float_time(g_MC_TET, -1, g_JULD_STATUS_9, floatClockDrift);
-trajNMeasStruct.tabMeas = [trajNMeasStruct.tabMeas; measStruct];
-
-trajNCycleStruct.juldTransmissionEnd = g_decArgo_ncDateDef;
-trajNCycleStruct.juldTransmissionEndStatus = g_JULD_STATUS_9;
 
 % check that all expected MC are present
 
@@ -586,16 +582,14 @@ if (a_cycleNum >= firstDeepCycle)
 end
 
 % configuration mission number
-if (a_cycleNum > 0) % we don't assign any configuration to cycle #0 data
-   configMissionNumber = get_config_mission_number_argos( ...
-      a_cycleNum, [], a_decoderId);
-   if (~isempty(configMissionNumber))
-      trajNCycleStruct.configMissionNumber = configMissionNumber;
-   end
+configMissionNumber = get_config_mission_number_argos( ...
+   a_cycleNum, [], a_decoderId);
+if (~isempty(configMissionNumber))
+   trajNCycleStruct.configMissionNumber = configMissionNumber;
 end
 
 % output data
 o_tabTrajNMeas = [o_tabTrajNMeas; trajNMeasStruct];
 o_tabTrajNCycle = trajNCycleStruct;
 
-return
+return;

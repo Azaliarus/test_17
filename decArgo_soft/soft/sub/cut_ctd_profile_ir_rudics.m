@@ -29,30 +29,21 @@ for idProf = 1:length(a_tabProfiles)
    
    profile = a_tabProfiles(idProf);
    
-   if (profile.sensorNumber < 1000)
-
-      % nominal case
-      if (profile.primarySamplingProfileFlag == -1)
-         if (profile.direction == 'A')
-            [cutProfiles] = cut_profile(profile);
-            tabProfiles = [tabProfiles cutProfiles];
-         else
-            if (profile.sensorNumber == 0)
-               % CTD profile
-               profile.primarySamplingProfileFlag = 1;
-               %             elseif (profile.sensorNumber == 1)
-               %                % DOXY profile
-               %                profile.primarySamplingProfileFlag = 0;
-            end
-            tabProfiles = [tabProfiles profile];
-         end
+   if (profile.primarySamplingProfileFlag == -1)
+      if (profile.direction == 'A')
+         [cutProfiles] = cut_profile(profile);
+         tabProfiles = [tabProfiles cutProfiles];
       else
+         if (profile.sensorNumber == 0)
+            % CTD profile
+            profile.primarySamplingProfileFlag = 1;
+         elseif (profile.sensorNumber == 1)
+            % DOXY profile
+            profile.primarySamplingProfileFlag = 0;
+         end
          tabProfiles = [tabProfiles profile];
       end
    else
-      
-      % for 'raw' (cyclic buffer) data do not cut CTD or OPTODE profiles
-      profile.primarySamplingProfileFlag = 0;
       tabProfiles = [tabProfiles profile];
    end
 end
@@ -60,7 +51,7 @@ end
 % update output parameters
 o_cutProfiles = tabProfiles;
 
-return
+return;
 
 % ------------------------------------------------------------------------------
 % Cut a CTD profile at the cut-off pressure of the CTD pump.
@@ -107,8 +98,7 @@ if (a_tabProfile.presCutOffProf ~= g_decArgo_presDef)
       end
    end
    
-   idPres  = find(strcmp({a_tabProfile.paramList.name}, 'PRES') == 1, 1);
-   presMeas = a_tabProfile.data(:, idPres);
+   presMeas = a_tabProfile.data(:, 1);
    paramPres = get_netcdf_param_attributes('PRES');
    idLevPrimary = find((presMeas ~= paramPres.fillValue) & (presMeas > presCutOffProf));
    % be careful, if acquisition mode is 'raw', the pressure measurements are not
@@ -118,7 +108,7 @@ if (a_tabProfile.presCutOffProf ~= g_decArgo_presDef)
       for id = 1:length(idStop)
          if (presMeas(idStop(id)+id) ~= paramPres.fillValue)
             idLevPrimary = idLevPrimary(1:idStop(id));
-            break
+            break;
          end
       end
    end
@@ -137,31 +127,20 @@ if (a_tabProfile.presCutOffProf ~= g_decArgo_presDef)
       if (primaryProfile.sensorNumber == 0)
          % CTD profile
          primaryProfile.primarySamplingProfileFlag = 1;
-         %       elseif (primaryProfile.sensorNumber == 1)
-         %          % DOXY profile
-         %          primaryProfile.primarySamplingProfileFlag = 0;
+      elseif (primaryProfile.sensorNumber == 1)
+         % DOXY profile
+         primaryProfile.primarySamplingProfileFlag = 0;
       end
       primaryProfile.vertSamplingScheme = primaryProfile.vertSamplingScheme{1};      
       primaryProfile.data = primaryProfile.data(1:idLevPrimary(end), :);
       if (~isempty(primaryProfile.dataQc))
          primaryProfile.dataQc = primaryProfile.dataQc(1:idLevPrimary(end), :);
       end
-      if (~isempty(primaryProfile.dataAdj))
-         primaryProfile.dataAdj = primaryProfile.dataAdj(1:idLevPrimary(end), :);
-         if (~isempty(primaryProfile.dataAdjQc))
-            primaryProfile.dataAdjQc = primaryProfile.dataAdjQc(1:idLevPrimary(end), :);
-         end
-      end
-      if (~isempty(primaryProfile.dates))
-         primaryProfile.dates = primaryProfile.dates(1:idLevPrimary(end), 1);
-         if (~isempty(primaryProfile.datesAdj))
-            primaryProfile.datesAdj = primaryProfile.datesAdj(1:idLevPrimary(end), 1);
-         end
-         datesPrimary = primaryProfile.dates;
-         datesPrimary(find(datesPrimary == primaryProfile.dateList(1).fillValue)) = [];
-         primaryProfile.minMeasDate = min(datesPrimary);
-         primaryProfile.maxMeasDate = max(datesPrimary);
-      end
+      datesPrimary = primaryProfile.dates(1:idLevPrimary(end), 1);
+      primaryProfile.dates = datesPrimary;
+      datesPrimary(find(datesPrimary == primaryProfile.dateList(1).fillValue)) = [];
+      primaryProfile.minMeasDate = min(datesPrimary);
+      primaryProfile.maxMeasDate = max(datesPrimary);
 
       o_cutProfiles = [o_cutProfiles primaryProfile];
    end
@@ -171,31 +150,20 @@ if (a_tabProfile.presCutOffProf ~= g_decArgo_presDef)
       if (nearSurfaceProfile.sensorNumber == 0)
          % CTD profile
          nearSurfaceProfile.primarySamplingProfileFlag = 2;
-         %       elseif (nearSurfaceProfile.sensorNumber == 1)
-         %          % DOXY profile
-         %          nearSurfaceProfile.primarySamplingProfileFlag = 0;
+      elseif (nearSurfaceProfile.sensorNumber == 1)
+         % DOXY profile
+         nearSurfaceProfile.primarySamplingProfileFlag = 0;
       end
-      nearSurfaceProfile.vertSamplingScheme = nearSurfaceProfile.vertSamplingScheme{2};
+      nearSurfaceProfile.vertSamplingScheme = nearSurfaceProfile.vertSamplingScheme{2};      
       nearSurfaceProfile.data = nearSurfaceProfile.data(idLevNearSurface(1):end, :);
       if (~isempty(nearSurfaceProfile.dataQc))
          nearSurfaceProfile.dataQc = nearSurfaceProfile.dataQc(idLevNearSurface(1):end, :);
       end
-      if (~isempty(nearSurfaceProfile.dataAdj))
-         nearSurfaceProfile.dataAdj = nearSurfaceProfile.dataAdj(idLevNearSurface(1):end, :);
-         if (~isempty(nearSurfaceProfile.dataAdjQc))
-            nearSurfaceProfile.dataAdjQc = nearSurfaceProfile.dataAdjQc(idLevNearSurface(1):end, :);
-         end
-      end
-      if (~isempty(nearSurfaceProfile.dates))
-         nearSurfaceProfile.dates = nearSurfaceProfile.dates(idLevNearSurface(1):end, 1);
-         if (~isempty(nearSurfaceProfile.datesAdj))
-            nearSurfaceProfile.datesAdj = nearSurfaceProfile.datesAdj(idLevNearSurface(1):end, 1);
-         end
-         datesNearSurface = nearSurfaceProfile.dates;
-         datesNearSurface(find(datesNearSurface == nearSurfaceProfile.dateList(1).fillValue)) = [];
-         nearSurfaceProfile.minMeasDate = min(datesNearSurface);
-         nearSurfaceProfile.maxMeasDate = max(datesNearSurface);
-      end
+      datesNearSurface = nearSurfaceProfile.dates(idLevNearSurface(1):end, 1);
+      nearSurfaceProfile.dates = datesNearSurface;
+      datesNearSurface(find(datesNearSurface == nearSurfaceProfile.dateList(1).fillValue)) = [];
+      nearSurfaceProfile.minMeasDate = min(datesNearSurface);
+      nearSurfaceProfile.maxMeasDate = max(datesNearSurface);
 
       o_cutProfiles = [o_cutProfiles nearSurfaceProfile];
    end
@@ -205,13 +173,13 @@ else
    if (a_tabProfile.sensorNumber == 0)
       % CTD profile
       a_tabProfile.primarySamplingProfileFlag = 1;
-      %    elseif (a_tabProfile.sensorNumber == 1)
-      %       % DOXY profile
-      %       a_tabProfile.primarySamplingProfileFlag = 0;
+   elseif (a_tabProfile.sensorNumber == 1)
+      % DOXY profile
+      a_tabProfile.primarySamplingProfileFlag = 0;
    end
    a_tabProfile.vertSamplingScheme = a_tabProfile.vertSamplingScheme{1};
    
    o_cutProfiles = a_tabProfile;
 end
 
-return
+return;

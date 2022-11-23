@@ -43,7 +43,7 @@ metaDataFile = 'C:\Users\jprannou\_RNU\Argo\ActionsCoriolis\ConvertNkeOldVersion
 prvFloatInfoFileName = 'C:\Users\jprannou\_RNU\Argo\ActionsCoriolis\ConvertNkeOldVersionsTo3.1\misc_info\andro_prv_float_info\_provor_floats_information_all.txt';
 
 % directory to store the log file
-DIR_LOG_FILE = 'C:\Users\jprannou\_RNU\DecArgo_soft\work\log\';
+DIR_LOG_FILE = 'C:\Users\jprannou\_RNU\DecArgo_soft\work\';
 
 global g_decArgo_janFirst1950InMatlab;
 
@@ -86,14 +86,14 @@ profDuringDescFloatList = load(descProfFloatListFileName);
 
 if ~(exist(floatMetaFileName, 'file') == 2)
    fprintf('ERROR: Meta-data file not found: %s\n', floatMetaFileName);
-   return
+   return;
 end
 
 % read meta file
 fId = fopen(floatMetaFileName, 'r');
 if (fId == -1)
    fprintf('ERROR: Unable to open file: %s\n', floatMetaFileName);
-   return
+   return;
 end
 fileContents = textscan(fId, '%s', 'delimiter', '\t');
 fileContents = fileContents{:};
@@ -114,7 +114,7 @@ wmoList = metaData(:, 1);
 for id = 1:length(wmoList)
    if (isempty(str2num(wmoList{id})))
       fprintf('%s is not a valid WMO number\n', wmoList{id});
-      return
+      return;
    end
 end
 S = sprintf('%s*', wmoList{:});
@@ -126,7 +126,7 @@ floatList = unique(wmoList);
 
 if ~(exist(floatListFileName, 'file') == 2)
    fprintf('File not found: %s\n', floatListFileName);
-   return
+   return;
 end
 refFloatList = load(floatListFileName);
 
@@ -251,8 +251,6 @@ for idFloat = 1:length(floatList)
       {'CALIB_RT_COEFFICIENT'} ...
       {'CALIB_RT_COMMENT'} ...
       {'CALIB_RT_DATE'} ...
-      {'CALIB_RT_ADJUSTED_ERROR'} ...
-      {'CALIB_RT_ADJ_ERROR_METHOD'} ...
       ];
    [metaStruct] = add_multi_dim_data( ...
       itemList, ...
@@ -264,9 +262,9 @@ for idFloat = 1:length(floatList)
    % retrieve DAC_FORMAT_ID
    dacFormatId = metaStruct.DAC_FORMAT_ID;
    if (isempty(dacFormatId))
-      fprintf('ERROR: DAC_FORMAT_ID (from PR_VERSION) is missing for float %d - no json file generated\n', ...
+      fprintf('ERROR: DAC_FORMAT_ID (from PR_VERSION) is missing for float %d => no json file generated\n', ...
          floatNum);
-      continue
+      continue;
    end
    
    
@@ -281,9 +279,9 @@ for idFloat = 1:length(floatList)
    % we create all configuration from data base information
    idFRepRate = find(strcmp(metaData(idForWmo, 5), 'REPETITION_RATE') == 1);
    if (isempty(idFRepRate))
-      fprintf('ERROR: REPETITION_RATE is missing for float %d - no json file generated\n', ...
+      fprintf('ERROR: REPETITION_RATE is missing for float %d => no json file generated\n', ...
          floatNum);
-      continue
+      continue;
    end
    
    configBddStruct = get_config_bdd_struct(dacFormatId);
@@ -478,7 +476,7 @@ for idFloat = 1:length(floatList)
       end
    end
    
-   % compute the duration of the cycle #0 - same as the following ones
+   % compute the duration of the cycle #0 => same as the following ones
    idCycleTime = find(strcmp(metaStruct.CONFIG_PARAMETER_NAME, 'CONFIG_CycleTime_hours') == 1);
 %    if ~(isempty(idCycleTime))
 %       configParamVal0{idCycleTime} = '';
@@ -523,8 +521,42 @@ for idFloat = 1:length(floatList)
    metaStruct.CONFIG_PARAMETER_VALUE = configParamVal;
    
    % RT_OFFSET
-   if (any(strcmp(metaData(idForWmo, 5), 'CALIB_RT_PARAMETER')))
-      metaStruct.RT_OFFSET = get_rt_offset(metaData, idForWmo);
+   idF = find(strcmp(metaData(idForWmo, 5), 'CALIB_RT_PARAMETER') == 1);
+   if (~isempty(idF))
+      rtOffsetData = [];
+      
+      rtOffsetParam = [];
+      for id = 1:length(idF)
+         dimLevel = str2num(metaData{idForWmo(idF(id)), 3});
+         fieldName = ['PARAM_' num2str(dimLevel)];
+         rtOffsetParam.(fieldName) = metaData{idForWmo(idF(id)), 4};
+      end
+      rtOffsetValue = [];
+      idF = find(strcmp(metaData(idForWmo, 5), 'CALIB_RT_COEFFICIENT') == 1);
+      for id = 1:length(idF)
+         dimLevel = str2num(metaData{idForWmo(idF(id)), 3});
+         fieldName = ['VALUE_' num2str(dimLevel)];
+         value = metaData{idForWmo(idF(id)), 4};
+         idPos = strfind(value, 'a0=');
+         if (~isempty(idPos))
+            rtOffsetValue.(fieldName) = value(idPos+3:end);
+         else
+            fprintf('ERROR: while parsing CALIB_RT_COEFFICIENT for float %d => exit\n', floatNum);
+            return;
+         end
+      end
+      rtOffsetDate = [];
+      idF = find(strcmp(metaData(idForWmo, 5), 'CALIB_RT_DATE') == 1);
+      for id = 1:length(idF)
+         dimLevel = str2num(metaData{idForWmo(idF(id)), 3});
+         fieldName = ['DATE_' num2str(dimLevel)];
+         rtOffsetDate.(fieldName) = metaData{idForWmo(idF(id)), 4};
+      end
+      rtOffsetData.PARAM = rtOffsetParam;
+      rtOffsetData.VALUE = rtOffsetValue;
+      rtOffsetData.DATE = rtOffsetDate;
+      
+      metaStruct.RT_OFFSET = rtOffsetData;
    end
    
    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -645,7 +677,7 @@ for idFloat = 1:length(floatList)
                floatNum, listDriftSamplingPeriod(idF1));
          else
             if (str2num(confParamVal{idF0, idC}) ~= listDriftSamplingPeriod(idF1))
-               fprintf('INFO: float %d: CONFIG_ParkSamplingPeriod_hours differ (BDD = %d, ANDRO = %d) - ANDRO value used\n', ...
+               fprintf('INFO: float %d: CONFIG_ParkSamplingPeriod_hours differ (BDD = %d, ANDRO = %d) => ANDRO value used\n', ...
                   floatNum, str2num(confParamVal{idF0, idC}), listDriftSamplingPeriod(idF1));
                metaStruct.CONFIG_PARAMETER_VALUE{idF0, idC} = num2str(listDriftSamplingPeriod(idF1));
             end
@@ -686,7 +718,7 @@ for idFloat = 1:length(floatList)
    fidOut = fopen(outputFileName, 'wt');
    if (fidOut == -1)
       fprintf('ERROR: Unable to create json output file: %s\n', outputFileName);
-      return
+      return;
    end
    
    fprintf(fidOut, '{\n');
@@ -827,7 +859,7 @@ fprintf('done (Elapsed time is %.1f seconds)\n', ellapsedTime);
 
 diary off;
 
-return
+return;
 
 % ------------------------------------------------------------------------------
 function [o_metaStruct] = add_multi_dim_data( ...
@@ -893,7 +925,7 @@ end
 %    o_metaStruct = setfield(o_metaStruct, a_item, val);
 % end
 
-return
+return;
 
 % ------------------------------------------------------------------------------
 function [o_configStruct] = get_config_bdd_struct(a_dacFormatId)
@@ -957,7 +989,7 @@ switch (a_dacFormatId)
       fprintf('WARNING: Nothing done yet in generate_json_float_meta_iridium_nke_old_versions for dacFormatId %s\n', a_dacFormatId);
 end
 
-return
+return;
 
 % ------------------------------------------------------------------------------
 function [o_metaStruct] = get_meta_bdd_struct()
@@ -1004,11 +1036,10 @@ o_metaStruct = struct( ...
    'STARTUP_DATE', '', ...
    'STARTUP_DATE_QC', '', ...
    'DEPLOYMENT_PLATFORM', 'DEPLOY_PLATFORM', ...
-   'DEPLOYMENT_CRUISE_ID', 'CRUISE_NAME', ...
+   'DEPLOYMENT_CRUISE_ID', 'DEPLOY_MISSION', ...
    'DEPLOYMENT_REFERENCE_STATION_ID', 'DEPLOY_AVAILABLE_PROFILE_ID', ...
    'END_MISSION_DATE', 'END_MISSION_DATE', ...
    'END_MISSION_STATUS', 'END_MISSION_STATUS', ...
-   'END_DECODING_DATE', 'END_DECODING_DATE', ...
    'PREDEPLOYMENT_CALIB_EQUATION', 'PREDEPLOYMENT_CALIB_EQUATION', ...
    'PREDEPLOYMENT_CALIB_COEFFICIENT', 'PREDEPLOYMENT_CALIB_COEFFICIENT', ...
    'PREDEPLOYMENT_CALIB_COMMENT', 'PREDEPLOYMENT_CALIB_COMMENT', ...
@@ -1016,11 +1047,9 @@ o_metaStruct = struct( ...
    'CALIB_RT_EQUATION', 'CALIB_RT_EQUATION', ...
    'CALIB_RT_COEFFICIENT', 'CALIB_RT_COEFFICIENT', ...
    'CALIB_RT_COMMENT', 'CALIB_RT_COMMENT', ...
-   'CALIB_RT_DATE', 'CALIB_RT_DATE', ...
-   'CALIB_RT_ADJUSTED_ERROR', 'CALIB_RT_ADJUSTED_ERROR', ...
-   'CALIB_RT_ADJ_ERROR_METHOD', 'CALIB_RT_ADJ_ERROR_METHOD');
+   'CALIB_RT_DATE', 'CALIB_RT_DATE');
 
-return
+return;
 
 % ------------------------------------------------------------------------------
 % Lecture des méta-données corrigées d'un flotteur.
@@ -1081,7 +1110,7 @@ o_startUpDate = [];
 fId = fopen(a_metaFileName, 'r');
 if (fId == -1)
    fprintf('Erreur ouverture fichier : %s\n', a_metaFileName);
-   return
+   return;
 end
 
 % lecture et stockage des données du fichier DEP
@@ -1119,7 +1148,7 @@ end
 
 fclose(fId);
 
-return
+return;
 
 % ------------------------------------------------------------------------------
 % Calcul des dates juliennes à partir des dates grégoriennes.
@@ -1159,7 +1188,7 @@ for idDate = 1:nbDates
    end
    if (strcmp([day ' ' hour], dateGregStr) == 0)
       o_julD = gregorian_2_julian_dec_argo([day ' ' hour]);
-      break
+      break;
    end
 end
 
@@ -1214,7 +1243,7 @@ o_listRefDay = [];
 
 if ~(~exist(a_floatInfoFileName, 'dir') && exist(a_floatInfoFileName, 'file'))
    fprintf('Float information file not found: %s\n', a_floatInfoFileName);
-   return
+   return;
 end
 
 fId = fopen(a_floatInfoFileName, 'r');
@@ -1262,4 +1291,4 @@ for id = 1:length(listRefDay)
    end
 end
 
-return
+return;

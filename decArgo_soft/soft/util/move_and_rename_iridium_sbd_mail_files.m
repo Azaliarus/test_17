@@ -25,19 +25,15 @@ INPUT_DIR_NAME = 'E:\message_ir_sbd_20150331\message_refused\';
 INPUT_DIR_NAME = 'C:\Users\jprannou\Desktop\justin\_DATA\IN\IRIDIUM_DATA\sbd_data_rt\300234061653240\';
 INPUT_DIR_NAME = 'C:\Users\jprannou\Desktop\justin\sbd_incoming\';
 INPUT_DIR_NAME = 'C:\Users\jprannou\Desktop\justin\sbd_incoming\';
-INPUT_DIR_NAME = 'C:\Users\jprannou\_DATA\POPSTAR\co012204\archive\message\';
-INPUT_DIR_NAME = 'C:\Users\jprannou\Contacts\Desktop\6903703\6903703_recup\mails_IN\';
 
 % output directory
 OUTPUT_DIR_NAME = 'E:\message_ir_sbd_20150331\message_renamed\';
 OUTPUT_DIR_NAME = 'C:\Users\jprannou\Desktop\justin\_DATA\IN\IRIDIUM_DATA\sbd_data_rt\300234061653240_out\';
 OUTPUT_DIR_NAME = 'C:\Users\jprannou\_DATA\IN\collecte_20151006\justin\';
 OUTPUT_DIR_NAME = 'C:\Users\jprannou\_DATA\IN\collecte_20151006\justin\';
-OUTPUT_DIR_NAME = 'C:\Users\jprannou\_DATA\POPSTAR\IN\';
-OUTPUT_DIR_NAME = 'C:\Users\jprannou\Contacts\Desktop\6903703\6903703_recup\mails_OUT\';
 
 % directory to store the log file
-DIR_LOG_FILE = 'C:\Users\jprannou\_RNU\DecArgo_soft\work\log\';
+DIR_LOG_FILE = 'C:\Users\jprannou\_RNU\DecArgo_soft\work\'; 
 
 
 % create and start log file recording
@@ -47,8 +43,8 @@ tic;
 
 % check the input directory
 if ~(exist(INPUT_DIR_NAME, 'dir') == 7)
-   fprintf('ERROR: Input directory doesn''t exist - exit\n');
-   return
+   fprintf('ERROR: Input directory doesn''t exist => exit\n');
+   return;
 end
 
 % create the output directory
@@ -75,10 +71,9 @@ for idF = 1:length(files)
                fileName, length(imei));
          end
                   
-%          idFUs = strfind(fileName, '_');
-%          idFExt = strfind(fileName, '.txt');
-%          pidNum = fileName(idFUs(end)+1:idFExt-1);
-                  pidNum = '0000';
+         idFUs = strfind(fileName, '_');
+         idFExt = strfind(fileName, '.txt');
+         pidNum = fileName(idFUs(end)+1:idFExt-1);
          
          for idFile = 1:length(imei)
             
@@ -92,7 +87,7 @@ for idF = 1:length(files)
                imei(idFile), momsn(idFile), mtmsn(idFile)) pidNum '.txt'];
             
             if (exist([outputDirName newfilename], 'file') == 2)
-               fprintf('WARNING: Fichier existe déjà: %s - renommé\n', [outputDirName newfilename]);
+               fprintf('WARNING: Fichier existe déjà: %s => renommé\n', [outputDirName newfilename]);
                cpt = 1;
                while (exist([outputDirName newfilename], 'file') == 2)
                   newfilename = [sprintf('co_%sZ_%d_%06d_%06d_', ...
@@ -126,7 +121,7 @@ fprintf('done (Elapsed time is %.1f seconds)\n', ellapsedTime);
 
 diary off;
 
-return
+return;
 
 % ------------------------------------------------------------------------------
 function [o_imei, o_timeOfSession, o_momsn, o_mtmsn, o_lineNum] = find_info_in_file(a_filePathName)
@@ -160,11 +155,11 @@ lineNum = 0;
 while 1
    line = fgetl(fId);
    if (line == -1)
-      break
+      break;
    end
    lineNum = lineNum + 1;
    if (isempty(strtrim(line)))
-      continue
+      continue;
    end
    
    if (strncmp(line, SUBJECT, length(SUBJECT)) && (imeiDone == 0))
@@ -225,7 +220,7 @@ end
 
 fclose(fId);
 
-return
+return;
 
 % ------------------------------------------------------------------------------
 function copy_file_part(a_filePathNameIn, a_filePathNameOut, a_firstLineNum, a_lastLineNum)
@@ -234,7 +229,7 @@ function copy_file_part(a_filePathNameIn, a_filePathNameOut, a_firstLineNum, a_l
 fIdIn = fopen(a_filePathNameIn, 'r');
 if (fIdIn == -1)
    fprintf('Erreur ouverture fichier : %s\n', a_filePathNameIn);
-   return
+   return;
 end
 
 lineStr = [];
@@ -242,7 +237,7 @@ lineNum = 0;
 while 1
    line = fgetl(fIdIn);
    if (line == -1)
-      break
+      break;
    end
    lineNum = lineNum + 1;
    if (a_lastLineNum ~= -1)
@@ -250,7 +245,7 @@ while 1
          lineStr{end+1} = line;
       else
          if (~isempty(lineStr))
-            break
+            break;
          end
       end
    else
@@ -266,7 +261,7 @@ fclose(fIdIn);
 fIdOut = fopen(a_filePathNameOut, 'w');
 if (fIdOut == -1)
    fprintf('Erreur ouverture fichier : %s\n', a_filePathNameOut);
-   return
+   return;
 end
 
 % concaténation dans le fichier
@@ -276,4 +271,4 @@ end
 
 fclose(fIdOut);
 
-return
+return;

@@ -56,12 +56,12 @@ if (~isempty(driftInfo))
          driftCtd = a_tabDrift(driftInfo(idF, 1));
       else
          if (isempty(idF))
-            fprintf('WARNING: Float #%d Cycle #%d Profile #%d: unable to find the associated CTD drift measurement profile to compute DOXY drift measurements of OPTODE sensor - DOXY drift measurements set to fill value\n', ...
+            fprintf('WARNING: Float #%d Cycle #%d Profile #%d: unable to find the associated CTD drift measurement profile to compute DOXY drift measurements of OPTODE sensor => DOXY drift measurements set to fill value\n', ...
                g_decArgo_floatNum, ...
                driftOptode.cycleNumber, ...
                driftOptode.profileNumber);
          else
-            fprintf('WARNING: Float #%d Cycle #%d Profile #%d: %d associated CTD drift measurement profiles have been found to compute DOXY drift measurements of OPTODE sensor - DOXY drift measurements set to fill value\n', ...
+            fprintf('WARNING: Float #%d Cycle #%d Profile #%d: %d associated CTD drift measurement profiles have been found to compute DOXY drift measurements of OPTODE sensor => DOXY drift measurements set to fill value\n', ...
                g_decArgo_floatNum, ...
                driftOptode.cycleNumber, ...
                driftOptode.profileNumber, ...
@@ -89,12 +89,12 @@ if (~isempty(driftInfo))
                profCtd = a_tabDrift(driftInfo(idF, 1));
             else
                if (isempty(idF))
-                  fprintf('WARNING: Float #%d Cycle #%d Profile #%d: unable to find the associated CTD drift measurement profile to compute BBP drift measurements of FLBB sensor - BBP drift measurements set to fill value\n', ...
+                  fprintf('WARNING: Float #%d Cycle #%d Profile #%d: unable to find the associated CTD drift measurement profile to compute BBP drift measurements of FLBB sensor => BBP drift measurements set to fill value\n', ...
                      g_decArgo_floatNum, ...
                      profFlbb.cycleNumber, ...
                      profFlbb.profileNumber);
                else
-                  fprintf('WARNING: Float #%d Cycle #%d Profile #%d: %d associated CTD drift measurement profiles have been found to compute BBP drift measurements of FLBB sensor - BBP data set to fill value\n', ...
+                  fprintf('WARNING: Float #%d Cycle #%d Profile #%d: %d associated CTD drift measurement profiles have been found to compute BBP drift measurements of FLBB sensor => BBP data set to fill value\n', ...
                      g_decArgo_floatNum, ...
                      profFlbb.cycleNumber, ...
                      profFlbb.profileNumber, ...
@@ -158,7 +158,7 @@ end
 % update output parameters
 o_tabDrift = a_tabDrift;
 
-return
+return;
 
 % ------------------------------------------------------------------------------
 % Compute derived parameters for the FLBB sensor.
@@ -209,13 +209,13 @@ for idP = 1:length(paramToDeriveList)
       paramToDerive = get_netcdf_param_attributes(paramToDeriveList{idP});
       derivedParam = get_netcdf_param_attributes(derivedParamList{idP});
       
-      chla = compute_CHLA_301_1015_1101_1105_1110_1111_1112( ...
+      chla = compute_CHLA_301( ...
          a_driftFlbb.data(:, idF), ...
          paramToDerive.fillValue, derivedParam.fillValue);
       
       a_driftFlbb.data(:, end+1) = chla;
       if (isempty(a_driftFlbb.dataQc))
-         a_driftFlbb.dataQc = ones(size(a_driftFlbb.data, 1), length(a_driftFlbb.paramList))*g_decArgo_qcDef;
+         a_driftFlbb.dataQc = ones(size(a_driftFlbb.data, 1), size(a_driftFlbb.data, 2)-1)*g_decArgo_qcDef;
       end
       chlaQc = ones(size(a_driftFlbb.data, 1), 1)*g_decArgo_qcDef;
       chlaQc(find(chla ~= derivedParam.fillValue)) = g_decArgo_qcNoQc;
@@ -288,7 +288,7 @@ else
          if (~isempty(bbp700))
             a_driftFlbb.data(:, end+1) = bbp700;
             if (isempty(a_driftFlbb.dataQc))
-               a_driftFlbb.dataQc = ones(size(a_driftFlbb.data, 1), length(a_driftFlbb.paramList))*g_decArgo_qcDef;
+               a_driftFlbb.dataQc = ones(size(a_driftFlbb.data, 1), size(a_driftFlbb.data, 2)-1)*g_decArgo_qcDef;
             end
             bbp700Qc = ones(size(a_driftFlbb.data, 1), 1)*g_decArgo_qcDef;
             bbp700Qc(find(bbp700 ~= derivedParam.fillValue)) = g_decArgo_qcNoQc;
@@ -308,7 +308,7 @@ end
 a_driftFlbb.derived = 1;
 o_driftFlbb = a_driftFlbb;
 
-return
+return;
 
 % ------------------------------------------------------------------------------
 % Compute derived parameters for the FLNTU sensor.
@@ -356,13 +356,13 @@ for idP = 1:length(paramToDeriveList)
       paramToDerive = get_netcdf_param_attributes(paramToDeriveList{idP});
       derivedParam = get_netcdf_param_attributes(derivedParamList{idP});
       
-      chla = compute_CHLA_302_303_1014( ...
+      chla = compute_CHLA_302_303( ...
          a_driftFlntu.data(:, idF), ...
          paramToDerive.fillValue, derivedParam.fillValue);
       
       a_driftFlntu.data(:, end+1) = chla;
       if (isempty(a_driftFlntu.dataQc))
-         a_driftFlntu.dataQc = ones(size(a_driftFlntu.data, 1), length(a_driftFlntu.paramList))*g_decArgo_qcDef;
+         a_driftFlntu.dataQc = ones(size(a_driftFlntu.data, 1), size(a_driftFlntu.data, 2)-1)*g_decArgo_qcDef;
       end
       chlaQc = ones(size(a_driftFlntu.data, 1), 1)*g_decArgo_qcDef;
       chlaQc(find(chla ~= derivedParam.fillValue)) = g_decArgo_qcNoQc;
@@ -385,13 +385,13 @@ for idP = 1:length(paramToDeriveList)
       paramToDerive = get_netcdf_param_attributes(paramToDeriveList{idP});
       derivedParam = get_netcdf_param_attributes(derivedParamList{idP});
       
-      turbi = compute_TURBIDITY_302_303_1014( ...
+      turbi = compute_TURBIDITY_302_303( ...
          a_driftFlntu.data(:, idF), ...
          paramToDerive.fillValue, derivedParam.fillValue);
       
       a_driftFlntu.data(:, end+1) = turbi;
       if (isempty(a_driftFlntu.dataQc))
-         a_driftFlntu.dataQc = ones(size(a_driftFlntu.data, 1), length(a_driftFlntu.paramList))*g_decArgo_qcDef;
+         a_driftFlntu.dataQc = ones(size(a_driftFlntu.data, 1), size(a_driftFlntu.data, 2)-1)*g_decArgo_qcDef;
       end
       turbiQc = ones(size(a_driftFlntu.data, 1), 1)*g_decArgo_qcDef;
       turbiQc(find(turbi ~= derivedParam.fillValue)) = g_decArgo_qcNoQc;
@@ -405,7 +405,7 @@ end
 a_driftFlntu.derived = 1;
 o_driftFlntu = a_driftFlntu;
 
-return
+return;
 
 % ------------------------------------------------------------------------------
 % Compute derived parameters for the CYCLOPS sensor.
@@ -459,7 +459,7 @@ for idP = 1:length(paramToDeriveList)
       
       a_driftCyc.data(:, end+1) = chla;
       if (isempty(a_driftCyc.dataQc))
-         a_driftCyc.dataQc = ones(size(a_driftCyc.data, 1), length(a_driftCyc.paramList))*g_decArgo_qcDef;
+         a_driftCyc.dataQc = ones(size(a_driftCyc.data, 1), size(a_driftCyc.data, 2)-1)*g_decArgo_qcDef;
       end
       chlaQc = ones(size(a_driftCyc.data, 1), 1)*g_decArgo_qcDef;
       chlaQc(find(chla ~= derivedParam.fillValue)) = g_decArgo_qcNoQc;
@@ -473,7 +473,7 @@ end
 a_driftCyc.derived = 1;
 o_driftCyc = a_driftCyc;
 
-return
+return;
 
 % ------------------------------------------------------------------------------
 % Compute derived parameters for the SEAPOINT sensor.
@@ -527,7 +527,7 @@ for idP = 1:length(paramToDeriveList)
       
       a_driftStm.data(:, end+1) = turbi;
       if (isempty(a_driftStm.dataQc))
-         a_driftStm.dataQc = ones(size(a_driftStm.data, 1), length(a_driftStm.paramList))*g_decArgo_qcDef;
+         a_driftStm.dataQc = ones(size(a_driftStm.data, 1), size(a_driftStm.data, 2)-1)*g_decArgo_qcDef;
       end
       turbiQc = ones(size(a_driftStm.data, 1), 1)*g_decArgo_qcDef;
       turbiQc(find(turbi ~= derivedParam.fillValue)) = g_decArgo_qcNoQc;
@@ -541,7 +541,7 @@ end
 a_driftStm.derived = 1;
 o_driftStm = a_driftStm;
 
-return
+return;
 
 % ------------------------------------------------------------------------------
 % Compute BBP from the data provided by the FLBB sensor.
@@ -602,7 +602,7 @@ ctdLinkData = assign_CTD_measurements(a_ctdDates, a_ctdData, a_BBP_dates);
 if (~isempty(ctdLinkData))   
       
    if (a_lambda == 700)
-      o_BBP = compute_BBP700_301_1015_1101_1105_1110_1111_1112( ...
+      o_BBP = compute_BBP700_301( ...
          a_BETA_BACKSCATTERING, ...
          a_BETA_BACKSCATTERING_fillValue, ...
          a_BBP_fillValue, ...
@@ -611,7 +611,7 @@ if (~isempty(ctdLinkData))
          a_TEMP_fillValue, ...
          a_PSAL_fillValue);
    else
-      fprintf('WARNING: Float #%d Cycle #%d Profile #%d: BBP processing not implemented yet for lambda = %g - BBP drift measurements set to fill value\n', ...
+      fprintf('WARNING: Float #%d Cycle #%d Profile #%d: BBP processing not implemented yet for lambda = %g => BBP drift measurements set to fill value\n', ...
          g_decArgo_floatNum, ...
          a_driftFlbb.cycleNumber, ...
          a_driftFlbb.profileNumber, ...
@@ -620,7 +620,7 @@ if (~isempty(ctdLinkData))
    
 end
 
-return
+return;
 
 % ------------------------------------------------------------------------------
 % Compute derived parameters for the OPTODE sensor.
@@ -714,7 +714,7 @@ else
                derivedParam = get_netcdf_param_attributes(derivedParamList{idD});
                
                % compute DOXY values
-               [doxy, ptsForDoxy] = compute_drift_DOXY_301( ...
+               doxy = compute_drift_DOXY_301( ...
                   a_driftOptode.data(:, idF1), ...
                   a_driftOptode.data(:, idF2), ...
                   a_driftOptode.data(:, idF3), ...
@@ -731,13 +731,11 @@ else
                
                a_driftOptode.data(:, end+1) = doxy;
                if (isempty(a_driftOptode.dataQc))
-                  a_driftOptode.dataQc = ones(size(a_driftOptode.data, 1), length(a_driftOptode.paramList))*g_decArgo_qcDef;
+                  a_driftOptode.dataQc = ones(size(a_driftOptode.data, 1), size(a_driftOptode.data, 2)-1)*g_decArgo_qcDef;
                end
                doxyQc = ones(size(a_driftOptode.data, 1), 1)*g_decArgo_qcDef;
                doxyQc(find(doxy ~= derivedParam.fillValue)) = g_decArgo_qcNoQc;
                a_driftOptode.dataQc(:, end+1) = doxyQc;
-               
-               a_driftOptode.ptsForDoxy = ptsForDoxy;
                
                a_driftOptode.paramList = [a_driftOptode.paramList derivedParam];
             end
@@ -772,7 +770,7 @@ else
                derivedParam = get_netcdf_param_attributes(derivedParamList{idD});
                
                % compute DOXY values
-               [doxy, ptsForDoxy] = compute_drift_DOXY_302_303( ...
+               doxy = compute_drift_DOXY_302_303( ...
                   a_driftOptode.data(:, idF1), ...
                   a_driftOptode.data(:, idF2), ...
                   paramToDerive1.fillValue, ...
@@ -787,13 +785,11 @@ else
                
                a_driftOptode.data(:, end+1) = doxy;
                if (isempty(a_driftOptode.dataQc))
-                  a_driftOptode.dataQc = ones(size(a_driftOptode.data, 1), length(a_driftOptode.paramList))*g_decArgo_qcDef;
+                  a_driftOptode.dataQc = ones(size(a_driftOptode.data, 1), size(a_driftOptode.data, 2)-1)*g_decArgo_qcDef;
                end
                doxyQc = ones(size(a_driftOptode.data, 1), 1)*g_decArgo_qcDef;
                doxyQc(find(doxy ~= derivedParam.fillValue)) = g_decArgo_qcNoQc;
                a_driftOptode.dataQc(:, end+1) = doxyQc;
-               
-               a_driftOptode.ptsForDoxy = ptsForDoxy;
                
                a_driftOptode.paramList = [a_driftOptode.paramList derivedParam];
             end
@@ -811,13 +807,13 @@ end
 a_driftOptode.derived = 1;
 o_driftOptode = a_driftOptode;
 
-return
+return;
 
 % ------------------------------------------------------------------------------
 % Compute DOXY from the data provided by the OPTODE sensor.
 %
 % SYNTAX :
-%  [o_DOXY, o_ptsForDoxy] = compute_drift_DOXY_301( ...
+%  [o_DOXY] = compute_drift_DOXY_301( ...
 %    a_C1PHASE_DOXY, a_C2PHASE_DOXY, a_TEMP_DOXY, ...
 %    a_C1PHASE_DOXY_fillValue, a_C2PHASE_DOXY_fillValue, a_TEMP_DOXY_fillValue, ...
 %    a_DOXY_fillValue, ...
@@ -844,8 +840,7 @@ return
 %   a_decoderId              : float decoder Id
 %
 % OUTPUT PARAMETERS :
-%   o_DOXY       : output drift DOXY data
-%   o_ptsForDoxy : PTS data used to compute DOXY
+%   o_DOXY    : output drift DOXY data
 %
 % EXAMPLES :
 %
@@ -855,7 +850,7 @@ return
 % RELEASES :
 %   12/01/2014 - RNU - creation
 % ------------------------------------------------------------------------------
-function [o_DOXY, o_ptsForDoxy] = compute_drift_DOXY_301( ...
+function [o_DOXY] = compute_drift_DOXY_301( ...
    a_C1PHASE_DOXY, a_C2PHASE_DOXY, a_TEMP_DOXY, ...
    a_C1PHASE_DOXY_fillValue, a_C2PHASE_DOXY_fillValue, a_TEMP_DOXY_fillValue, ...
    a_DOXY_fillValue, ...
@@ -866,7 +861,6 @@ function [o_DOXY, o_ptsForDoxy] = compute_drift_DOXY_301( ...
 
 % output parameters initialization
 o_DOXY = ones(length(a_C1PHASE_DOXY), 1)*a_DOXY_fillValue;
-o_ptsForDoxy = [];
 
 % current float WMO number
 global g_decArgo_floatNum;
@@ -896,10 +890,9 @@ if (~isempty(ctdLinkData))
             a_PSAL_fillValue, ...
             a_DOXY_fillValue, ...
             a_driftOptode);
-         o_ptsForDoxy = ctdLinkData;
-         
+
       otherwise
-         fprintf('WARNING: Float #%d Cycle #%d Profile #%d: DOXY processing not implemented yet for decoderId #%d - DOXY drift measurements set to fill value\n', ...
+         fprintf('WARNING: Float #%d Cycle #%d Profile #%d: DOXY processing not implemented yet for decoderId #%d => DOXY drift measurements set to fill value\n', ...
             g_decArgo_floatNum, ...
             a_driftOptode.cycleNumber, ...
             a_driftOptode.profileNumber, ...
@@ -908,13 +901,13 @@ if (~isempty(ctdLinkData))
    end
 end
                
-return
+return;
 
 % ------------------------------------------------------------------------------
 % Compute DOXY from the data provided by the OPTODE sensor.
 %
 % SYNTAX :
-%  [o_DOXY, o_ptsForDoxy] = compute_drift_DOXY_302_303( ...
+%  [o_DOXY] = compute_drift_DOXY_302_303( ...
 %    a_DPHASE_DOXY, a_TEMP_DOXY, ...
 %    a_DPHASE_DOXY_fillValue, a_TEMP_DOXY_fillValue, ...
 %    a_DOXY_fillValue, ...
@@ -939,8 +932,7 @@ return
 %   a_decoderId             : float decoder Id
 %
 % OUTPUT PARAMETERS :
-%   o_DOXY       : output drift DOXY data
-%   o_ptsForDoxy : PTS data used to compute DOXY
+%   o_DOXY : output drift DOXY data
 %
 % EXAMPLES :
 %
@@ -950,7 +942,7 @@ return
 % RELEASES :
 %   11/18/2015 - RNU - creation
 % ------------------------------------------------------------------------------
-function [o_DOXY, o_ptsForDoxy] = compute_drift_DOXY_302_303( ...
+function [o_DOXY] = compute_drift_DOXY_302_303( ...
    a_DPHASE_DOXY, a_TEMP_DOXY, ...
    a_DPHASE_DOXY_fillValue, a_TEMP_DOXY_fillValue, ...
    a_DOXY_fillValue, ...
@@ -961,7 +953,6 @@ function [o_DOXY, o_ptsForDoxy] = compute_drift_DOXY_302_303( ...
 
 % output parameters initialization
 o_DOXY = ones(length(a_DPHASE_DOXY), 1)*a_DOXY_fillValue;
-o_ptsForDoxy = [];
 
 % current float WMO number
 global g_decArgo_floatNum;
@@ -989,10 +980,9 @@ if (~isempty(ctdLinkData))
             a_PSAL_fillValue, ...
             a_DOXY_fillValue, ...
             a_driftOptode);
-         o_ptsForDoxy = ctdLinkData;
 
       otherwise
-         fprintf('WARNING: Float #%d Cycle #%d Profile #%d: DOXY processing not implemented yet for decoderId #%d - DOXY drift measurements set to fill value\n', ...
+         fprintf('WARNING: Float #%d Cycle #%d Profile #%d: DOXY processing not implemented yet for decoderId #%d => DOXY drift measurements set to fill value\n', ...
             g_decArgo_floatNum, ...
             a_driftOptode.cycleNumber, ...
             a_driftOptode.profileNumber, ...
@@ -1001,4 +991,4 @@ if (~isempty(ctdLinkData))
    end
 end
                
-return
+return;

@@ -3,12 +3,10 @@
 %
 % SYNTAX :
 %  print_data_in_csv_file_ir_rudics_sbd2_CTD_mean_stdMed( ...
-%    a_decoderId, ...
 %    a_cycleNum, a_profNum, a_phaseNum, ...
 %    a_dataCTDMean, a_dataCTDStdMed)
 %
 % INPUT PARAMETERS :
-%   a_decoderId     : float decoder Id
 %   a_cycleNum      : cycle number of the packet
 %   a_profNum       : profile number of the packet
 %   a_phaseNum      : phase number of the packet
@@ -26,7 +24,6 @@
 %   02/11/2013 - RNU - creation
 % ------------------------------------------------------------------------------
 function print_data_in_csv_file_ir_rudics_sbd2_CTD_mean_stdMed( ...
-   a_decoderId, ...
    a_cycleNum, a_profNum, a_phaseNum, ...
    a_dataCTDMean, a_dataCTDStdMed)
 
@@ -75,7 +72,7 @@ end
 if (isempty(idDataStdMed))
    
    % mean data only
-   fprintf(g_decArgo_outputCsvFileId, '%d; %d; %d; %s; CTD; Date; PRES (dbar); TEMP (degC); PSAL (PSU)\n', ...
+   fprintf(g_decArgo_outputCsvFileId, '%d; %d; %d; %s; CTD; Date; PRES (dbar); TEMP (°C); PSAL (PSU)\n', ...
       g_decArgo_floatNum, a_cycleNum, a_profNum, get_phase_name(a_phaseNum));
 
    dataMean = [];
@@ -90,7 +87,7 @@ if (isempty(idDataStdMed))
    idDel = find((dataMean(:, 3) == 0) & (dataMean(:, 4) == 0) & (dataMean(:, 5) == 0));
    dataMean(idDel, :) = [];
    
-   dataMean(:, 3) = sensor_2_value_for_pressure_ir_rudics_sbd2(dataMean(:, 3), a_decoderId);
+   dataMean(:, 3) = sensor_2_value_for_pressure_ir_rudics_sbd2(dataMean(:, 3));
    dataMean(:, 4) = sensor_2_value_for_temperature_ir_rudics_sbd2(dataMean(:, 4));
    dataMean(:, 5) = sensor_2_value_for_salinity_ir_rudics_sbd2(dataMean(:, 5));
 
@@ -119,9 +116,9 @@ else
 
       % mean and stdMed data
       fprintf(g_decArgo_outputCsvFileId, ['%d; %d; %d; %s; CTD; Date; ' ...
-         'PRES (dbar); TEMP (degC); PSAL (PSU); ' ...
-         'TEMP_STD (degC); PSAL_STD (PSU); ' ...
-         'PRES_MED (dbar); TEMP_MED (degC); PSAL_MED (PSU)\n'], ...
+         'PRES (dbar); TEMP (°C); PSAL (PSU); ' ...
+         'TEMP_STD (°C); PSAL_STD (PSU); ' ...
+         'PRES_MED (dbar); TEMP_MED (°C); PSAL_MED (PSU)\n'], ...
          g_decArgo_floatNum, a_cycleNum, a_profNum, get_phase_name(a_phaseNum));
 
       % merge the data
@@ -167,9 +164,9 @@ else
                if (~isempty(idF))
                   idOk = idOk(idF);
                else
-                  fprintf('WARNING: Float #%d Cycle #%d: cannot fit CTD standard deviation and median data with associated mean data - standard deviation and median data ignored\n', ...
+                  fprintf('WARNING: Float #%d Cycle #%d: cannot fit CTD standard deviation and median data with associated mean data => standard deviation and median data ignored\n', ...
                      g_decArgo_floatNum, a_cycleNum);
-                  continue
+                  continue;
                end
             end
             data(idOk, 6:10) = dataStdMed(idL, 2:6);
@@ -179,12 +176,12 @@ else
          end
       end
       
-      data(:, 3) = sensor_2_value_for_pressure_ir_rudics_sbd2(data(:, 3), a_decoderId);
+      data(:, 3) = sensor_2_value_for_pressure_ir_rudics_sbd2(data(:, 3));
       data(:, 4) = sensor_2_value_for_temperature_ir_rudics_sbd2(data(:, 4));
       data(:, 5) = sensor_2_value_for_salinity_ir_rudics_sbd2(data(:, 5));
       data(:, 6) = sensor_2_value_for_temperature_without_offset_ir_rudics_sbd2(data(:, 6));
       data(:, 7) = sensor_2_value_for_salinity_ir_rudics_sbd2(data(:, 7));
-      data(:, 8) = sensor_2_value_for_pressure_ir_rudics_sbd2(data(:, 8), a_decoderId);
+      data(:, 8) = sensor_2_value_for_pressure_ir_rudics_sbd2(data(:, 8));
       data(:, 9) = sensor_2_value_for_temperature_ir_rudics_sbd2(data(:, 9));
       data(:, 10) = sensor_2_value_for_salinity_ir_rudics_sbd2(data(:, 10));
 
@@ -207,4 +204,4 @@ else
    end
 end
 
-return
+return;

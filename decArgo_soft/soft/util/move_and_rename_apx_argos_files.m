@@ -21,27 +21,27 @@
 % ------------------------------------------------------------------------------
 function move_and_rename_apx_argos_files(varargin)
 
-% DIR_INPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\IN\split_apex_062608\ori_split_cycle\';
-% DIR_OUTPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\IN\split_apex_062608\ori_split_cycle_final\';
-% DIR_INPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\IN\split_apex_061609\in_split_cycle\';
-% DIR_OUTPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\IN\split_apex_061609\in_split_cycle_final\';
-% DIR_INPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\IN\split_apex_021009\in_split_cycle\';
-% DIR_OUTPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\IN\split_apex_021009\in_split_cycle_final\';
-% DIR_INPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\IN\split_apex_061810\in_split_cycle\';
-% DIR_OUTPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\IN\split_apex_061810\in_split_cycle_final\';
-% DIR_INPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\IN\split_apex_093008\in_split_cycle_CORRECT\';
-% DIR_OUTPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\IN\split_apex_093008\in_split_cycle_final\';
-% DIR_INPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\IN\split_apex_061810\118188\in_split_cycle_CORRECT\';
-% DIR_OUTPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\IN\split_apex_061810\118188\in_split_cycle_final\';
+DIR_INPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\IN\split_apex_062608\ori_split_cycle\';
+DIR_OUTPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\IN\split_apex_062608\ori_split_cycle_final\';
+DIR_INPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\IN\split_apex_061609\in_split_cycle\';
+DIR_OUTPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\IN\split_apex_061609\in_split_cycle_final\';
+DIR_INPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\IN\split_apex_021009\in_split_cycle\';
+DIR_OUTPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\IN\split_apex_021009\in_split_cycle_final\';
+DIR_INPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\IN\split_apex_061810\in_split_cycle\';
+DIR_OUTPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\IN\split_apex_061810\in_split_cycle_final\';
+DIR_INPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\IN\split_apex_093008\in_split_cycle_CORRECT\';
+DIR_OUTPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\IN\split_apex_093008\in_split_cycle_final\';
+DIR_INPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\IN\split_apex_061810\118188\in_split_cycle_CORRECT\';
+DIR_OUTPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\IN\split_apex_061810\118188\in_split_cycle_final\';
 
-% DIR_INPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\ArgosApex_processing_20160208\fichiers_cycle_CORRECT\';
-% DIR_OUTPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\ArgosApex_processing_20160208\fichiers_cycle_CORRECT_final\';
-% DIR_INPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\Apex_set2\110813\';
-% DIR_OUTPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\Apex_set2\110813_final\';
-% DIR_INPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\Apex_set2\082213\';
-% DIR_OUTPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\Apex_set2\082213_final\';
-% DIR_INPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\Apex_set2\082213_1\';
-% DIR_OUTPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\Apex_set2\082213_1_final\';
+DIR_INPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\ArgosApex_processing_20160208\fichiers_cycle_CORRECT\';
+DIR_OUTPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\ArgosApex_processing_20160208\fichiers_cycle_CORRECT_final\';
+DIR_INPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\Apex_set2\110813\';
+DIR_OUTPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\Apex_set2\110813_final\';
+DIR_INPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\Apex_set2\082213\';
+DIR_OUTPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\Apex_set2\082213_final\';
+DIR_INPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\Apex_set2\082213_1\';
+DIR_OUTPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\Apex_set2\082213_1_final\';
 % DIR_INPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\Apex_set2\021208\';
 % DIR_OUTPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\Apex_set2\021208_final\';
 % DIR_INPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\Apex_set2\032213\';
@@ -52,27 +52,12 @@ function move_and_rename_apx_argos_files(varargin)
 % DIR_OUTPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\Apex_set2\090413_final\';
 % DIR_INPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\Apex_set2\121512\';
 % DIR_OUTPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\Apex_set2\121512_final\';
-% DIR_INPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\ArgosApex_processing_20160914\fichiers_cycle_apex_233_floats_bascule_20160823_CORRECT\';
-% DIR_OUTPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\ArgosApex_processing_20160914\fichiers_cycle_apex_233_floats_bascule_20160823_CORRECT_FINAL\';
-% DIR_INPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\Apex_set3\071807\';
-% DIR_OUTPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\Apex_set3\071807_final\';
-% DIR_INPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\Apex_set3\082807\';
-% DIR_OUTPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\Apex_set3\082807_final\';
-% DIR_INPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\Apex_set3\020110\';
-% DIR_OUTPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\Apex_set3\020110_final\';
-% DIR_INPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\Apex_set3\090810\';
-% DIR_OUTPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\Apex_set3\090810_final\';
-% DIR_INPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\Apex_set3\102015\';
-% DIR_OUTPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\Apex_set3\102015_final\';
-% DIR_INPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\IN\collectes_20161202\tmp2\ori_out\STEP4\';
-% DIR_OUTPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\IN\collectes_20161202\tmp2\ori_out\FINAL\';
-DIR_INPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\IN\APEX_ARGOS_APF11\IN\ori_cycle_CORRECT\';
-DIR_OUTPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\IN\APEX_ARGOS_APF11\IN\FINAL\';
-DIR_INPUT_ARGOS_FILES = 'C:\Users\jprannou\_RNU\DecArgo_soft\work\TEMPO\OUT\STEP4\';
-DIR_OUTPUT_ARGOS_FILES = 'C:\Users\jprannou\_RNU\DecArgo_soft\work\TEMPO\OUT\FINAL\';
+DIR_INPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\ArgosApex_processing_20160914\fichiers_cycle_apex_233_floats_bascule_20160823_CORRECT\';
+DIR_OUTPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\ArgosApex_processing_20160914\fichiers_cycle_apex_233_floats_bascule_20160823_CORRECT_FINAL\';
+
 
 % directory to store the log file
-DIR_LOG_FILE = 'C:\Users\jprannou\_RNU\DecArgo_soft\work\log\';
+DIR_LOG_FILE = 'C:\Users\jprannou\_RNU\DecArgo_soft\work\';
 
 % global input parameter information
 global g_decArgo_processModeAll;
@@ -136,7 +121,7 @@ if (nargin == 0)
    % floats to process come from floatListFileName
    if ~(exist(floatListFileName, 'file') == 2)
       fprintf('File not found: %s\n', floatListFileName);
-      return
+      return;
    end
    
    fprintf('Floats from list: %s\n', floatListFileName);
@@ -179,7 +164,7 @@ for idFloat = 1:nbFloats
    if (isempty(idF))
       fprintf('ERROR: No information on float #%d\n', floatNum);
       fprintf('(nothing done)\n');
-      continue
+      continue;
    end
    floatArgosId = str2num(listArgosId{idF});
    floatEndDate = listEndDate(idF);
@@ -205,12 +190,12 @@ for idFloat = 1:nbFloats
                % check if the file should be considered
                fileDate = datenum(argosFileName(8:26), 'yyyy-mm-dd-HH-MM-SS') - g_decArgo_janFirst1950InMatlab;
                if (fileDate > floatEndDate)
-                  fprintf('INFO: Date of input file (%s) is after float end decoding date (%s) - file stored without cycle number (i.e. not decoded)\n', ...
+                  fprintf('INFO: Date of input file (%s) is after float end decoding date (%s) => file stored without cycle number (i.e. not decoded)\n', ...
                      julian_2_gregorian_dec_argo(fileDate), ...
                      julian_2_gregorian_dec_argo(floatEndDate));
                   g_decArgo_inputArgosFile = argosFilePathName;
                   move_argos_input_file(floatArgosId, fileDate, floatNum, [], 'UUU');
-                  continue
+                  continue;
                end
             end
 
@@ -219,10 +204,10 @@ for idFloat = 1:nbFloats
                g_decArgo_janFirst1950InMatlab;
             
          else
-            fprintf('ERROR: Not expected file name: %s - file not considered\n', argosFileName);
+            fprintf('ERROR: Not expected file name: %s => file not considered\n', argosFileName);
          end
       else
-         fprintf('ERROR: Not expected file name: %s - file not considered\n', argosFileName);
+         fprintf('ERROR: Not expected file name: %s => file not considered\n', argosFileName);
       end
    end
    
@@ -239,7 +224,7 @@ fprintf('done (Elapsed time is %.1f seconds)\n', ellapsedTime);
 
 diary off;
 
-return
+return;
 
 % ------------------------------------------------------------------------------
 % Process one Argos cycle file by:
@@ -301,7 +286,7 @@ floatCycleTime = listCycleTime(idFloat);
 
 % retrieve useful float meta-data
 [launchDate, preludeDuration, profilePressure, cycleDuration, dpfFloatFlag] = ...
-   get_apx_meta_data_for_cycle_number_determination(a_floatNum, floatLaunchDate, floatCycleTime, floatDecId);
+   get_apx_meta_data_for_cycle_number_determination(a_floatNum, floatDecId, floatLaunchDate, floatCycleTime);
 
 % minimum duration of the first deep cycle for a DPF float (first transmission
 % is expected to occur after an ascent/descent at profile pressure with an
@@ -316,7 +301,6 @@ tabLastMsgDate = [];
 % first loop to decode cycle number from transmitted data
 remainingArgosFileNames = [];
 remainingFileCycleNumber = [];
-offsetCyNum = 0;
 nbFiles = length(a_argosFileNames);
 for idFile = 1:nbFiles
    
@@ -330,36 +314,6 @@ for idFile = 1:nbFiles
    firstArgosMsgDate = min(argosDataDate);
    lastArgosMsgDate = max(argosDataDate);
    
-   % specific
-   % Apex float 3901663 (decId 1022) regularly resets at sea
-   if (a_floatNum == 3901663)
-      if (lastArgosMsgDate <= launchDate)
-         
-         fprintf('INFO: Last date of input file (%s) is before float launch date (%s) - file stored without cycle number (i.e. not decoded)\n', ...
-            julian_2_gregorian_dec_argo(lastArgosMsgDate), ...
-            julian_2_gregorian_dec_argo(launchDate));
-         move_argos_input_file(floatArgosId, firstArgosMsgDate, a_floatNum, [], 'TTT');
-         continue
-      else
-         if (fix(firstArgosMsgDate) == gregorian_2_julian_dec_argo('2018/04/20 00:00:00'))
-            cycleNumber = 0;
-         elseif (fix(firstArgosMsgDate) == gregorian_2_julian_dec_argo('2018/04/30 00:00:00'))
-            cycleNumber = 1;
-            prevDate = gregorian_2_julian_dec_argo('2018/04/30 00:00:00');
-         else
-            cycleNumber = cycleNumber + round((firstArgosMsgDate-prevDate)/10);
-            prevDate = firstArgosMsgDate;
-         end
-      end
-      
-      move_argos_input_file(floatArgosId, firstArgosMsgDate, a_floatNum, cycleNumber);
-      tabCycleNumber = [tabCycleNumber; cycleNumber];
-      tabFirstMsgDate = [tabFirstMsgDate; firstArgosMsgDate];
-      tabLastMsgDate = [tabLastMsgDate; lastArgosMsgDate];
-      
-      continue
-   end
-   
    % store file with only ghost messages without any cycle number
    if (isempty(argosDataDate))
       
@@ -371,32 +325,32 @@ for idFile = 1:nbFiles
       else
          move_argos_input_file(floatArgosId, min(argosLocDate), a_floatNum, [], 'EEE');
       end
-      fprintf('INFO: File (%s) contains no Argos messages - file stored without cycle number (i.e. not decoded)\n', ...
+      fprintf('INFO: File (%s) contains no Argos messages => file stored without cycle number (i.e. not decoded)\n', ...
          argosFileName);
-      continue
+      continue;
    elseif (length(unique(argosDataDate)) < NB_MSG_MIN)
       
       move_argos_input_file(floatArgosId, firstArgosMsgDate, a_floatNum, [], 'GGG');
-      fprintf('INFO: File (%s) contains only ghost messages - file stored without cycle number (i.e. not decoded)\n', ...
+      fprintf('INFO: File (%s) contains only ghost messages => file stored without cycle number (i.e. not decoded)\n', ...
          argosFileName);
-      continue
+      continue;
    end
    
    % compute the cycle number
    
    if (isempty(launchDate))
       
-      fprintf('ERROR: Unable to compute cycle number because of missing meta-data - file stored without cycle number (i.e. not decoded)\n');
+      fprintf('ERROR: Unable to compute cycle number because of missing meta-data => file stored without cycle number (i.e. not decoded)\n');
       move_argos_input_file(floatArgosId, firstArgosMsgDate, a_floatNum, [], 'MMM');
-      continue
+      continue;
    else
       if (lastArgosMsgDate <= launchDate)
          
-         fprintf('INFO: Last date of input file (%s) is before float launch date (%s) - file stored without cycle number (i.e. not decoded)\n', ...
+         fprintf('INFO: Last date of input file (%s) is before float launch date (%s) => file stored without cycle number (i.e. not decoded)\n', ...
             julian_2_gregorian_dec_argo(lastArgosMsgDate), ...
             julian_2_gregorian_dec_argo(launchDate));
          move_argos_input_file(floatArgosId, firstArgosMsgDate, a_floatNum, [], 'TTT');
-         continue
+         continue;
       else
          
          subFileNameList = {argosFileName};
@@ -404,7 +358,7 @@ for idFile = 1:nbFiles
          % check if the input file contains data of prelude phase and first deep
          % cycle (generally occurs for DPF floats)
          if (isempty(tabCycleNumber) && (g_decArgo_dpfSplitDone == 0))
-            
+
             diffArgosDataDates = diff(argosDataDate)*24;
             if (max(diffArgosDataDates) > dpfFirstDeepCycleDuration/2)
                
@@ -419,7 +373,7 @@ for idFile = 1:nbFiles
                else
                   fprintf('ERROR: Unable to split Argos cycle file: %s\n', ...
                      argosFileName);
-                  continue
+                  continue;
                end
             end
          end
@@ -443,18 +397,11 @@ for idFile = 1:nbFiles
                   ((length(subFileNameList) == 2) && (idFile2 == 1)))
                checkTestMsg = 1;
             end
-            
+               
             [cycleNumber, cycleNumberCount] = decode_apex_cycle_number( ...
                argosFileName, floatDecId, floatArgosId, checkTestMsg);
-            
-            % specific
-            if (a_floatNum == 3901639)
-               cycleNumber = -1;
-               cycleNumberCount = -1;
-            end
-            
             if (cycleNumberCount > 1)
-               
+            
                % manage possible roll over of profile number counter
                if (~isempty(tabCycleNumber))
                   idPrevCycle = find(tabLastMsgDate < firstArgosMsgDate);
@@ -621,4 +568,4 @@ fprintf('INFO: float #%d cycle duration : mean1 %.1f hours (stdev1 %.1f hours); 
 
 fprintf('\n')
 
-return
+return;

@@ -27,7 +27,6 @@ o_ok = 1;
 
 [status, message, messageid] = copyfile(a_sourceFileName, a_destFileName);
 if (status == 0)
-   message(end-1:end) = []; % remove LF and CR characters
    fprintf('ERROR: Error while copying file %s to file %s (%s)\n', ...
       a_sourceFileName, ...
       a_destFileName, ...
@@ -35,4 +34,4 @@ if (status == 0)
    o_ok = 0;
 end
 
-return
+return;

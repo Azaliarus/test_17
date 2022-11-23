@@ -3,11 +3,10 @@
 %
 % SYNTAX :
 %  print_data_in_csv_file_ir_rudics_CTD_raw( ...
-%    a_decoderId, a_cycleNum, a_profNum, a_phaseNum, ...
+%    a_cycleNum, a_profNum, a_phaseNum, ...
 %    a_dataCTDRaw)
 %
 % INPUT PARAMETERS :
-%   a_decoderId  : float decoder Id
 %   a_cycleNum   : cycle number of the packet
 %   a_profNum    : profile number of the packet
 %   a_phaseNum   : phase number of the packet
@@ -24,7 +23,7 @@
 %   02/11/2013 - RNU - creation
 % ------------------------------------------------------------------------------
 function print_data_in_csv_file_ir_rudics_CTD_raw( ...
-   a_decoderId, a_cycleNum, a_profNum, a_phaseNum, ...
+   a_cycleNum, a_profNum, a_phaseNum, ...
    a_dataCTDRaw)
 
 % current float WMO number
@@ -49,7 +48,7 @@ idDataRaw = find((a_dataCTDRawDate(:, 1) == a_cycleNum) & ...
    (a_dataCTDRawDate(:, 2) == a_profNum) & ...
    (a_dataCTDRawDate(:, 3) == a_phaseNum));
 
-fprintf(g_decArgo_outputCsvFileId, '%d; %d; %d; %s; CTD raw; Date; PRES (dbar); TEMP (degC); PSAL (PSU)\n', ...
+fprintf(g_decArgo_outputCsvFileId, '%d; %d; %d; %s; CTD raw; Date; PRES (dbar); TEMP (°C); PSAL (PSU)\n', ...
    g_decArgo_floatNum, a_cycleNum, a_profNum, get_phase_name(a_phaseNum));
 
 data = [];
@@ -64,7 +63,7 @@ end
 idDel = find((data(:, 3) == 0) & (data(:, 4) == 0) & (data(:, 5) == 0));
 data(idDel, :) = [];
 
-data(:, 3) = sensor_2_value_for_pressure_ir_rudics_sbd2(data(:, 3), a_decoderId);
+data(:, 3) = sensor_2_value_for_pressure_ir_rudics_sbd2(data(:, 3));
 data(:, 4) = sensor_2_value_for_temperature_ir_rudics_sbd2(data(:, 4));
 data(:, 5) = sensor_2_value_for_salinity_ir_rudics_sbd2(data(:, 5));
 
@@ -85,4 +84,4 @@ for idL = 1:size(data, 1)
    end
 end
 
-return
+return;

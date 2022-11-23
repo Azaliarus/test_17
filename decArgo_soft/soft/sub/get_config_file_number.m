@@ -77,33 +77,16 @@ if (~isempty(refWmo))
             floatFrameLen, ...
             floatCycleTime, floatDriftSamplingPeriod, floatDelay, ...
             floatLaunchDate, floatLaunchLon, floatLaunchLat, ...
-            floatRefDay, floatDmFlag] = get_one_float_info(refWmo, []);
-         
-         % decoder Ids:
-         % decId = 1 to 99: NKE floats with Argos transmission => Trans Type = 1
-         % decId = 1xx    : NKE CTS4 and CTS5 floats with Iridium Rudics transmission => Trans Type = 2
-         % decId = 2xx    : NKE floats with Iridium Sbd transmission => Trans Type = 3
-         % decId = 3xx    : NKE BGC floats with Iridium Sbd #2 transmission => Trans Type = 4
-         % decId = 10xx   : Apex floats with Argos transmission => Trans Type = 1
-         % decId = 11xx   : Apex floats with Iridium Rudics transmission => Trans Type = 2
-         % decId = 12xx   : Navis floats with Iridium Rudics transmission => Trans Type = 2
-         % decId = 13xx   : Apex floats with Iridium Sbd transmission => Trans Type = 3
-         % decId = 20xx   : Nova floats with Iridium Sbd transmission => Trans Type = 3
+            floatRefDay, floatEndDate, floatDmFlag] = get_one_float_info(refWmo, []);
          
          if (~isempty(floatDecId))
-            if (((fix(floatDecId / 100) == 0) && (floatTransType == 1)) || ...
-                  ((fix(floatDecId / 100) == 1) && (floatTransType == 2)) || ...
-                  ((fix(floatDecId / 100) == 2) && (floatTransType == 3)) || ...
+            if (((fix(floatDecId / 100) == 2) && (floatTransType == 3)) || ...
                   ((fix(floatDecId / 100) == 3) && (floatTransType == 4)) || ...
-                  ((fix(floatDecId / 100) == 10) && (floatTransType == 1)) || ...
-                  ((fix(floatDecId / 100) == 11) && (floatTransType == 2)) || ...
-                  ((fix(floatDecId / 100) == 11) && (floatTransType == 2)) || ...
-                  ((fix(floatDecId / 100) == 13) && (floatTransType == 3)) || ...
-                  ((fix(floatDecId / 100) == 20) && (floatTransType == 3)))
+                  ((fix(floatDecId / 1000) == 2) && (floatTransType == 3)))
                g_decArgo_configFilePathName = tabConfigFilePathName;
                g_decArgo_dirInputJsonFloatDecodingParametersFile = [];
                o_configFileNumber = idConfigFile;
-               return
+               return;
             end
          end
       end
@@ -111,9 +94,9 @@ if (~isempty(refWmo))
 end
 
 if (isempty(refWmo))
-   errorLabel = 'ERROR: we need a float WMO number (through ''floatwmo'' or ''floatwmolist'' parameter) to select the correct configuration file - exit\n';
+   errorLabel = 'ERROR: we need a float WMO number (through ''floatwmo'' or ''floatwmolist'' parameter) to select the correct configuration file => exit\n';
 else
-   errorLabel = sprintf('ERROR: unavailable information to select the correct configuration file for float #%d - exit\n', ...
+   errorLabel = sprintf('ERROR: unavailable information to select the correct configuration file for float #%d => exit\n', ...
       refWmo);
 end
 
@@ -131,4 +114,4 @@ docRootNode.appendChild(newChild);
 
 fprintf(errorLabel);
 
-return
+return;

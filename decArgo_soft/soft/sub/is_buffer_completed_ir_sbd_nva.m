@@ -29,6 +29,9 @@ o_completed = 0;
 % current float WMO number
 global g_decArgo_floatNum;
 
+% flag to detect a second Iridium session
+global g_decArgo_secondIridiumSession;
+
 % arrays to store rough information on received data
 global g_decArgo_1TypePacketReceived;
 global g_decArgo_5TypePacketReceived;
@@ -68,7 +71,7 @@ elseif (a_whyFlag == 1)
       
       %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
       
-      case {2001, 2002, 2003} % Nova, Dova
+      case {2001, 2002} % Nova, Dova
          
          if (g_decArgo_1TypePacketReceived == 0)
             fprintf('BUFF_INFO: Float #%d: Technical packet #1 is missing\n', ...
@@ -104,4 +107,4 @@ elseif (a_whyFlag == 1)
    end
 end
 
-return
+return;

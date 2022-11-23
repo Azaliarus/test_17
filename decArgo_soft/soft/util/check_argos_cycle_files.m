@@ -20,17 +20,24 @@
 function check_argos_cycle_files(varargin)
 
 % directory of the argos files to check
-DIR_INPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\IN\ARGOS\cycle\';
-DIR_INPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\IN\collectes_20161202\tmp2\ori_out\FINAL\';
-DIR_INPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\IN\ARGOS\cycle\';
-DIR_INPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\IN\APEX_ARGOS_APF11\OUT\FINAL\';
-DIR_INPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\IN\APEX_ARGOS_APF11\OUT_CO\';
-DIR_INPUT_ARGOS_FILES = 'C:\Users\jprannou\Desktop\TMP\OUT\FINAL\';
-DIR_INPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\TRAJ_DM\IN\ARGOS\';
-DIR_INPUT_ARGOS_FILES = 'C:\Users\jprannou\Contacts\Desktop\TEST\';
+DIR_INPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\IN\split_apex_062608\ori_split_cycle_final\';
+DIR_INPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\IN\split_apex_061609\in_split_cycle_final\';
+DIR_INPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\IN\split_apex_021009\in_split_cycle_final\';
+DIR_INPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\IN\split_apex_061810\in_split_cycle_final\';
+DIR_INPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\ArgosApex_processing_20160208\fichiers_cycle_CORRECT_final\';
+DIR_INPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\IN\ARN\OUT\FINAL\';
+DIR_INPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\Apex_set2\110813_final\';
+DIR_INPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\Apex_set2\082213_final\';
+DIR_INPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\Apex_set2\082213_1_final\';
+% DIR_INPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\Apex_set2\021208_final\';
+% DIR_INPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\Apex_set2\032213_final\';
+% DIR_INPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\Apex_set2\110613_final\';
+% DIR_INPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\Apex_set2\090413_final\';
+% DIR_INPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\Apex_set2\121512_final\';
+DIR_INPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\ArgosApex_processing_20160914\fichiers_cycle_apex_233_floats_bascule_20160823_CORRECT_FINAL\';
 
 % directory to store the log and CSV files
-DIR_LOG_FILE = 'C:\Users\jprannou\_RNU\DecArgo_soft\work\log\';
+DIR_LOG_FILE = 'C:\Users\jprannou\_RNU\DecArgo_soft\work\';
 
 % min non-trans duration (in hour) to use the ghost detection
 MIN_NON_TRANS_DURATION_FOR_GHOST = 7;
@@ -43,7 +50,7 @@ global g_decArgo_delayedModeFlag;
 init_default_values;
 
 % date of the last check
-LAST_CHECK_GREG_DATE = '01/01/1900';
+LAST_CHECK_GREG_DATE = '01/06/2010';
 lastCheckMatDate = datenum(LAST_CHECK_GREG_DATE, 'dd/mm/YYYY');
 
 % consider only active floats (since last check date)
@@ -66,7 +73,7 @@ if (nargin == 0)
    % floats to process come from floatListFileName
    if ~(exist(floatListFileName, 'file') == 2)
       fprintf('File not found: %s\n', floatListFileName);
-      return
+      return;
    end
    fprintf('Floats from list: %s\n', floatListFileName);
    floatList = load(floatListFileName);
@@ -91,7 +98,7 @@ tic;
 outputFileName = [DIR_LOG_FILE '/' 'check_argos_cycle_files' name '_' datestr(now, 'yyyymmddTHHMMSS') '.csv'];
 fidOut = fopen(outputFileName, 'wt');
 if (fidOut == -1)
-   return
+   return;
 end
 header = ['To check; Line; WMO; File; Cy #; Missing cy; Cy dur; ' ...
    'JulD first; JulD last; Trans dur; Nb ghost del; ' ...
@@ -121,7 +128,7 @@ for idFloat = 1:nbFloats
    if (isempty(idF))
       fprintf('ERROR: No information on float #%d\n', floatNum);
       fprintf('(nothing done)\n');
-      continue
+      continue;
    end
    floatArgosId = str2num(listArgosId{idF});
    floatFrameLen = listFrameLen(idF);
@@ -137,11 +144,11 @@ for idFloat = 1:nbFloats
       for idFile = 1:length(argosFiles)
          if (argosFiles(idFile).datenum >= lastCheckMatDate)
             consider = 1;
-            break
+            break;
          end
       end
       if (consider == 0)
-         continue
+         continue;
       end
    end
    
@@ -250,4 +257,4 @@ fprintf('done (Elapsed time is %.1f seconds)\n', ellapsedTime);
 
 diary off;
 
-return
+return;

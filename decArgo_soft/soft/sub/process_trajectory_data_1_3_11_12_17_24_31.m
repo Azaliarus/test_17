@@ -122,7 +122,7 @@ if (a_addLaunchData == 1)
       a_floatSurfData.launchDate, ...
       a_floatSurfData.launchLon, ...
       a_floatSurfData.launchLat, ...
-      ' ', ' ', '0', 0);
+      ' ', ' ', '0');
    
    trajNMeasStruct.surfOnly = 1;
    trajNMeasStruct.tabMeas = [trajNMeasStruct.tabMeas; measStruct];
@@ -147,7 +147,7 @@ cycleSurfData = a_floatSurfData.cycleData(end);
 if (cycleSurfData.firstMsgTime ~= g_decArgo_dateDef)
    measStruct = create_one_meas_surface(g_MC_FMT, ...
       cycleSurfData.firstMsgTime, ...
-      g_decArgo_argosLonDef, [], [], [], [], ~isempty(a_floatClockDrift));
+      g_decArgo_argosLonDef, [], [], [], []);
    trajNMeasStruct.tabMeas = [trajNMeasStruct.tabMeas; measStruct];
    
    trajNCycleStruct.juldFirstMessage = cycleSurfData.firstMsgTime;
@@ -162,8 +162,7 @@ for idpos = 1:length(cycleSurfData.argosLocDate)
       cycleSurfData.argosLocLat(idpos), ...
       cycleSurfData.argosLocAcc(idpos), ...
       cycleSurfData.argosLocSat(idpos), ...
-      cycleSurfData.argosLocQc(idpos), ...
-      ~isempty(a_floatClockDrift));
+      cycleSurfData.argosLocQc(idpos));
    trajNMeasStruct.tabMeas = [trajNMeasStruct.tabMeas; measStruct];
 end
 
@@ -179,7 +178,7 @@ end
 if (cycleSurfData.lastMsgTime ~= g_decArgo_dateDef)
    measStruct = create_one_meas_surface(g_MC_LMT, ...
       cycleSurfData.lastMsgTime, ...
-      g_decArgo_argosLonDef, [], [], [], [], ~isempty(a_floatClockDrift));
+      g_decArgo_argosLonDef, [], [], [], []);
    trajNMeasStruct.tabMeas = [trajNMeasStruct.tabMeas; measStruct];
    
    trajNCycleStruct.juldLastMessage = cycleSurfData.lastMsgTime;
@@ -539,16 +538,14 @@ if (a_cycleNum >= firstDeepCycle)
 end
 
 % configuration mission number
-if (a_cycleNum > 0) % we don't assign any configuration to cycle #0 data
-   configMissionNumber = get_config_mission_number_argos( ...
-      a_cycleNum, a_repRateMetaData, a_decoderId);
-   if (~isempty(configMissionNumber))
-      trajNCycleStruct.configMissionNumber = configMissionNumber;
-   end
+configMissionNumber = get_config_mission_number_argos( ...
+   a_cycleNum, a_repRateMetaData, a_decoderId);
+if (~isempty(configMissionNumber))
+   trajNCycleStruct.configMissionNumber = configMissionNumber;
 end
 
 % output data
 o_tabTrajNMeas = [o_tabTrajNMeas; trajNMeasStruct];
 o_tabTrajNCycle = trajNCycleStruct;
 
-return
+return;

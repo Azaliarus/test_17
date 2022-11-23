@@ -33,16 +33,15 @@ ID_OFFSET = 1;
 
 
 if (isempty(a_tabTech))
-   return
+   return;
 end
 
 if (size(a_tabTech, 1) > 1)
    fprintf('ERROR: Float #%d cycle #%d: BUFFER anomaly (%d tech message in the buffer)\n', ...
       g_decArgo_floatNum, g_decArgo_cycleNum, ...
       size(a_tabTech, 1));
-end
-
-for id = 1:size(a_tabTech, 1)
+elseif (size(a_tabTech, 1) == 1)
+   id = 1;
    
    fprintf(g_decArgo_outputCsvFileId, '%d; %d; Tech; TECHNICAL PACKET CONTENTS\n', ...
       g_decArgo_floatNum, g_decArgo_cycleNum);
@@ -242,4 +241,4 @@ for id = 1:size(a_tabTech, 1)
       g_decArgo_floatNum, g_decArgo_cycleNum, a_tabTech(id, 52+ID_OFFSET));
 end
 
-return
+return;

@@ -53,7 +53,7 @@ if (~isempty(g_decArgo_calibInfo) && isfield(g_decArgo_calibInfo, 'OPTODE') && i
       %          a_tabCoef(5, 1:28) = [FoilPolyDegO0 FoilPolyDegO1 ... FoilPolyDegO27]
       %          a_tabCoef(6, 1:2) = [ConcCoef0 ConcCoef1]
       
-      if (ismember(a_decoderId, [28, 29, 106, 202, 207, 208, 301]))
+      if (ismember(a_decoderId, [28 29 106 202 207 208 301]))
          % as tempValues come from the CTD or from TEMP_DOXY, we don't use TempCoefI, so
          tabDoxyCoef(2, 1:6) = [0 1 0 0 0 0];
       end
@@ -61,7 +61,7 @@ if (~isempty(g_decArgo_calibInfo) && isfield(g_decArgo_calibInfo, 'OPTODE') && i
       fprintf(g_decArgo_outputCsvFileId, '%d; %d; Calib; CALIBRATION COEFFICIENTS\n', ...
          g_decArgo_floatNum, -1);
       
-      if (isempty(find((size(tabDoxyCoef) == [2 7]) ~= 1, 1)))
+      if (size(tabDoxyCoef) == [2 7])
          for idC = 1:4
             fprintf(g_decArgo_outputCsvFileId, '%d; %d; Calib; %s; %g\n', ...
                g_decArgo_floatNum, -1, ...
@@ -72,8 +72,7 @@ if (~isempty(g_decArgo_calibInfo) && isfield(g_decArgo_calibInfo, 'OPTODE') && i
                g_decArgo_floatNum, -1, ...
                ['SVUFoilCoef' num2str(idC-1)], tabDoxyCoef(2, idC));
          end
-      elseif (isempty(find((size(tabDoxyCoef) == [5 28]) ~= 1, 1)) || ...
-            isempty(find((size(tabDoxyCoef) == [6 28]) ~= 1, 1)))
+      elseif ((size(tabDoxyCoef) == [5 28]) || (size(tabDoxyCoef) == [6 28]))
          for idC = 1:4
             fprintf(g_decArgo_outputCsvFileId, '%d; %d; Calib; %s; %g\n', ...
                g_decArgo_floatNum, -1, ...
@@ -104,7 +103,7 @@ if (~isempty(g_decArgo_calibInfo) && isfield(g_decArgo_calibInfo, 'OPTODE') && i
                g_decArgo_floatNum, -1, ...
                ['FoilPolyDegO' num2str(idC-1)], tabDoxyCoef(5, idC));
          end
-         if (isempty(find((size(tabDoxyCoef) == [6 28]) ~= 1, 1)))
+         if (size(tabDoxyCoef) == [6 28])
             for idC = 1:2
                fprintf(g_decArgo_outputCsvFileId, '%d; %d; Calib; %s; %g\n', ...
                   g_decArgo_floatNum, -1, ...
@@ -140,4 +139,4 @@ if (~isempty(g_decArgo_calibInfo) && isfield(g_decArgo_calibInfo, 'OPTODE') && i
       'SBEOptodeE', tabDoxyCoef(1, 9));
 end
 
-return
+return;

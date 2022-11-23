@@ -81,18 +81,13 @@ if (~isempty(a_tabTech))
    idF2 = find(a_tabTech(:, 1) == 4);
    if (~isempty(idF2))
       if (length(idF2) > 1)
-         fprintf('ERROR: Float #%d cycle #%d: %d decoded tech message #2  - using the last one\n', ...
+         fprintf('ERROR: Float #%d cycle #%d: %d decoded tech message #2  => using the last one\n', ...
             g_decArgo_floatNum, g_decArgo_cycleNum, ...
             length(idF2));
       end
       
       tabTech = a_tabTech(idF2(end), :);
-      pres = sensor_2_value_for_pressure_202_210_to_214_217_222_to_225(tabTech(10));
-      temp = sensor_2_value_for_temperature_201_to_203_215_216_218_221(tabTech(11));
-      psal = tabTech(12)/1000;
-      if (any([pres temp psal] ~= 0))
-         presCutOffProf = pres;
-      end
+      presCutOffProf = sensor_2_value_for_pressure_202_210_211(tabTech(10));
    end
 end
 if (isempty(presCutOffProf))
@@ -101,15 +96,15 @@ if (isempty(presCutOffProf))
    presCutOffProf = [];
    [configNames, configValues] = get_float_config_ir_sbd(g_decArgo_cycleNum);
    ctpPumpSwitchOffPres = get_config_value('CONFIG_PT20', configNames, configValues);
-   if (~isempty(ctpPumpSwitchOffPres))
+   if (~isnan(ctpPumpSwitchOffPres))
       presCutOffProf = ctpPumpSwitchOffPres + 0.5;
       
-      fprintf('DEC_WARNING: Float #%d Cycle #%d: PRES_CUT_OFF_PROF parameter is missing in the tech data - value retrieved from the configuration\n', ...
+      fprintf('DEC_WARNING: Float #%d Cycle #%d: PRES_CUT_OFF_PROF parameter is missing in the tech data => value retrieved from the configuration\n', ...
          g_decArgo_floatNum, g_decArgo_cycleNum);
    else
       presCutOffProf = 5 + 0.5;
       
-      fprintf('DEC_WARNING: Float #%d Cycle #%d: PRES_CUT_OFF_PROF parameter is missing in the tech data and in the configuration - value set to 5 dbars\n', ...
+      fprintf('DEC_WARNING: Float #%d Cycle #%d: PRES_CUT_OFF_PROF parameter is missing in the tech data and in the configuration => value set to 5 dbars\n', ...
          g_decArgo_floatNum, g_decArgo_cycleNum);
    end
 end
@@ -280,7 +275,7 @@ for idProf = 1:3
       end
       
       % add profile date and location information
-      [profStruct] = add_profile_date_and_location_201_to_224_2001_to_2003( ...
+      [profStruct] = add_profile_date_and_location_201_to_211_2001_2002( ...
          profStruct, a_gpsData, a_iridiumMailData, ...
          a_descentToParkStartDate, a_ascentEndDate, a_transStartDate);
       
@@ -294,4 +289,4 @@ for idProf = 1:3
    end
 end
 
-return
+return;

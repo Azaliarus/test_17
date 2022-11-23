@@ -2,11 +2,10 @@
 % Retrieve the value of a static configuration parameter.
 %
 % SYNTAX :
-%  [o_configValue] = get_static_config_value(a_configName, a_warningIfMissing)
+%  [o_configValue] = get_static_config_value(a_configName)
 %
 % INPUT PARAMETERS :
-%   a_configName       : static configuration parameter name
-%   a_warningIfMissing : print a warning if wanted config parameter is missing
+%   a_configName : static configuration parameter name
 %
 % OUTPUT PARAMETERS :
 %   o_configValue : static configuration parameter value
@@ -19,7 +18,7 @@
 % RELEASES :
 %   12/08/2015 - RNU - creation
 % ------------------------------------------------------------------------------
-function [o_configValue] = get_static_config_value(a_configName, a_warningIfMissing)
+function [o_configValue] = get_static_config_value(a_configName)
 
 % output parameters initialization
 o_configValue = [];
@@ -35,9 +34,9 @@ global g_decArgo_floatConfig;
 idConfItem = find(strcmp(g_decArgo_floatConfig.STATIC.NAMES, a_configName) == 1, 1);
 if (~isempty(idConfItem))
    o_configValue = str2num(g_decArgo_floatConfig.STATIC.VALUES{idConfItem});
-elseif (a_warningIfMissing == 1)
+else
    fprintf('WARNING: Float #%d: static config parameter ''%s'' is missing\n', ...
       g_decArgo_floatNum, a_configName);
 end
 
-return
+return;

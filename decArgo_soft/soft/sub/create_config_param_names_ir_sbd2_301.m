@@ -87,7 +87,7 @@ for idS = [0 1 4]
       decConfNames{end+1} = sprintf('CONFIG_PC_%d_0_%d', idS, id);
       idParamName = find(g_decArgo_outputNcConfParamId == 500+id);
       [paramName] = create_param_name_ir_rudics_sbd2(g_decArgo_outputNcConfParamLabel{idParamName}, ...
-         [{'<short_sensor_name>'} {sensor{idS+1}}]);
+         [{'<short sensor name>'} {sensor{idS+1}}]);
       ncConfNames{end+1} = paramName;
    end
    for idZ = 1:5
@@ -96,7 +96,7 @@ for idS = [0 1 4]
             decConfNames{end+1} = sprintf('CONFIG_PC_%d_0_%d', idS, id+(idZ-1)*5);
             idParamName = find(g_decArgo_outputNcConfParamId == 500+id);
             [paramName] = create_param_name_ir_rudics_sbd2(g_decArgo_outputNcConfParamLabel{idParamName}, ...
-               [{'<short_sensor_name>'} {sensor{idS+1}} {'<N>'} {num2str(idZ)}]);
+               [{'<short sensor name>'} {sensor{idS+1}} {'<N>'} {num2str(idZ)}]);
             ncConfNames{end+1} = paramName;
          end
       end
@@ -105,7 +105,7 @@ for idS = [0 1 4]
       decConfNames{end+1} = sprintf('CONFIG_PC_%d_0_%d', idS, 9+(idZ-1)*5);
       idParamName = find(g_decArgo_outputNcConfParamId == 509);
       [paramName] = create_param_name_ir_rudics_sbd2(g_decArgo_outputNcConfParamLabel{idParamName}, ...
-         [{'<short_sensor_name>'} {sensor{idS+1}} ...
+         [{'<short sensor name>'} {sensor{idS+1}} ...
          {'<N>'} {num2str(idZ)} ...
          {'<N+1>'} {num2str(idZ+1)}]);
       ncConfNames{end+1} = paramName;
@@ -132,7 +132,7 @@ for idS = [0 1 4]
          if (id <= 2)
             idParamName = find(g_decArgo_outputNcConfParamId == 600+id);
             [paramName] = create_param_name_ir_rudics_sbd2(g_decArgo_outputNcConfParamLabel{idParamName}, ...
-               [{'<short_sensor_name>'} {sensor{idS+1}}]);
+               [{'<short sensor name>'} {sensor{idS+1}}]);
          else
             idParamName = find(g_decArgo_outputNcConfParamId == firstId+id);
             [paramName] = g_decArgo_outputNcConfParamLabel{idParamName};
@@ -145,7 +145,7 @@ for idT = 0:3
    for idS = [0 1 7]
       for idP = 0:1
          for idI = 0:3
-            for idK = 0:8
+            for idK = 0:6
                paramNum = 100000 + idK + idI*10 + idP*100 + idS*1000 + idT*10000;
                idParamName = find(g_decArgo_outputNcConfParamId == paramNum);
                if (~isempty(idParamName))
@@ -167,4 +167,4 @@ end
 o_decArgoConfParamNames = decConfNames;
 o_ncConfParamNames = ncConfNames;
 
-return
+return;

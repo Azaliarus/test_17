@@ -62,8 +62,8 @@ if (a_profStruct.direction == 'D')
          % we use the last message time of the current cycle minus the cycle
          % duration
          
-         if (~isempty(a_profStruct.configMissionNumber))
-            [configNames, configValues] = get_float_config_argos_1(a_profStruct.configMissionNumber);
+         if (~isempty(profStruct.configMissionNumber))
+            [configNames, configValues] = get_float_config_argos_1(profStruct.configMissionNumber);
             cycleDuration = get_config_value('CONFIG_MC002_', configNames, configValues);
             if (~isempty(cycleDuration))
                profJulD = a_floatSurfData.cycleData(idCycle).lastMsgTime - cycleDuration/24;
@@ -168,4 +168,4 @@ end
 % output data
 o_profStruct = a_profStruct;
 
-return
+return;

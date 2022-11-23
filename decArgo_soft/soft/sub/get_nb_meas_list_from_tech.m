@@ -31,7 +31,7 @@ global g_decArgo_floatNum;
 
 
 if (isempty(a_tabTech))
-   return
+   return;
 end
 
 nbMeasDescShallow = [];
@@ -53,17 +53,11 @@ switch (a_decoderId)
       nbMeasAscShallow = a_tabTech(31);
       nbMeasAscDeep = a_tabTech(32);
       
-   case {201, 202, 203, 215}
+   case {201, 202, 203}
       nbMeasDescShallow = a_tabTech(5);
       nbMeasDescDeep = a_tabTech(6);
       nbMeasAscShallow = a_tabTech(8);
       nbMeasAscDeep = a_tabTech(9);
-      
-   case {216, 218, 221}
-      nbMeasDescShallow = a_tabTech(6);
-      nbMeasDescDeep = a_tabTech(7);
-      nbMeasAscShallow = a_tabTech(9);
-      nbMeasAscDeep = a_tabTech(10);
       
    case {204, 205, 206, 207, 208, 209}
       nbMeasDescShallow = a_tabTech(36);
@@ -71,13 +65,13 @@ switch (a_decoderId)
       nbMeasAscShallow = a_tabTech(39);
       nbMeasAscDeep = a_tabTech(40);
       
-   case {210, 211, 212, 222, 213, 214, 217, 223, 224, 225}
+   case {210, 211}
       nbMeasDescShallow = a_tabTech(9);
       nbMeasDescDeep = a_tabTech(10);
       nbMeasAscShallow = a_tabTech(12);
       nbMeasAscDeep = a_tabTech(13);
       
-   case {2001, 2002, 2003}
+   case {2001, 2002}
       nbMeasDescShallow = 0;
       nbMeasDescDeep = a_tabTech(19);
       nbMeasAscShallow = 0;
@@ -92,5 +86,5 @@ end
 
 o_nbMeasList = [nbMeasDescShallow nbMeasDescDeep nbMeasAscShallow nbMeasAscDeep];
 
-return
+return;
 

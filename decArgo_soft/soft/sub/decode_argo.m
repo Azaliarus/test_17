@@ -30,11 +30,11 @@ for idFloat = 1:nbFloats
       floatFrameLen, ...
       floatCycleTime, floatDriftSamplingPeriod, floatDelay, ...
       floatLaunchDate, floatLaunchLon, floatLaunchLat, ...
-      floatRefDay, floatDmFlag] = get_one_float_info(floatNum, []);
+      floatRefDay, floatEndDate, floatDmFlag] = get_one_float_info(floatNum, []);
    
    if (isempty(floatArgosId))
-      fprintf('ERROR: No information on float #%d - nothing done\n', floatNum);
-      continue
+      fprintf('ERROR: No information on float #%d => nothing done\n', floatNum);
+      continue;
    end
    
    if (floatDecId < 1000)
@@ -43,11 +43,9 @@ for idFloat = 1:nbFloats
       decode_apex(floatNum);
    elseif ((floatDecId > 2000) && (floatDecId < 3000))
       decode_nova(floatNum);
-   elseif ((floatDecId > 3000) && (floatDecId < 4000))
-      decode_nemo(floatNum);
    else
-      fprintf('ERROR: DecId #%d unavailable - nothing done\n', floatDecId);
+      fprintf('ERROR: DecId #%d unavailable => nothing done\n', floatDecId);
    end
 end
 
-return
+return;

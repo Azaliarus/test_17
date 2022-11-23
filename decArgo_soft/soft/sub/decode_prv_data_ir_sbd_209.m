@@ -42,9 +42,6 @@ global g_decArgo_floatNum;
 % current cycle number
 global g_decArgo_cycleNum;
 
-% shift to apply to transmitted cycle number (see 6901248)
-global g_decArgo_cycleNumShift;
-
 % default values
 global g_decArgo_janFirst1950InMatlab;
 global g_decArgo_dateDef;
@@ -69,8 +66,50 @@ global g_decArgo_nbOf3Or10Or13Or16TypePacketReceived;
 global g_decArgo_generateNcTech;
 
 
-% initialize information arrays
-init_counts;
+% if it is the first deep cycle or if the first deep cycle already occured, we
+% add 1 to cycle numbers
+if (a_procLevel ~= 0)
+   if (a_firstDeepCycleDone == 0)
+      
+      % we try to find if it is the first deep cycle
+      idTechPacket = find(a_tabData(:, 1) == 0);
+      for idMes = 1:length(idTechPacket)
+         
+         % message data frame
+         msgData = a_tabData(idTechPacket(idMes), 2:end);
+         
+         % first item bit number
+         firstBit = 1;
+         % item bit lengths
+         tabNbBits = [ ...
+            16 16 ...
+            16 8 ...
+            16 16 16 8 8 8 8 ...
+            repmat(8, 1, 6) ...
+            16 16 8 8 8 ...
+            repmat(8, 1, 6) ...
+            16 16 8 ...
+            repmat(8, 1, 8) ...
+            8 16 16 ...
+            repmat(8, 1, 11) ...
+            8 8 8 16 ...
+            8 16 8 8 8 ...
+            8 8 ...
+            8 8 16 8 8 8 16 8 8 ...
+            6 1 1 ...
+            repmat(8, 1, 9) ...
+            ];
+         % get item bits
+         tabTech = get_bits(firstBit, tabNbBits, msgData);
+         
+         % subsurface information are set to 0 for a surface cycle
+         if ~((length(unique(tabTech(32:39))) == 1) && (unique(tabTech(32:39)) == 0))
+            a_firstDeepCycleDone = 1;
+            break;
+         end
+      end
+   end
+end
 
 % decode packet data
 optodeType = [];
@@ -115,14 +154,17 @@ for idMes = 1:size(a_tabData, 1)
          % get item bits
          tabTech = get_bits(firstBit, tabNbBits, msgData);
          
-         g_decArgo_0TypePacketReceivedFlag = 1;
-         g_decArgo_nbOf1Or8Or11Or14TypePacketExpected = tabTech(32);
-         g_decArgo_nbOf2Or9Or12Or15TypePacketExpected = tabTech(33);
-         g_decArgo_nbOf3Or10Or13Or16TypePacketExpected = tabTech(34);
          if (a_procLevel == 0)
-            continue
+            g_decArgo_0TypePacketReceivedFlag = 1;
+            g_decArgo_nbOf1Or8Or11Or14TypePacketExpected = tabTech(32);
+            g_decArgo_nbOf2Or9Or12Or15TypePacketExpected = tabTech(33);
+            g_decArgo_nbOf3Or10Or13Or16TypePacketExpected = tabTech(34);
+            continue;
          end
-                  
+         
+         % add one to cycle numbers (except for the prelude phase)
+         tabTech(2) = tabTech(2) + a_firstDeepCycleDone;
+         
          % some pressures are given in bars
          tabTech(10) = tabTech(10)*10;
          tabTech(11) = tabTech(11)*10;
@@ -133,26 +175,20 @@ for idMes = 1:size(a_tabData, 1)
          tabTech(28) = tabTech(28)*10;
          tabTech(55) = tabTech(55)*10;
          tabTech(60) = tabTech(60)*10;
+
+         % set cycle number
+         g_decArgo_cycleNum = tabTech(2);
+         fprintf('cyle #%d\n', g_decArgo_cycleNum);
          
-         % message and measurement counts are set to 0 for a surface cycle
+         % all subsurface information (tabTech(3:42)) are not set to 0 for a
+         % surface cycle (see 6901470 #164 and #165)
+         % => only message and measurement counts (tabTech(32:39)) are checked
+         % to choose between a deep or a surface cycle
          if ((length(unique(tabTech(32:39))) == 1) && (unique(tabTech(32:39)) == 0))
             o_deepCycle = 0;
          else
             o_deepCycle = 1;
          end
-         
-         % set cycle number
-         floatCycleNumber = tabTech(2);
-         if ((a_firstDeepCycleDone == 0) && (o_deepCycle == 0))
-            g_decArgo_cycleNumShift = floatCycleNumber;
-            g_decArgo_cycleNum = 0;
-         else
-            g_decArgo_cycleNum = floatCycleNumber - g_decArgo_cycleNumShift + 1;
-         end
-         fprintf('Cycle #%d\n', g_decArgo_cycleNum);
-     
-         % pressure sensor offset
-         tabTech(49) = twos_complement_dec_argo(tabTech(49), 8)/10;
          
          % compute float time
          floatTime = datenum(sprintf('%02d%02d%02d%02d%02d%02d', tabTech(43:48)), 'HHMMSSddmmyy') - g_decArgo_janFirst1950InMatlab;
@@ -175,27 +211,27 @@ for idMes = 1:size(a_tabData, 1)
          
          o_tabTech = [o_tabTech; ...
             packType tabTech(1:76)' floatTime gpsLocLon gpsLocLat sbdFileDate];
-         
+
          % output NetCDF files
          if (g_decArgo_generateNcTech ~= 0)
             store_tech_data_for_nc_209(o_tabTech, o_deepCycle);
          end
-         
+                  
          %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
       case {1, 2, 3, 8, 9, 10, 11, 12, 13, 14, 15, 16}
          % CTDO packets
          
          o_deepCycle = 1;
-         
-         if ((packType == 1) || (packType == 8) || (packType == 11) || (packType == 14))
-            g_decArgo_nbOf1Or8Or11Or14TypePacketReceived = g_decArgo_nbOf1Or8Or11Or14TypePacketReceived + 1;
-         elseif ((packType == 2) || (packType == 9) || (packType == 12) || (packType == 15))
-            g_decArgo_nbOf2Or9Or12Or15TypePacketReceived = g_decArgo_nbOf2Or9Or12Or15TypePacketReceived + 1;
-         elseif ((packType == 3) || (packType == 10) || (packType == 13) || (packType == 16))
-            g_decArgo_nbOf3Or10Or13Or16TypePacketReceived = g_decArgo_nbOf3Or10Or13Or16TypePacketReceived + 1;
-         end
+
          if (a_procLevel == 0)
-            continue
+            if ((packType == 1) || (packType == 8) || (packType == 11) || (packType == 14))
+               g_decArgo_nbOf1Or8Or11Or14TypePacketReceived = g_decArgo_nbOf1Or8Or11Or14TypePacketReceived + 1;
+            elseif ((packType == 2) || (packType == 9) || (packType == 12) || (packType == 15))
+               g_decArgo_nbOf2Or9Or12Or15TypePacketReceived = g_decArgo_nbOf2Or9Or12Or15TypePacketReceived + 1;
+            elseif ((packType == 3) || (packType == 10) || (packType == 13) || (packType == 16))
+               g_decArgo_nbOf3Or10Or13Or16TypePacketReceived = g_decArgo_nbOf3Or10Or13Or16TypePacketReceived + 1;
+            end
+            continue;
          end
          
          % deduce optode type information from received data
@@ -218,11 +254,11 @@ for idMes = 1:size(a_tabData, 1)
                   (((packType == 8) || (packType == 9) || (packType == 10)) && (optodeType == 1)) || ...
                   (((packType == 11) || (packType == 12) || (packType == 13)) && (optodeType == 4)) || ...
                   (((packType == 14) || (packType == 15) || (packType == 16)) && (optodeType == 5)))
-               fprintf('ERROR: Float #%d: Inconsistency between optode type (PM17 = %d) and received data type (= %d) - received data will be ignored\n', ...
+               fprintf('ERROR: Float #%d: Inconsistency between optode type (PM17 = %d) and received data type (= %d) => received data will be ignored\n', ...
                   g_decArgo_floatNum, optodeType, packType);
             end
          end
-         
+                  
          % message data frame
          msgData = a_tabData(idMes, 2:end);
          
@@ -349,7 +385,7 @@ for idMes = 1:size(a_tabData, 1)
                   packType tabDate' ones(1, length(tabDate))*-1 ...
                   tabPres' tabTemp' tabPsal' ...
                   tabC1Phase' tabC2Phase' tabTempDoxyAa' optodeType];
-               
+
             case 4
                % CTD + SBE 63
                
@@ -416,7 +452,7 @@ for idMes = 1:size(a_tabData, 1)
                   packType tabDate' ones(1, length(tabDate))*-1 ...
                   tabPres' tabTemp' tabPsal' ...
                   tabPhaseDelay' tabTempDoxySbe' optodeType];
-               
+
             case 5
                % CTD + Aanderaa 4330 + SBE 63
                
@@ -510,7 +546,7 @@ for idMes = 1:size(a_tabData, 1)
                   tabPres' tabTemp' tabPsal' ...
                   tabC1Phase' tabC2Phase' tabTempDoxyAa' ...
                   tabPhaseDelay' tabTempDoxySbe' optodeType];
-               
+
             otherwise
                fprintf('WARNING: Float #%d: Nothing done yet for optode type #%d\n', ...
                   g_decArgo_floatNum, ...
@@ -521,9 +557,9 @@ for idMes = 1:size(a_tabData, 1)
       case 5
          % parameter packet
          
-         g_decArgo_5TypePacketReceivedFlag = 1;
          if (a_procLevel == 0)
-            continue
+            g_decArgo_5TypePacketReceivedFlag = 1;
+            continue;
          end
          
          % message data frame
@@ -541,21 +577,17 @@ for idMes = 1:size(a_tabData, 1)
          % get item bits
          tabParam = get_bits(firstBit, tabNbBits, msgData);
          tabParam(8) = tabParam(8) + 1;
-         
+
          % compute float time
          floatTime = datenum(sprintf('%02d%02d%02d%02d%02d%02d', tabParam(1:6)), 'HHMMSSddmmyy') - g_decArgo_janFirst1950InMatlab;
          
          % calibration coefficients
          tabParam(52) = tabParam(52)/1000;
-         if (tabParam(53) < 32768) % 32768 = 65536/2
-            tabParam(53) = -tabParam(53);
-         else
-            tabParam(53) = 65536 - tabParam(53);
-         end
+         tabParam(53) = -tabParam(53);
          
          o_floatParam = [o_floatParam; ...
-            packType tabParam' floatTime sbdFileDate];
-         
+            packType tabParam' floatTime sbdFileDate];    
+
       otherwise
          fprintf('WARNING: Float #%d: Nothing done yet for packet type #%d\n', ...
             g_decArgo_floatNum, ...
@@ -563,145 +595,4 @@ for idMes = 1:size(a_tabData, 1)
    end
 end
 
-if (a_procLevel > 0)
-   
-   % collect information on received packet types
-   collect_received_packet_type_info;
-end
-
-return
-
-% ------------------------------------------------------------------------------
-% Initialize global flags and counters used to decide if a buffer is completed
-% or not.
-%
-% SYNTAX :
-%  init_counts
-%
-% INPUT PARAMETERS :
-%
-% OUTPUT PARAMETERS :
-%
-% EXAMPLES :
-%
-% SEE ALSO :
-% AUTHORS  : Jean-Philippe Rannou (Altran)(jean-philippe.rannou@altran.com)
-% ------------------------------------------------------------------------------
-% RELEASES :
-%   03/03/2017 - RNU - creation
-% ------------------------------------------------------------------------------
-function init_counts
-
-% arrays to store rough information on received data
-global g_decArgo_0TypePacketReceivedFlag;
-global g_decArgo_4TypePacketReceivedFlag;
-global g_decArgo_5TypePacketReceivedFlag;
-global g_decArgo_7TypePacketReceivedFlag;
-global g_decArgo_nbOf1Or8Or11Or14TypePacketExpected;
-global g_decArgo_nbOf1Or8Or11Or14TypePacketReceived;
-global g_decArgo_nbOf2Or9Or12Or15TypePacketExpected;
-global g_decArgo_nbOf2Or9Or12Or15TypePacketReceived;
-global g_decArgo_nbOf3Or10Or13Or16TypePacketExpected;
-global g_decArgo_nbOf3Or10Or13Or16TypePacketReceived;
-global g_decArgo_nbOf1Or8TypePacketExpected;
-global g_decArgo_nbOf1Or8TypePacketReceived;
-global g_decArgo_nbOf2Or9TypePacketExpected;
-global g_decArgo_nbOf2Or9TypePacketReceived;
-global g_decArgo_nbOf3Or10TypePacketExpected;
-global g_decArgo_nbOf3Or10TypePacketReceived;
-global g_decArgo_nbOf13Or11TypePacketExpected;
-global g_decArgo_nbOf13Or11TypePacketReceived;
-global g_decArgo_nbOf14Or12TypePacketExpected;
-global g_decArgo_nbOf14Or12TypePacketReceived;
-global g_decArgo_nbOf6TypePacketReceived;
-
-% initialize information arrays
-g_decArgo_0TypePacketReceivedFlag = 0;
-g_decArgo_4TypePacketReceivedFlag = 0;
-g_decArgo_5TypePacketReceivedFlag = 0;
-g_decArgo_nbOf1Or8Or11Or14TypePacketExpected = -1;
-g_decArgo_nbOf1Or8Or11Or14TypePacketReceived = 0;
-g_decArgo_nbOf2Or9Or12Or15TypePacketExpected = -1;
-g_decArgo_nbOf2Or9Or12Or15TypePacketReceived = 0;
-g_decArgo_nbOf3Or10Or13Or16TypePacketExpected = -1;
-g_decArgo_nbOf3Or10Or13Or16TypePacketReceived = 0;
-g_decArgo_nbOf1Or8TypePacketExpected = -1;
-g_decArgo_nbOf1Or8TypePacketReceived = 0;
-g_decArgo_nbOf2Or9TypePacketExpected = -1;
-g_decArgo_nbOf2Or9TypePacketReceived = 0;
-g_decArgo_nbOf3Or10TypePacketExpected = -1;
-g_decArgo_nbOf3Or10TypePacketReceived = 0;
-g_decArgo_nbOf13Or11TypePacketExpected = -1;
-g_decArgo_nbOf13Or11TypePacketReceived = 0;
-g_decArgo_nbOf14Or12TypePacketExpected = -1;
-g_decArgo_nbOf14Or12TypePacketReceived = 0;
-g_decArgo_nbOf6TypePacketReceived = 0;
-
-% items not concerned by this decoder
-g_decArgo_4TypePacketReceivedFlag = 1;
-g_decArgo_7TypePacketReceivedFlag = 1;
-
-g_decArgo_nbOf1Or8TypePacketExpected = 0;
-g_decArgo_nbOf2Or9TypePacketExpected = 0;
-g_decArgo_nbOf3Or10TypePacketExpected = 0;
-g_decArgo_nbOf13Or11TypePacketExpected = 0;
-g_decArgo_nbOf14Or12TypePacketExpected = 0;
-
-return
-
-% ------------------------------------------------------------------------------
-% Collect information on received packet types
-%
-% SYNTAX :
-%  collect_received_packet_type_info
-%
-% INPUT PARAMETERS :
-%
-% OUTPUT PARAMETERS :
-%
-% EXAMPLES :
-%
-% SEE ALSO :
-% AUTHORS  : Jean-Philippe Rannou (Altran)(jean-philippe.rannou@altran.com)
-% ------------------------------------------------------------------------------
-% RELEASES :
-%   05/29/2017 - RNU - creation
-% ------------------------------------------------------------------------------
-function collect_received_packet_type_info
-
-% arrays to store rough information on received data
-global g_decArgo_0TypePacketReceivedFlag;
-global g_decArgo_4TypePacketReceivedFlag;
-global g_decArgo_5TypePacketReceivedFlag;
-global g_decArgo_7TypePacketReceivedFlag;
-global g_decArgo_nbOf1Or8Or11Or14TypePacketReceived;
-global g_decArgo_nbOf2Or9Or12Or15TypePacketReceived;
-global g_decArgo_nbOf3Or10Or13Or16TypePacketReceived;
-global g_decArgo_nbOf1Or8TypePacketReceived;
-global g_decArgo_nbOf2Or9TypePacketReceived;
-global g_decArgo_nbOf3Or10TypePacketReceived;
-global g_decArgo_nbOf13Or11TypePacketReceived;
-global g_decArgo_nbOf14Or12TypePacketReceived;
-global g_decArgo_nbOf6TypePacketReceived;
-
-% array ro store statistics on received packets
-global g_decArgo_nbDescentPacketsReceived;
-global g_decArgo_nbParkPacketsReceived;
-global g_decArgo_nbAscentPacketsReceived;
-global g_decArgo_nbNearSurfacePacketsReceived;
-global g_decArgo_nbInAirPacketsReceived;
-global g_decArgo_nbHydraulicPacketsReceived;
-global g_decArgo_nbTechPacketsReceived;
-global g_decArgo_nbTech1PacketsReceived;
-global g_decArgo_nbTech2PacketsReceived;
-global g_decArgo_nbParmPacketsReceived;
-global g_decArgo_nbParm1PacketsReceived;
-global g_decArgo_nbParm2PacketsReceived;
-
-g_decArgo_nbDescentPacketsReceived = g_decArgo_nbOf1Or8Or11Or14TypePacketReceived;
-g_decArgo_nbParkPacketsReceived = g_decArgo_nbOf2Or9Or12Or15TypePacketReceived;
-g_decArgo_nbAscentPacketsReceived = g_decArgo_nbOf3Or10Or13Or16TypePacketReceived;
-g_decArgo_nbTechPacketsReceived = g_decArgo_0TypePacketReceivedFlag;
-g_decArgo_nbParmPacketsReceived = g_decArgo_5TypePacketReceivedFlag;
-
-return
+return;

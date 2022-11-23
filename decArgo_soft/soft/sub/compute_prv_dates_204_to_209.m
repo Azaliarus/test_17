@@ -98,7 +98,7 @@ global g_decArgo_iridiumMailData;
 
 
 if (isempty(a_tabTech))
-   return
+   return;
 end
 
 refDay = a_refDay;
@@ -133,32 +133,21 @@ elseif (length(idF) == 1)
       else
          
          % retrieve the last message time of the current cycle
-         [firstMsgDateOfCycle, lastMsgDateOfCycle] = ...
+         [~, lastMsgDateOfCycle] = ...
             compute_first_last_msg_time_from_iridium_mail(g_decArgo_iridiumMailData, g_decArgo_cycleNum);
          
          % retrieve the current cycle duration from the configuration
          [configNames, configValues] = get_float_config_ir_sbd(g_decArgo_cycleNum);
          cycleDurationDays = get_config_value('CONFIG_PM01', configNames, configValues);
          
-         cyDurFromLaunchDate = 0;
-         if (isempty(cycleDurationDays) && (g_decArgo_cycleNum == 1))
-            % we have not been able to compute the duration of the first cycle
-            % in init_float_config_prv_ir_sbd_* (generally because
-            % 'CONFIG_PM04' = 'delay before mission' is not set)
-            if (firstMsgDateOfCycle ~= g_decArgo_dateDef)
-               cycleDurationDays = firstMsgDateOfCycle - a_launchDate;
-               cyDurFromLaunchDate = 1;
-            end
-         end
-         
-         if ((lastMsgDateOfCycle ~= g_decArgo_dateDef) && ~isempty(cycleDurationDays))
+         if ((lastMsgDateOfCycle ~= g_decArgo_dateDef) && ~isnan(cycleDurationDays))
          
             % compute the estimate of the last message time of the previous
             % cycle
             estLastMsgDateOfPrevCycle = lastMsgDateOfCycle - cycleDurationDays;
             estLastMsgDateOfPrevCycle = floor(estLastMsgDateOfPrevCycle*1440)/1440;
             o_cycleStartDate = fix(estLastMsgDateOfPrevCycle) + a_tabTech(id, 4)/1440;
-            if ((o_cycleStartDate < estLastMsgDateOfPrevCycle) && (cyDurFromLaunchDate == 0)) % for cycle #1, when the cycle duration is computed from launch date, estLastMsgDateOfPrevCycle is not so reliable
+            if (o_cycleStartDate < estLastMsgDateOfPrevCycle)
                o_cycleStartDate = o_cycleStartDate + 1;
             end
             
@@ -222,7 +211,7 @@ elseif (length(idF) == 1)
          [configNames, configValues] = get_float_config_ir_sbd(g_decArgo_cycleNum);
          PT4Seconds = get_config_value('CONFIG_PT04', configNames, configValues)/100;
          
-         if (~isempty(PT4Seconds))
+         if (~isnan(PT4Seconds))
             
             o_ascentEndDate = o_transStartDate - 10/1440 - PT4Seconds/86400;
             
@@ -362,4 +351,4 @@ if (print == 1)
    end
 end
 
-return
+return;

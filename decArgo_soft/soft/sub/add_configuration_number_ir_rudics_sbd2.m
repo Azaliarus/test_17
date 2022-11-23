@@ -3,21 +3,18 @@
 % the N_MEASUREMENT and N_CYCLE measurements.
 %
 % SYNTAX :
-%  [o_tabProfiles, o_tabTrajNMeas, o_tabTrajNCycle, o_tabTechNMeas] = ...
-%    add_configuration_number_ir_rudics_sbd2( ...
-%    a_tabProfiles, a_tabTrajNMeas, a_tabTrajNCycle, a_tabTechNMeas)
+%  [o_tabProfiles, o_tabTrajNMeas, o_tabTrajNCycle] = ...
+%    add_configuration_number_ir_rudics_sbd2(a_tabProfiles, a_tabTrajNMeas, a_tabTrajNCycle)
 %
 % INPUT PARAMETERS :
 %   a_tabProfiles   : input profile structures
 %   a_tabTrajNMeas  : input trajectory N_MEASUREMENT measurement structures
 %   a_tabTrajNCycle : input trajectory N_CYCLE measurement structures
-%   a_tabTechNMeas  : input technical N_MEASUREMENT measurement structures
 %
 % OUTPUT PARAMETERS :
 %   o_tabProfiles   : output profile structures
 %   o_tabTrajNMeas  : output trajectory N_MEASUREMENT measurement structures
 %   o_tabTrajNCycle : output trajectory N_CYCLE measurement structures
-%   o_tabTechNMeas  : output technical N_MEASUREMENT measurement structures
 %
 % EXAMPLES :
 %
@@ -27,15 +24,13 @@
 % RELEASES :
 %   07/16/2013 - RNU - creation
 % ------------------------------------------------------------------------------
-function [o_tabProfiles, o_tabTrajNMeas, o_tabTrajNCycle, o_tabTechNMeas] = ...
-   add_configuration_number_ir_rudics_sbd2( ...
-   a_tabProfiles, a_tabTrajNMeas, a_tabTrajNCycle, a_tabTechNMeas)
+function [o_tabProfiles, o_tabTrajNMeas, o_tabTrajNCycle] = ...
+   add_configuration_number_ir_rudics_sbd2(a_tabProfiles, a_tabTrajNMeas, a_tabTrajNCycle)
 
 % output parameters initialization
 o_tabProfiles = [];
 o_tabTrajNMeas = [];
 o_tabTrajNCycle = [];
-o_tabTechNMeas = [];
 
 % current float WMO number
 global g_decArgo_floatNum;
@@ -61,7 +56,7 @@ for idProf = 1:length(a_tabProfiles)
       if ((g_decArgo_realtimeFlag == 1) || (g_decArgo_delayedModeFlag == 1))
          if (a_tabProfiles(idProf).outputCycleNumber == -1)
             % update the reports structure cycle list
-            g_decArgo_reportStruct = add_cycle_number_in_report_struct(g_decArgo_reportStruct, g_decArgo_floatConfig.USE.CYCLE_OUT(idConf));
+            g_decArgo_reportStruct.cycleList = [g_decArgo_reportStruct.cycleList g_decArgo_floatConfig.USE.CYCLE_OUT(idConf)];
          end
       end
       
@@ -69,7 +64,7 @@ for idProf = 1:length(a_tabProfiles)
    end
 end
 
-% add the output cycle number of the traj N_MEASUREMENT measurements
+% add the output cycle number of the N_MEASUREMENT measurements
 for idNCy = 1:length(a_tabTrajNMeas)
    idConf = find((g_decArgo_floatConfig.USE.CYCLE == a_tabTrajNMeas(idNCy).cycleNumber) & ...
       (g_decArgo_floatConfig.USE.PROFILE == a_tabTrajNMeas(idNCy).profileNumber));
@@ -103,9 +98,7 @@ if (~isempty(idF))
          idFCy = find(inputUsedCy == cyNum);
          if (isempty(idFCy))
             if (cyNum > 0)
-               idFCyPrev = find(inputUsedCy <= cyNum-1, 1, 'last');
-               cyNumPrev = inputUsedCy(idFCyPrev);
-               idFCyPrev = find(inputUsedCy == cyNumPrev);
+               idFCyPrev = find(inputUsedCy == cyNum-1);
                idFCyProfPrev = idFCyPrev(find(inputUsedProf(idFCyPrev) == max(inputUsedProf(idFCyPrev))));
                
                inputUsedCy(end+1) = cyNum;
@@ -140,7 +133,7 @@ if (~isempty(idF))
                while (profNum - shift >= 0)
                   idFCyProfPrev = idFCy(find(inputUsedProf(idFCy) == profNum - shift));
                   if (~isempty(idFCyProfPrev))
-                     break
+                     break;
                   else
                      shift = shift + 1;
                   end
@@ -219,26 +212,11 @@ for idNCy = 1:length(a_tabTrajNCycle)
    idConf = find((g_decArgo_floatConfig.USE.CYCLE == a_tabTrajNCycle(idNCy).cycleNumber) & ...
       (g_decArgo_floatConfig.USE.PROFILE == a_tabTrajNCycle(idNCy).profileNumber));
    if (~isempty(idConf))
+      a_tabTrajNCycle(idNCy).configMissionNumber = g_decArgo_floatConfig.USE.CONFIG(idConf);
       a_tabTrajNCycle(idNCy).outputCycleNumber = g_decArgo_floatConfig.USE.CYCLE_OUT(idConf);
       if (a_tabTrajNCycle(idNCy).surfOnly == 2)
          a_tabTrajNCycle(idNCy).outputCycleNumber = 0;
       end
-      if (a_tabTrajNCycle(idNCy).outputCycleNumber > 0) % we don't assign any configuration to cycle #0 data
-         a_tabTrajNCycle(idNCy).configMissionNumber = g_decArgo_floatConfig.USE.CONFIG(idConf);
-      end
-   else
-      if (a_tabTrajNCycle(idNCy).cycleNumber == 0) && (a_tabTrajNCycle(idNCy).profileNumber == 0)
-         a_tabTrajNCycle(idNCy).outputCycleNumber = 0;
-      end
-   end
-end
-
-% add the output cycle number of the tech N_MEASUREMENT measurements
-for idNCy = 1:length(a_tabTechNMeas)
-   idConf = find((g_decArgo_floatConfig.USE.CYCLE == a_tabTechNMeas(idNCy).cycleNumber) & ...
-      (g_decArgo_floatConfig.USE.PROFILE == a_tabTechNMeas(idNCy).profileNumber));
-   if (~isempty(idConf))
-      a_tabTechNMeas(idNCy).outputCycleNumber = g_decArgo_floatConfig.USE.CYCLE_OUT(idConf);
    end
 end
 
@@ -246,6 +224,5 @@ end
 o_tabProfiles = a_tabProfiles;
 o_tabTrajNMeas = a_tabTrajNMeas;
 o_tabTrajNCycle = a_tabTrajNCycle;
-o_tabTechNMeas = a_tabTechNMeas;
 
-return
+return;

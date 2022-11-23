@@ -3,11 +3,10 @@
 %
 % SYNTAX :
 %  print_data_in_csv_file_ir_rudics_CROVER_raw( ...
-%    a_decoderId, a_cycleNum, a_profNum, a_phaseNum, ...
+%    a_cycleNum, a_profNum, a_phaseNum, ...
 %    a_dataCROVERRaw)
 %
 % INPUT PARAMETERS :
-%   a_decoderId     : float decoder Id
 %   a_cycleNum      : cycle number of the packet
 %   a_profNum       : profile number of the packet
 %   a_phaseNum      : phase number of the packet
@@ -24,7 +23,7 @@
 %   02/11/2013 - RNU - creation
 % ------------------------------------------------------------------------------
 function print_data_in_csv_file_ir_rudics_CROVER_raw( ...
-   a_decoderId, a_cycleNum, a_profNum, a_phaseNum, ...
+   a_cycleNum, a_profNum, a_phaseNum, ...
    a_dataCROVERRaw)
 
 % current float WMO number
@@ -35,7 +34,6 @@ global g_decArgo_outputCsvFileId;
 
 % global default values
 global g_decArgo_dateDef;
-global g_decArgo_coefAttDef;
 
 % unpack the input data
 a_dataCROVERRawDate = a_dataCROVERRaw{1};
@@ -48,7 +46,7 @@ idDataRaw = find((a_dataCROVERRawDate(:, 1) == a_cycleNum) & ...
    (a_dataCROVERRawDate(:, 2) == a_profNum) & ...
    (a_dataCROVERRawDate(:, 3) == a_phaseNum));
 
-fprintf(g_decArgo_outputCsvFileId, '%d; %d; %d; %s; cROVER raw; Date; PRES (dbar); CP660 (1/m)\n', ...
+fprintf(g_decArgo_outputCsvFileId, '%d; %d; %d; %s; cROVER raw; Date; PRES (dbar); CP660 (count)\n', ...
    g_decArgo_floatNum, a_cycleNum, a_profNum, get_phase_name(a_phaseNum));
 
 data = [];
@@ -62,13 +60,8 @@ end
 idDel = find((data(:, 3) == 0) & (data(:, 4) == 0));
 data(idDel, :) = [];
 
-data(:, 3) = sensor_2_value_for_pressure_ir_rudics_sbd2(data(:, 3), a_decoderId);
+data(:, 3) = sensor_2_value_for_pressure_ir_rudics_sbd2(data(:, 3));
 data(:, 4) = sensor_2_value_for_coefAtt_ir_rudics(data(:, 4));
-% manage wiring mistake of float 6902828
-if (g_decArgo_floatNum == 6902828)
-   idNoDef = find(data(:, 4) ~= g_decArgo_coefAttDef);
-   data(idNoDef, 4) = 0.002129 - data(idNoDef, 4);
-end
 
 for idL = 1:size(data, 1)
    if (data(idL, 1) ~= g_decArgo_dateDef)
@@ -87,4 +80,4 @@ for idL = 1:size(data, 1)
    end
 end
 
-return
+return;

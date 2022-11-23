@@ -113,14 +113,14 @@ ncstartup;
 
 if ~(exist(a_fileName, 'file') == 2)
    fprintf('Fichier introuvable : %s\n', a_fileName);
-   return
+   return;
 end
 
 fCdf = netcdf(a_fileName, 'read');
 
 if (isempty(fCdf))
    fprintf('Echec ouverture fichier : %s\n', a_fileName);
-   return
+   return;
 end
 
 % dimensions
@@ -170,7 +170,7 @@ o_launchQc = fCdf{'LAUNCH_QC'}(:);
 o_startDate = fCdf{'START_DATE'}(:);
 o_startDateQc = fCdf{'START_DATE_QC'}(:);
 o_deployPlatform = fCdf{'DEPLOY_PLATFORM'}(:);
-o_deployMission = fCdf{'CRUISE_NAME'}(:);
+o_deployMission = fCdf{'DEPLOY_MISSION'}(:);
 o_deployAvailableProfileId = fCdf{'DEPLOY_AVAILABLE_PROFILE_ID'}(:);
 o_endMissionDate = fCdf{'END_MISSION_DATE'}(:);
 o_endMissionStatus = fCdf{'END_MISSION_STATUS'}(:);
@@ -215,4 +215,4 @@ end
 
 close(fCdf);
 
-return
+return;

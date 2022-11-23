@@ -45,10 +45,6 @@ global g_decArgo_generateNcMeta;
 % DOM node of XML report
 global g_decArgo_xmlReportDOMNode;
 
-% minimum number of float messages in an Argos file to be processed within the
-% 'profile' mode
-global g_decArgo_minNumMsgForProcessing;
-
 
 % check input parameters
 processModeInputParam = 0;
@@ -57,9 +53,9 @@ floatWmoInputParam = 0;
 floatWmoListInputParam = 0;
 if (~isempty(a_varargin))
    if (rem(length(a_varargin), 2) ~= 0)
-      fprintf('ERROR: expecting an even number of input arguments (e.g. (''argument_name'', ''argument_value'') - exit\n');
+      fprintf('ERROR: expecting an even number of input arguments (e.g. (''argument_name'', ''argument_value'') => exit\n');
       o_inputError = 1;
-      return
+      return;
    else
       for id = 1:2:length(a_varargin)
          if (strcmpi(a_varargin{id}, 'processmode'))
@@ -75,17 +71,17 @@ if (~isempty(a_varargin))
                   g_decArgo_processModeAll = 1;
                   g_decArgo_processModeRedecode = 1;
                else
-                  fprintf('ERROR: inconsistent input arguments - exit\n');
+                  fprintf('ERROR: inconsistent input arguments => exit\n');
                   o_inputError = 1;
-                  return
+                  return;
                end
                
                % store input parameter in the XML report
                g_decArgo_xmlReportDOMNode = add_element_in_xml_report(g_decArgo_xmlReportDOMNode, 'param_processmode', a_varargin{id+1});
             else
-               fprintf('ERROR: inconsistent input arguments - exit\n');
+               fprintf('ERROR: inconsistent input arguments => exit\n');
                o_inputError = 1;
-               return
+               return;
             end
          elseif (strcmpi(a_varargin{id}, 'argosfile'))
             if (argosFileInputParam == 0)
@@ -95,9 +91,9 @@ if (~isempty(a_varargin))
                % store input parameter in the XML report
                g_decArgo_xmlReportDOMNode = add_element_in_xml_report(g_decArgo_xmlReportDOMNode, 'param_argosfile', a_varargin{id+1});
             else
-               fprintf('ERROR: inconsistent input arguments - exit\n');
+               fprintf('ERROR: inconsistent input arguments => exit\n');
                o_inputError = 1;
-               return
+               return;
             end
          elseif (strcmpi(a_varargin{id}, 'floatwmo'))
             if ((floatWmoInputParam == 0) && (floatWmoListInputParam == 0))
@@ -107,9 +103,9 @@ if (~isempty(a_varargin))
                % store input parameter in the XML report
                g_decArgo_xmlReportDOMNode = add_element_in_xml_report(g_decArgo_xmlReportDOMNode, 'param_floatwmo', a_varargin{id+1});
             else
-               fprintf('ERROR: inconsistent input arguments - exit\n');
+               fprintf('ERROR: inconsistent input arguments => exit\n');
                o_inputError = 1;
-               return
+               return;
             end
          elseif (strcmpi(a_varargin{id}, 'floatwmolist'))
             if ((floatWmoInputParam == 0) && (floatWmoListInputParam == 0))
@@ -119,12 +115,12 @@ if (~isempty(a_varargin))
                % store input parameter in the XML report
                g_decArgo_xmlReportDOMNode = add_element_in_xml_report(g_decArgo_xmlReportDOMNode, 'param_floatwmolist', a_varargin{id+1});
             else
-               fprintf('ERROR: inconsistent input arguments - exit\n');
+               fprintf('ERROR: inconsistent input arguments => exit\n');
                o_inputError = 1;
-               return
+               return;
             end
          else
-            fprintf('INFO: unexpected input argument (%s) - ignored\n', a_varargin{id});
+            fprintf('WARNING: unexpected input argument (%s) => ignored\n', a_varargin{id});
          end
       end
    end
@@ -132,21 +128,21 @@ end
 
 % check mandatory input parameters
 if (processModeInputParam == 0)
-   fprintf('ERROR: ''processmode'' input param is mandatory - exit\n');
+   fprintf('ERROR: ''processmode'' input param is mandatory => exit\n');
    o_inputError = 1;
-   return
+   return;
 end
 if (g_decArgo_processModeRedecode == 0)
    if (argosFileInputParam == 0)
-      fprintf('ERROR: ''argosfile'' input param is mandatory when ''processmode'' = ''all'' or ''profile'' - exit\n');
+      fprintf('ERROR: ''argosfile'' input param is mandatory when ''processmode'' = ''all'' or ''profile'' => exit\n');
       o_inputError = 1;
-      return
+      return;
    end
 else
    if ((floatWmoInputParam == 0) && (floatWmoListInputParam == 0))
-      fprintf('ERROR: ''floatwmo'' or ''floatwmolist'' input param is mandatory when ''processmode'' = ''redecode'' - exit\n');
+      fprintf('ERROR: ''floatwmo'' or ''floatwmolist'' input param is mandatory when ''processmode'' = ''redecode'' => exit\n');
       o_inputError = 1;
-      return
+      return;
    end
 end
    
@@ -183,9 +179,9 @@ end
 % check the Argos input file
 if (g_decArgo_processModeRedecode == 0)
    if ~(exist(g_decArgo_inputArgosFile, 'file') == 2)
-      fprintf('ERROR: input Argos file (%s) does not exist - exit\n', g_decArgo_inputArgosFile);
+      fprintf('ERROR: input Argos file (%s) does not exist => exit\n', g_decArgo_inputArgosFile);
       o_inputError = 1;
-      return
+      return;
    end
 end
 
@@ -193,29 +189,9 @@ end
 if (g_decArgo_processModeRedecode == 1)
    if (~isempty(g_decArgo_inputFloatWmoList))
       if ~(exist(g_decArgo_inputFloatWmoList, 'file') == 2)
-         fprintf('ERROR: input WMO list file (%s) does not exist - exit\n', g_decArgo_inputFloatWmoList);
+         fprintf('ERROR: input WMO list file (%s) does not exist => exit\n', g_decArgo_inputFloatWmoList);
          o_inputError = 1;
-         return
-      end
-   end
-end
-
-% in 'profile' mode, check that the Argos input file contains at least
-% g_decArgo_minNumMsgForProcessing float messages
-if ((g_decArgo_processModeAll == 0) && (g_decArgo_processModeRedecode == 0))
-   % argos input file name
-   [pathstr, inputArgosFileName, ext] = fileparts(g_decArgo_inputArgosFile);
-   idPos = strfind(inputArgosFileName, '_');
-   if (~isempty(idPos))
-      floatArgosId = str2num(inputArgosFileName(1:idPos(1)-1));
-      
-      [argosLocDate, argosLocLon, argosLocLat, argosLocAcc, argosLocSat, ...
-         argosDataDate, argosDataData] = read_argos_file({g_decArgo_inputArgosFile}, floatArgosId, 31);
-      if (length(argosDataDate) < g_decArgo_minNumMsgForProcessing)
-         fprintf('INFO: in ''profile'' mode the Argos input file should contain at least %d float messages to be processed\n', ...
-            g_decArgo_minNumMsgForProcessing);
-         o_inputError = 1;
-         return
+         return;
       end
    end
 end
@@ -229,4 +205,4 @@ if (g_decArgo_processModeAll == 0)
    g_decArgo_generateNcMeta = 0;
 end
 
-return
+return;

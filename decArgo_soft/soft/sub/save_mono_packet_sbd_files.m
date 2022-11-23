@@ -28,9 +28,6 @@ o_ok = 0;
 
 global g_decArgo_janFirst1950InMatlab;
 
-% current float WMO number
-global g_decArgo_floatNum;
-
 
 % split sensor technical data packets (packet type 250 is 70 bytes length
 % whereas input SBD size is 140 bytes)
@@ -55,17 +52,8 @@ idOther = setdiff([1:size(a_tabSensors, 1)], idSensorTechDataPack);
 tabSensors = [tabSensors; a_tabSensors(idOther, :)];
 tabDates = [tabDates; a_tabDates(idOther, :)];
 
-% lut to convert sensor data type to sensor number
-lut = [0 0 0 1 1 1 -1 -1 -1 3 3 3 2 2 2 4 4 4 5 5 5 6 6 6 6 6];
-
 % decode packet data
 for idMes = 1:size(tabSensors, 1)
-   
-   % sensor data type
-   sensorDataType = [];
-   
-   % sensor number
-   sensorNum = [];
    
    % packet type
    packType = tabSensors(idMes, 1);
@@ -78,24 +66,13 @@ for idMes = 1:size(tabSensors, 1)
       case 0
          % sensor data
          
-         % sensor data type
-         sensorDataType = tabSensors(idMes, 2);
-         if ((sensorDataType+1 < 1) || (sensorDataType+1 > length(lut)))
-            fprintf('WARNING: Inconsistent sensorDataType (%d) - packet ignored\n', ...
-               sensorDataType);
-            continue
-         end
-         
-         % sensor number
-         sensorNum = lut(sensorDataType+1);
-         
          % message data frame
          msgData = tabSensors(idMes, 3:end);
          
          % empty msg
          uMsgdata = unique(msgData);
          if ((length(uMsgdata) == 1) && (uMsgdata == 0))
-            continue
+            continue;
          end
          
          % first item bit number
@@ -110,15 +87,8 @@ for idMes = 1:size(tabSensors, 1)
          profNum = values(2);
          phaseNum = values(3);
          
-         %          if ((sensorNum == 0) && (cycleNum == 3) && (profNum == 0) && (phaseNum == 9))
-         %             g_decArgo_cpt = g_decArgo_cpt + 1
-         %          end
-         
       case 250
          % sensor tech data
-         
-         % sensor number
-         sensorNum = tabSensors(idMes, 2);
          
          % message data frame
          msgData = tabSensors(idMes, 3:end);
@@ -138,9 +108,6 @@ for idMes = 1:size(tabSensors, 1)
       case 251
          % sensor parameter
          
-         % sensor number
-         sensorNum = tabSensors(idMes, 2);
-
          cycleNum = '';
          profNum = '';
          phaseNum = '';
@@ -238,12 +205,8 @@ for idMes = 1:size(tabSensors, 1)
          phaseNum = '';
          
       otherwise
-         fprintf('WARNING: Float #%d: Nothing done yet for packet type #%d\n', ...
-            g_decArgo_floatNum, ...
+         fprintf('WARNING: Nothing done yet for packet type #%d\n', ...
             packType);
-         cycleNum = '';
-         profNum = '';
-         phaseNum = '';
    end
    
    %    fprintf('Type %d ycle #%d prof #%d phase %d\n', ...
@@ -252,9 +215,7 @@ for idMes = 1:size(tabSensors, 1)
    cycleNumStr = 'xxx';
    profNumStr = 'x';
    phaseNumStr = 'xx';
-   sensorDataTypeStr = 'xx';
-   sensorNumStr = 'x';
-
+   
    if (packType ~= 252)
       %       if (~isempty(cycleNum) && (cycleNum == a_cyNumFile))
       if (~isempty(cycleNum))
@@ -266,22 +227,13 @@ for idMes = 1:size(tabSensors, 1)
       if (~isempty(phaseNum))
          phaseNumStr = sprintf('%02d', phaseNum);
       end
-      if (~isempty(sensorDataType))
-         sensorDataTypeStr = sprintf('%02d', sensorDataType);
-      end
-      if (~isempty(sensorNum))
-         sensorNumStr = sprintf('%d', sensorNum);
-      end
       
-      outputFileName = [ ...
-         a_loginName '_' ...
+      outputFileName = [a_loginName '_' ...
          datestr(a_tabDates + g_decArgo_janFirst1950InMatlab, 'yyyymmddTHHMMSS') '_' ...
          sprintf('%03d', packType) '_' ...
          cycleNumStr '_' ...
          profNumStr '_' ...
-         phaseNumStr '_' ...
-         sensorNumStr '_' ...
-         sensorDataTypeStr];
+         phaseNumStr];
       
       fileNnum = 0;
       outputFilePathName = [a_outputPathName '/' outputFileName '_' sprintf('%03d.sbd', fileNnum)];
@@ -291,7 +243,7 @@ for idMes = 1:size(tabSensors, 1)
          for idFile = 1:length(existingFiles)
             fileName = existingFiles(idFile).name;
             idFUs = strfind(fileName, '_');
-            maxNum = max(maxNum, str2num(fileName(idFUs(8)+1:end-4)));
+            maxNum = max(maxNum, str2num(fileName(idFUs(6)+1:end-4)));
          end
          fileNnum = maxNum + 1;
          outputFilePathName = [a_outputPathName '/' outputFileName '_' sprintf('%03d.sbd', fileNnum)];
@@ -312,7 +264,7 @@ for idMes = 1:size(tabSensors, 1)
          fclose(fId);
       end
       %       elseif (~isempty(cycleNum))
-      %          fprintf('WARNING: Cycle number of the data (%d) differ from cycle number of the SBD file name (%d) - data not considered\n', ...
+      %          fprintf('WARNING: Cycle number of the data (%d) differ from cycle number of the SBD file name (%d) => data not considered\n', ...
       %             cycleNum, a_cyNumFile);
       %       end
    else
@@ -326,16 +278,14 @@ for idMes = 1:size(tabSensors, 1)
          profNumStr = sprintf('%d', profNum);
          phaseNumStr = sprintf('%02d', phaseNum);
          
-         outputFileName = [ ...
-            a_loginName '_' ...
+         %          if (cycleNum == a_cyNumFile)
+         outputFileName = [a_loginName '_' ...
             datestr(a_tabDates + g_decArgo_janFirst1950InMatlab, 'yyyymmddTHHMMSS') '_' ...
             sprintf('%03d', packType) '_' ...
             cycleNumStr '_' ...
             profNumStr '_' ...
-            phaseNumStr '_' ...
-            sensorNumStr '_' ...
-            sensorDataTypeStr];
-      
+            phaseNumStr];
+         
          fileNnum = 0;
          outputFilePathName = [a_outputPathName '/' outputFileName '_' sprintf('%03d.sbd', fileNnum)];
          if (exist(outputFilePathName, 'file') == 2)
@@ -344,7 +294,7 @@ for idMes = 1:size(tabSensors, 1)
             for idFile = 1:length(existingFiles)
                fileName = existingFiles(idFile).name;
                idFUs = strfind(fileName, '_');
-               maxNum = max(maxNum, str2num(fileName(idFUs(8)+1:end-4)));
+               maxNum = max(maxNum, str2num(fileName(idFUs(6)+1:end-4)));
             end
             fileNnum = maxNum + 1;
             outputFilePathName = [a_outputPathName '/' outputFileName '_' sprintf('%03d.sbd', fileNnum)];
@@ -365,7 +315,7 @@ for idMes = 1:size(tabSensors, 1)
             fclose(fId);
          end
          %          else
-         %             fprintf('WARNING: Cycle number of the data (%d) differ from cycle number of the SBD file name (%d) - data not considered\n', ...
+         %             fprintf('WARNING: Cycle number of the data (%d) differ from cycle number of the SBD file name (%d) => data not considered\n', ...
          %                cycleNum, a_cyNumFile);
          %          end
       end
@@ -374,4 +324,4 @@ end
 
 o_ok = 1;
 
-return
+return;

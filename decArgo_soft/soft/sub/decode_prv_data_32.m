@@ -57,12 +57,6 @@ global g_decArgo_tPhaseDoxyCountsDef;
 % configuration values
 global g_decArgo_generateNcTech;
 
-% output NetCDF technical parameter index information
-global g_decArgo_outputNcParamIndex;
-
-% output NetCDF technical parameter values
-global g_decArgo_outputNcParamValue;
-
 % output parameters initialization
 o_tabProfCTDO = [];
 o_tabDrifCTDO = [];
@@ -127,13 +121,6 @@ for idMes = 1:size(a_tabSensors, 1)
             o_tabTech1(45) = (o_tabTech1(45)+200)*10;
          end
          
-         % BE CAREFUL
-         % there is an issue with grounding day
-         % => the decoded value should be 16 - transmitted value
-         if (o_tabTech1(18) > 0)
-            o_tabTech1(15) = mod(16 - o_tabTech1(15), 16);
-         end
-         
          % output CSV file
          if (~isempty(g_decArgo_outputCsvFileId))
             print_tech1_data_in_csv_30_32(o_tabTech1);
@@ -148,24 +135,10 @@ for idMes = 1:size(a_tabSensors, 1)
          % check cycle number consistency
          offset = o_deepCycle;
          if ((o_tabTech1(1) + offset) ~= g_decArgo_cycleNum)
-            if (o_tabTech1(1) == 0)
-               fprintf('INFO: Float #%d Cycle #%d: Cycle number of Argos file name (%d) and transmitted cycle number (%d) are inconsistent - the float is in EOL\n', ...
-                  g_decArgo_floatNum, ...
-                  g_decArgo_cycleNum, ...
-                  g_decArgo_cycleNum, o_tabTech1(1));
-            else
-               fprintf('ERROR: Float #%d Cycle #%d: Cycle number of Argos file name (%d) and transmitted cycle number (%d) are inconsistent\n', ...
-                  g_decArgo_floatNum, ...
-                  g_decArgo_cycleNum, ...
-                  g_decArgo_cycleNum, o_tabTech1(1));
-            end
-         end
-         
-         % store technical message #1 redundancy
-         if (g_decArgo_generateNcTech ~= 0)
-            g_decArgo_outputNcParamIndex = [g_decArgo_outputNcParamIndex;
-               g_decArgo_cycleNum 1000];
-            g_decArgo_outputNcParamValue{end+1} = msgOcc;
+            fprintf('ERROR: Float #%d Cycle #%d: Cycle number of Argos file name (%d) and transmitted cycle number (%d) are inconsistent\n', ...
+               g_decArgo_floatNum, ...
+               g_decArgo_cycleNum, ...
+               g_decArgo_cycleNum, o_tabTech1(1));
          end
          
          %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -231,31 +204,19 @@ for idMes = 1:size(a_tabSensors, 1)
          if ((length(deepInfo) == 1) && (deepInfo == 0))
             o_deepCycle = 0;
          end
-
+         
          % check cycle number consistency
          offset = o_deepCycle;
          if ((o_tabTech2(1) + offset) ~= g_decArgo_cycleNum)
-            if (o_tabTech2(1) == 0)
-               fprintf('INFO: Float #%d Cycle #%d: Cycle number of Argos file name (%d) and transmitted cycle number (%d) are inconsistent - the float is in EOL\n', ...
-                  g_decArgo_floatNum, ...
-                  g_decArgo_cycleNum, ...
-                  g_decArgo_cycleNum, o_tabTech2(1));
-            else
-               fprintf('ERROR: Float #%d Cycle #%d: Cycle number of Argos file name (%d) and transmitted cycle number (%d) are inconsistent\n', ...
-                  g_decArgo_floatNum, ...
-                  g_decArgo_cycleNum, ...
-                  g_decArgo_cycleNum, o_tabTech2(1));
-            end
+            fprintf('ERROR: Float #%d Cycle #%d: Cycle number of Argos file name (%d) and transmitted cycle number (%d) are inconsistent\n', ...
+               g_decArgo_floatNum, ...
+               g_decArgo_cycleNum, ...
+               g_decArgo_cycleNum, o_tabTech2(1));
          end
-
+         
          % output NetCDF files
          if (g_decArgo_generateNcTech ~= 0)
             store_tech2_data_for_nc_30_32(o_tabTech2, floatTimeParts, utcTimeJuld, o_floatClockDrift, o_deepCycle);
-            
-            % store technical message #2 redundancy
-            g_decArgo_outputNcParamIndex = [g_decArgo_outputNcParamIndex;
-               g_decArgo_cycleNum 1001];
-            g_decArgo_outputNcParamValue{end+1} = msgOcc;
          end
          
          %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -279,15 +240,6 @@ for idMes = 1:size(a_tabSensors, 1)
          % output CSV file
          if (~isempty(g_decArgo_outputCsvFileId))
             print_param_data_in_csv_30_32(o_tabParam);
-         end
-         
-         % store parameter message redundancy
-         if (g_decArgo_generateNcTech ~= 0)
-            if (g_decArgo_cycleNum == 0)
-               g_decArgo_outputNcParamIndex = [g_decArgo_outputNcParamIndex;
-                  g_decArgo_cycleNum 1002];
-               g_decArgo_outputNcParamValue{end+1} = msgOcc;
-            end
          end
          
          %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -327,13 +279,13 @@ for idMes = 1:size(a_tabSensors, 1)
             % pressure
             formatBit = get_bits(curBit, 1, msgData);
             if (isempty(formatBit))
-               break
+               break;
             end
             curBit = curBit + 1;
             if (formatBit == 0)
                value = get_bits(curBit, 11, msgData);
                if (isempty(value))
-                  break
+                  break;
                end
                presCounts(curCtdoMes) = value;
                if (value == 2047)
@@ -345,7 +297,7 @@ for idMes = 1:size(a_tabSensors, 1)
             else
                relPresCounts = get_bits(curBit, 6, msgData);
                if (isempty(relPresCounts))
-                  break
+                  break;
                end
                presCounts(curCtdoMes) = presCounts(curCtdoMes-1) - sign*relPresCounts;
                presCountsOk(curCtdoMes) = 1;
@@ -355,20 +307,20 @@ for idMes = 1:size(a_tabSensors, 1)
             % temperature
             formatBit = get_bits(curBit, 1, msgData);
             if (isempty(formatBit))
-               break
+               break;
             end
             curBit = curBit + 1;
             if (formatBit == 0)
                value = get_bits(curBit, 15, msgData);
                if (isempty(value))
-                  break
+                  break;
                end
                tempCounts(curCtdoMes) = value;
                curBit = curBit + 15;
             else
                relTempCounts = get_bits(curBit, 10, msgData);
                if (isempty(relTempCounts))
-                  break
+                  break;
                end
                tempCounts(curCtdoMes) = tempCounts(curCtdoMes-1) + sign*(relTempCounts - 100);
                curBit = curBit + 10;
@@ -377,20 +329,20 @@ for idMes = 1:size(a_tabSensors, 1)
             % salinity
             formatBit = get_bits(curBit, 1, msgData);
             if (isempty(formatBit))
-               break
+               break;
             end
             curBit = curBit + 1;
             if (formatBit == 0)
                value = get_bits(curBit, 15, msgData);
                if (isempty(value))
-                  break
+                  break;
                end
                salCounts(curCtdoMes) = value;
                curBit = curBit + 15;
             else
                relSalCounts = get_bits(curBit, 8, msgData);
                if (isempty(relSalCounts))
-                  break
+                  break;
                end
                salCounts(curCtdoMes) = salCounts(curCtdoMes-1) + sign*(relSalCounts - 25);
                curBit = curBit + 8;
@@ -399,20 +351,20 @@ for idMes = 1:size(a_tabSensors, 1)
             % oxygen
             formatBit = get_bits(curBit, 1, msgData);
             if (isempty(formatBit))
-               break
+               break;
             end
             curBit = curBit + 1;
             if (formatBit == 0)
                value = get_bits(curBit, 13, msgData);
                if (isempty(value))
-                  break
+                  break;
                end
                oxyCounts(curCtdoMes) = value;
                curBit = curBit + 13;
             else
                relOxyCounts = get_bits(curBit, 9, msgData);
                if (isempty(relOxyCounts))
-                  break
+                  break;
                end
                oxyCounts(curCtdoMes) = oxyCounts(curCtdoMes-1) + relOxyCounts - 256;
                curBit = curBit + 9;
@@ -420,7 +372,7 @@ for idMes = 1:size(a_tabSensors, 1)
 
             curCtdoMes = curCtdoMes + 1;
             if (curCtdoMes == 6)
-               break
+               break;
             end
          end
          
@@ -456,13 +408,13 @@ for idMes = 1:size(a_tabSensors, 1)
             % pressure
             formatBit = get_bits(curBit, 1, msgData);
             if (isempty(formatBit))
-               break
+               break;
             end
             curBit = curBit + 1;
             if (formatBit == 0)
                value = get_bits(curBit, 11, msgData);
                if (isempty(value))
-                  break
+                  break;
                end
                presCounts(curCtdoMes) = value;
                if (value == 2047)
@@ -474,7 +426,7 @@ for idMes = 1:size(a_tabSensors, 1)
             else
                relPresCounts = twos_complement_dec_argo(get_bits(curBit, 6, msgData), 6);
                if (isempty(relPresCounts))
-                  break
+                  break;
                end
                presCounts(curCtdoMes) = presCounts(curCtdoMes-1) + relPresCounts;
                presCountsOk(curCtdoMes) = 1;
@@ -484,20 +436,20 @@ for idMes = 1:size(a_tabSensors, 1)
             % temperature
             formatBit = get_bits(curBit, 1, msgData);
             if (isempty(formatBit))
-               break
+               break;
             end
             curBit = curBit + 1;
             if (formatBit == 0)
                value = get_bits(curBit, 15, msgData);
                if (isempty(value))
-                  break
+                  break;
                end
                tempCounts(curCtdoMes) = value;
                curBit = curBit + 15;
             else
                relTempCounts = twos_complement_dec_argo(get_bits(curBit, 10, msgData), 10);
                if (isempty(relTempCounts))
-                  break
+                  break;
                end
                tempCounts(curCtdoMes) = tempCounts(curCtdoMes-1) + relTempCounts;
                curBit = curBit + 10;
@@ -506,20 +458,20 @@ for idMes = 1:size(a_tabSensors, 1)
             % salinity
             formatBit = get_bits(curBit, 1, msgData);
             if (isempty(formatBit))
-               break
+               break;
             end
             curBit = curBit + 1;
             if (formatBit == 0)
                value = get_bits(curBit, 15, msgData);
                if (isempty(value))
-                  break
+                  break;
                end
                salCounts(curCtdoMes) = value;
                curBit = curBit + 15;
             else
                relSalCounts = twos_complement_dec_argo(get_bits(curBit, 8, msgData), 8);
                if (isempty(relSalCounts))
-                  break
+                  break;
                end
                salCounts(curCtdoMes) = salCounts(curCtdoMes-1) + relSalCounts;
                curBit = curBit + 8;
@@ -528,20 +480,20 @@ for idMes = 1:size(a_tabSensors, 1)
             % oxygen
             formatBit = get_bits(curBit, 1, msgData);
             if (isempty(formatBit))
-               break
+               break;
             end
             curBit = curBit + 1;
             if (formatBit == 0)
                value = get_bits(curBit, 13, msgData);
                if (isempty(value))
-                  break
+                  break;
                end
                oxyCounts(curCtdoMes) = value;
                curBit = curBit + 13;
             else
                relOxyCounts = get_bits(curBit, 9, msgData);
                if (isempty(relOxyCounts))
-                  break
+                  break;
                end
                oxyCounts(curCtdoMes) = oxyCounts(curCtdoMes-1) + relOxyCounts - 256;
                curBit = curBit + 9;
@@ -549,7 +501,7 @@ for idMes = 1:size(a_tabSensors, 1)
 
             curCtdoMes = curCtdoMes + 1;
             if (curCtdoMes == 6)
-               break
+               break;
             end
          end
          
@@ -665,4 +617,4 @@ if (~isempty(tabDrifCTDO))
    end
 end
 
-return
+return;

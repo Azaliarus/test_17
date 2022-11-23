@@ -3,15 +3,12 @@
 %
 % SYNTAX :
 %  create_nc_tech_file(a_decoderId, ...
-%    a_tabNcTechIndex, a_tabNcTechVal, a_tabTechNMeas, a_tabTechAuxNMeas, ...
-%    a_tabNcTechLabelInfo, a_metaDataFromJson)
+%    a_tabNcTechIndex, a_tabNcTechVal, a_tabNcTechLabelInfo, a_metaDataFromJson)
 %
 % INPUT PARAMETERS :
 %   a_decoderId          : float decoder Id
 %   a_tabNcTechIndex     : index information on technical data
-%   a_tabNcTechVal       : values of technical data
-%   a_tabTechNMeas       : values of technical parameter data
-%   a_tabTechAuxNMeas    : values of technical parameter AUX data
+%   a_tabNcTechVal       : values of thecnical data
 %   a_tabNcTechLabelInfo : additional information for technical labels
 %   a_metaDataFromJson   : additional information retrieved from JSON meta-data
 %                          file
@@ -27,8 +24,7 @@
 %   03/31/2014 - RNU - creation
 % ------------------------------------------------------------------------------
 function create_nc_tech_file(a_decoderId, ...
-   a_tabNcTechIndex, a_tabNcTechVal, a_tabTechNMeas, a_tabTechAuxNMeas, ...
-   a_tabNcTechLabelInfo, a_metaDataFromJson)
+   a_tabNcTechIndex, a_tabNcTechVal, a_tabNcTechLabelInfo, a_metaDataFromJson)
 
 % Argos (1), Iridium RUDICS (2) or Iridium SBD (3) float
 global g_decArgo_floatTransType;
@@ -54,8 +50,8 @@ global g_decArgo_generateNcFlag;
 
 
 % no data to save
-if (isempty(a_tabNcTechIndex) && isempty(a_tabTechNMeas) && isempty(a_tabTechAuxNMeas))
-   return
+if (isempty(a_tabNcTechIndex) && isempty(a_tabNcTechVal))
+   return;
 end
 
 if (g_decArgo_floatTransType == 1)
@@ -101,7 +97,7 @@ if (g_decArgo_floatTransType == 1)
                   
                   idF = find(g_decArgo_existingArgosFileSystemDate >= ncFileUpdateDate, 1);
                   if (isempty(idF))
-                     return
+                     return;
                   end
                end
             end
@@ -109,25 +105,42 @@ if (g_decArgo_floatTransType == 1)
       end
    end
       
-   create_nc_tech_file_3_1(a_decoderId, ...
-      a_tabNcTechIndex, a_tabNcTechVal, a_tabTechNMeas, a_tabTechAuxNMeas, ...
-      a_tabNcTechLabelInfo, a_metaDataFromJson);
+   create_nc_tech_file_3_1( ...
+      a_tabNcTechIndex, a_tabNcTechVal, a_tabNcTechLabelInfo, a_metaDataFromJson);
    
-elseif (ismember(g_decArgo_floatTransType, [2 3 4]))
+elseif (g_decArgo_floatTransType == 2)
    
    % Iridium RUDICS floats
-   % Iridium SBD floats
-   % Iridium SBD ProvBioII floats
    
-   if ((g_decArgo_generateNcTech == 2) && (g_decArgo_generateNcFlag == 0))
-      % no buffer has been decoded => the file should not be updated
-      return
+   if ((g_decArgo_generateNcTech == 1) || ...
+         ((g_decArgo_generateNcTech == 2) && (g_decArgo_generateNcFlag == 1)))
+            
+      create_nc_tech_file_3_1( ...
+         a_tabNcTechIndex, a_tabNcTechVal, a_tabNcTechLabelInfo, a_metaDataFromJson);
    end
    
-   create_nc_tech_file_3_1(a_decoderId, ...
-      a_tabNcTechIndex, a_tabNcTechVal, a_tabTechNMeas, a_tabTechAuxNMeas, ...
-      a_tabNcTechLabelInfo, a_metaDataFromJson);
+elseif (g_decArgo_floatTransType == 3)
+   
+   % Iridium SBD floats
+   
+   if ((g_decArgo_generateNcTech == 1) || ...
+         ((g_decArgo_generateNcTech == 2) && (g_decArgo_generateNcFlag == 1)))
+            
+      create_nc_tech_file_3_1( ...
+         a_tabNcTechIndex, a_tabNcTechVal, a_tabNcTechLabelInfo, a_metaDataFromJson);
+   end
+   
+elseif (g_decArgo_floatTransType == 4)
+   
+   % Iridium SBD ProvBioII floats
+   
+   if ((g_decArgo_generateNcTech == 1) || ...
+         ((g_decArgo_generateNcTech == 2) && (g_decArgo_generateNcFlag == 1)))
+            
+      create_nc_tech_file_3_1( ...
+         a_tabNcTechIndex, a_tabNcTechVal, a_tabNcTechLabelInfo, a_metaDataFromJson);
+   end
    
 end
 
-return
+return;

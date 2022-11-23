@@ -1,5 +1,5 @@
 % ------------------------------------------------------------------------------
-% Compute drift derived parameters and add them in the drift measurements
+% Compute drift derived parameters and add them in the drift measurements 
 % profile structures.
 %
 % SYNTAX :
@@ -27,13 +27,6 @@ o_tabDrift = [];
 
 % current float WMO number
 global g_decArgo_floatNum;
-
-% sensor list
-global g_decArgo_sensorMountedOnFloat;
-
-% lists of managed decoders
-global g_decArgo_decoderIdListNkeCts4;
-global g_decArgo_decoderIdListNkeCts5Usea;
 
 
 % collect information on drift measurement profiles
@@ -63,12 +56,12 @@ if (~isempty(driftInfo))
          driftCtd = a_tabDrift(driftInfo(idF, 1));
       else
          if (isempty(idF))
-            fprintf('WARNING: Float #%d Cycle #%d Profile #%d: unable to find the associated CTD drift measurement profile to compute DOXY drift measurements of OPTODE sensor - DOXY drift measurements set to fill value\n', ...
+            fprintf('WARNING: Float #%d Cycle #%d Profile #%d: unable to find the associated CTD drift measurement profile to compute DOXY drift measurements of OPTODE sensor => DOXY drift measurements set to fill value\n', ...
                g_decArgo_floatNum, ...
                driftOptode.cycleNumber, ...
                driftOptode.profileNumber);
          else
-            fprintf('WARNING: Float #%d Cycle #%d Profile #%d: %d associated CTD drift measurement profiles have been found to compute DOXY drift measurements of OPTODE sensor - DOXY drift measurements set to fill value\n', ...
+            fprintf('WARNING: Float #%d Cycle #%d Profile #%d: %d associated CTD drift measurement profiles have been found to compute DOXY drift measurements of OPTODE sensor => DOXY drift measurements set to fill value\n', ...
                g_decArgo_floatNum, ...
                driftOptode.cycleNumber, ...
                driftOptode.profileNumber, ...
@@ -85,75 +78,40 @@ if (~isempty(driftInfo))
       a_tabDrift(driftInfo(idSensor2(idP), 1)) = compute_drift_derived_parameters_for_OCR(a_tabDrift(driftInfo(idSensor2(idP), 1)));
    end
    
-   if (ismember('ECO2', g_decArgo_sensorMountedOnFloat))
+   % compute ECO3 derived parameters
+   % V1 START
+   %       idSensor3 = find((driftInfo(:, 2) == 3) & (driftInfo(:, 3) == 0));
+   %       for idD = 1:length(idSensor3)
+   %          a_tabDrift(driftInfo(idSensor3(idD), 1)) = compute_drift_derived_parameters_for_ECO3_V1(a_tabDrift(driftInfo(idSensor3(idD), 1)));
+   %       end
+   % V1 END
+   idSensor3 = find((driftInfo(:, 2) == 3) & (driftInfo(:, 3) == 0));
+   for idP = 1:length(idSensor3)
+      profEco3 = a_tabDrift(driftInfo(idSensor3(idP), 1));
       
-      % compute ECO2 derived parameters
-      idSensor3 = find((driftInfo(:, 2) == 3) & (driftInfo(:, 3) == 0));
-      for idP = 1:length(idSensor3)
-         profEco2 = a_tabDrift(driftInfo(idSensor3(idP), 1));
-         
-         % look for the associated CTD profile
-         driftCtd = [];
-         idF = find((driftInfo(:, 2) == 0) & ...
-            (driftInfo(:, 4) == profEco2.cycleNumber) & ...
-            (driftInfo(:, 5) == profEco2.profileNumber));
-         if (length(idF) == 1)
-            driftCtd = a_tabDrift(driftInfo(idF, 1));
+      % look for the associated CTD profile
+      profCtd = [];
+      idF = find((driftInfo(:, 2) == 0) & ...
+         (driftInfo(:, 4) == profEco3.cycleNumber) & ...
+         (driftInfo(:, 5) == profEco3.profileNumber));
+      if (length(idF) == 1)
+         profCtd = a_tabDrift(driftInfo(idF, 1));
+      else
+         if (isempty(idF))
+            fprintf('WARNING: Float #%d Cycle #%d Profile #%d: unable to find the associated CTD drift measurement profile to compute BBP drift measurements of ECO3 sensor => BBP drift measurements set to fill value\n', ...
+               g_decArgo_floatNum, ...
+               profEco3.cycleNumber, ...
+               profEco3.profileNumber);
          else
-            if (isempty(idF))
-               fprintf('WARNING: Float #%d Cycle #%d Profile #%d: unable to find the associated CTD drift measurement profile to compute BBP drift measurements of ECO2 sensor - BBP drift measurements set to fill value\n', ...
-                  g_decArgo_floatNum, ...
-                  profEco2.cycleNumber, ...
-                  profEco2.profileNumber);
-            else
-               fprintf('WARNING: Float #%d Cycle #%d Profile #%d: %d associated CTD drift measurement profiles have been found to compute BBP drift measurements of ECO2 sensor - BBP data set to fill value\n', ...
-                  g_decArgo_floatNum, ...
-                  profEco2.cycleNumber, ...
-                  profEco2.profileNumber, ...
-                  length(idF));
-            end
+            fprintf('WARNING: Float #%d Cycle #%d Profile #%d: %d associated CTD drift measurement profiles have been found to compute BBP drift measurements of ECO3 sensor => BBP data set to fill value\n', ...
+               g_decArgo_floatNum, ...
+               profEco3.cycleNumber, ...
+               profEco3.profileNumber, ...
+               length(idF));
          end
-         a_tabDrift(driftInfo(idSensor3(idP), 1)) = compute_drift_derived_parameters_for_ECO2( ...
-            profEco2, driftCtd);
       end
-      
-   elseif (ismember('ECO3', g_decArgo_sensorMountedOnFloat))
-      
-      % compute ECO3 derived parameters
-      % V1 START
-      %       idSensor3 = find((driftInfo(:, 2) == 3) & (driftInfo(:, 3) == 0));
-      %       for idD = 1:length(idSensor3)
-      %          a_tabDrift(driftInfo(idSensor3(idD), 1)) = compute_drift_derived_parameters_for_ECO3_V1(a_tabDrift(driftInfo(idSensor3(idD), 1)));
-      %       end
-      % V1 END
-      idSensor3 = find((driftInfo(:, 2) == 3) & (driftInfo(:, 3) == 0));
-      for idP = 1:length(idSensor3)
-         profEco3 = a_tabDrift(driftInfo(idSensor3(idP), 1));
-         
-         % look for the associated CTD profile
-         driftCtd = [];
-         idF = find((driftInfo(:, 2) == 0) & ...
-            (driftInfo(:, 4) == profEco3.cycleNumber) & ...
-            (driftInfo(:, 5) == profEco3.profileNumber));
-         if (length(idF) == 1)
-            driftCtd = a_tabDrift(driftInfo(idF, 1));
-         else
-            if (isempty(idF))
-               fprintf('WARNING: Float #%d Cycle #%d Profile #%d: unable to find the associated CTD drift measurement profile to compute BBP drift measurements of ECO3 sensor - BBP drift measurements set to fill value\n', ...
-                  g_decArgo_floatNum, ...
-                  profEco3.cycleNumber, ...
-                  profEco3.profileNumber);
-            else
-               fprintf('WARNING: Float #%d Cycle #%d Profile #%d: %d associated CTD drift measurement profiles have been found to compute BBP drift measurements of ECO3 sensor - BBP data set to fill value\n', ...
-                  g_decArgo_floatNum, ...
-                  profEco3.cycleNumber, ...
-                  profEco3.profileNumber, ...
-                  length(idF));
-            end
-         end
-         a_tabDrift(driftInfo(idSensor3(idP), 1)) = compute_drift_derived_parameters_for_ECO3( ...
-            profEco3, driftCtd);
-      end
+      a_tabDrift(driftInfo(idSensor3(idP), 1)) = compute_drift_derived_parameters_for_ECO3( ...
+         profEco3, profCtd);
    end
    
    % compute SUNA derived parameters
@@ -161,28 +119,14 @@ if (~isempty(driftInfo))
    for idD = 1:length(idSensor6)
       driftCtd = [];
       driftSuna = a_tabDrift(driftInfo(idSensor6(idD), 1));
-      
-      % FOR PROVOR CTS4 and CTS5_USEA
-      % associated PTS values are provided with the NITRATE data when in "APF
-      % frame"; however we use the PTS profile of the CTD sensor (better
-      % reliability for SUNA measurement pressures that will be shifted by
-      % the SUNA vertical pressure offset).
-      % If CTD sensor profile is not available, we will use (in following
-      % sub-function) the NITRATE associated PTS values.
-      % FOR PROVOR CTS5_OSEAN:
-      % the CTD PTS values are provided with the SUNA data. As P values come
-      % from the CTD, they differ from the SUNA measurement ones. We then
-      % decided to store PTS in a dedicated profile and to set the VSS to
-      % 'Secondary sampling: discrete [CTD measurements concurrent with SUNA
-      % measurements, just slightly offset in time]'
-      % thus the PTS data sent with SUNA data are stored in a dedicated profile
-      % associated to sensor number 6
-      % these data are used only if CTD sensor profile is not available
-      % (see above explanations for CTS4)
+      % the CTD PTS values are provided with the data when in "APF frame" mode
+      % if we are not in "APF frame" mode, we need the associated CTD drift
+      % measurement profile
+      % (for better reliability, we prefer to check the "APF frame" mode from
+      % the received data than from the SUNA configuration)
       paramNameList = {driftSuna.paramList.name};
-      if (ismember(a_decoderId, [g_decArgo_decoderIdListNkeCts4 g_decArgo_decoderIdListNkeCts5Usea]))
-         % PROVOR CTS4 and CTS5_USEA float
-         % look for the CTD drift profile
+      if (isempty(find(strcmp('TEMP', paramNameList) == 1, 1)))
+         % look for the associated CTD drift measurement profile
          idF = find((driftInfo(:, 2) == 0) & ...
             (driftInfo(:, 4) == driftSuna.cycleNumber) & ...
             (driftInfo(:, 5) == driftSuna.profileNumber));
@@ -190,120 +134,28 @@ if (~isempty(driftInfo))
             driftCtd = a_tabDrift(driftInfo(idF, 1));
          else
             if (isempty(idF))
-               fprintf('WARNING: Float #%d Cycle #%d Profile #%d: unable to find the associated CTD drift measurement profile to compute NITRATE drift measurements of SUNA sensor - we use SUNA PTS data to compute NITRATE\n', ...
+               fprintf('WARNING: Float #%d Cycle #%d Profile #%d: unable to find the associated CTD drift measurement profile to compute NITRATE drift measurements of SUNA sensor => NITRATE drift measurements set to fill value\n', ...
                   g_decArgo_floatNum, ...
                   driftSuna.cycleNumber, ...
                   driftSuna.profileNumber);
             else
-               fprintf('WARNING: Float #%d Cycle #%d Profile #%d: %d associated CTD drift measurement profiles have been found to compute NITRATE drift measurements of SUNA sensor - we use SUNA PTS data to compute NITRATE\n', ...
+               fprintf('WARNING: Float #%d Cycle #%d Profile #%d: %d associated CTD drift measurement profiles have been found to compute NITRATE drift measurements of SUNA sensor => NITRATE drift measurements set to fill value\n', ...
                   g_decArgo_floatNum, ...
                   driftSuna.cycleNumber, ...
                   driftSuna.profileNumber, ...
                   length(idF));
-            end
-         end
-      else
-         % PROVOR CTS5_OSEAN float
-         if (~isempty(find(strcmp('TEMP', paramNameList) == 1, 1)))
-            % it is the PTS drift profile reported by the SUNA sensor (we stored
-            % a dedicated PTS drift profile with SensorNumber = 6)
-            continue % so that the next one with SensorNumber = 6 contains the NITRATE data
-         end
-         % look for the associated CTD drift profile
-         idF = find((driftInfo(:, 2) == 0) & ...
-            (driftInfo(:, 4) == driftSuna.cycleNumber) & ...
-            (driftInfo(:, 5) == driftSuna.profileNumber));
-         if (length(idF) == 1)
-            driftCtd = a_tabDrift(driftInfo(idF, 1));
-         else
-            if (isempty(idF))
-               fprintf('WARNING: Float #%d Cycle #%d Profile #%d: unable to find the associated CTD drift measurement profile to compute NITRATE drift measurements of SUNA sensor - we use SUNA PTS data to compute NITRATE\n', ...
-                  g_decArgo_floatNum, ...
-                  driftSuna.cycleNumber, ...
-                  driftSuna.profileNumber);
-            else
-               fprintf('WARNING: Float #%d Cycle #%d Profile #%d: %d associated CTD drift measurement profiles have been found to compute NITRATE drift measurements of SUNA sensor - we use SUNA PTS data to compute NITRATE\n', ...
-                  g_decArgo_floatNum, ...
-                  driftSuna.cycleNumber, ...
-                  driftSuna.profileNumber, ...
-                  length(idF));
-            end
-            
-            % look for the SUNA associated CTD driftprofile
-            idF = find((driftInfo(:, 2) == 6) & ...
-               (driftInfo(:, 4) == driftSuna.cycleNumber) & ...
-               (driftInfo(:, 5) == driftSuna.profileNumber));
-            % idSensor6(idP) is the current drift profile (with NITRATE data)
-            % idF contains all SUNA drift profiles (with NITRATE data and with
-            % associated PTS)
-            idF = setdiff(idF, idSensor6(idP)); % to select SUNA drift profile with associated PTS
-            if (length(idF) == 1)
-               driftCtd = a_tabDrift(driftInfo(idF, 1));
-            else
-               if (isempty(idF))
-                  fprintf('WARNING: Float #%d Cycle #%d Profile #%d: unable to find the SUNA PTS data to compute NITRATE drift measurements of SUNA sensor - NITRATE data set to fill value\n', ...
-                     g_decArgo_floatNum, ...
-                     driftSuna.cycleNumber, ...
-                     driftSuna.profileNumber);
-               end
             end
          end
       end
       a_tabDrift(driftInfo(idSensor6(idD), 1)) = compute_drift_derived_parameters_for_SUNA( ...
-         driftSuna, driftCtd, a_decoderId);
-   end
-   
-   % compute TRANSISTOR_PH derived parameters
-   idSensorPh = [];
-   if (ismember(a_decoderId, g_decArgo_decoderIdListNkeCts4))
-      % PROVOR CTS4 float => sensor #4
-      if (ismember('TRANSISTOR_PH', g_decArgo_sensorMountedOnFloat))
-         idSensorPh = find((driftInfo(:, 2) == 4) & (driftInfo(:, 3) == 0));
-      end
-   else
-      % PROVOR CTS5 float => sensor #7
-      idSensorPh = find((driftInfo(:, 2) == 7) & (driftInfo(:, 3) == 0));
-   end
-   for idD = 1:length(idSensorPh)
-      driftTransPh = a_tabDrift(driftInfo(idSensorPh(idD), 1));
-      
-      % look for the associated CTD drift measurements
-      driftCtd = [];
-      idF = find((driftInfo(:, 2) == 0) & ...
-         (driftInfo(:, 4) == driftTransPh.cycleNumber) & ...
-         (driftInfo(:, 5) == driftTransPh.profileNumber));
-      if (length(idF) == 1)
-         driftCtd = a_tabDrift(driftInfo(idF, 1));
-      else
-         if (isempty(idF))
-            fprintf('WARNING: Float #%d Cycle #%d Profile #%d: unable to find the associated CTD drift measurement profile to compute PH_IN_SITU_FREE and PH_IN_SITU_TOTAL drift measurements of TRANSISTOR_PH sensor - PH_IN_SITU_FREE and PH_IN_SITU_TOTAL drift measurements set to fill value\n', ...
-               g_decArgo_floatNum, ...
-               driftTransPh.cycleNumber, ...
-               driftTransPh.profileNumber);
-         else
-            fprintf('WARNING: Float #%d Cycle #%d Profile #%d: %d associated CTD drift measurement profiles have been found to compute PH_IN_SITU_FREE and PH_IN_SITU_TOTAL drift measurements of TRANSISTOR_PH sensor - PH_IN_SITU_FREE and PH_IN_SITU_TOTAL drift measurements set to fill value\n', ...
-               g_decArgo_floatNum, ...
-               driftTransPh.cycleNumber, ...
-               driftTransPh.profileNumber, ...
-               length(idF));
-         end
-      end
-      a_tabDrift(driftInfo(idSensorPh(idD), 1)) = ...
-         compute_drift_derived_parameters_for_TRANSISTOR_PH( ...
-         driftTransPh, driftCtd);
-   end
-
-   % compute MPE derived parameters
-   idSensor110 = find((driftInfo(:, 2) == 110) & (driftInfo(:, 3) == 0));
-   for idP = 1:length(idSensor110)
-      a_tabDrift(driftInfo(idSensor110(idP), 1)) = compute_drift_derived_parameters_for_MPE(a_tabDrift(driftInfo(idSensor110(idP), 1)));
+         driftSuna, driftCtd);
    end
 end
 
 % update output parameters
 o_tabDrift = a_tabDrift;
 
-return
+return;
 
 % ------------------------------------------------------------------------------
 % Compute derived parameters for the OCR sensor.
@@ -351,30 +203,19 @@ for idP = 1:length(paramToDeriveList)
       paramToDerive = get_netcdf_param_attributes(paramToDeriveList{idP});
       derivedParam = get_netcdf_param_attributes(derivedParamList{idP});
       
-      downIrr380 = compute_DOWN_IRRADIANCE380_105_to_112_121_to_127( ...
+      downIrr380 = compute_DOWN_IRRADIANCE380_105_to_109( ...
          a_driftOcr.data(:, idF), ...
          paramToDerive.fillValue, derivedParam.fillValue);
       
       a_driftOcr.data(:, end+1) = downIrr380;
       if (isempty(a_driftOcr.dataQc))
-         a_driftOcr.dataQc = ones(size(a_driftOcr.data, 1), length(a_driftOcr.paramList))*g_decArgo_qcDef;
+         a_driftOcr.dataQc = ones(size(a_driftOcr.data, 1), size(a_driftOcr.data, 2)-1)*g_decArgo_qcDef;
       end
       downIrr380Qc = ones(size(a_driftOcr.data, 1), 1)*g_decArgo_qcDef;
       downIrr380Qc(find(downIrr380 ~= derivedParam.fillValue)) = g_decArgo_qcNoQc;
       a_driftOcr.dataQc(:, end+1) = downIrr380Qc;
 
-      if (~isempty(a_driftOcr.dataAdj))
-         a_driftOcr.dataAdj(:, end+1) = ones(size(a_driftOcr.data, 1), 1)*derivedParam.fillValue;
-         if (isempty(a_driftOcr.dataAdjQc))
-            a_driftOcr.dataAdjQc = ones(size(a_driftOcr.data, 1), length(a_driftOcr.paramList))*g_decArgo_qcDef;
-         end
-         a_driftOcr.dataAdjQc(:, end+1) = ones(size(a_driftOcr.data, 1), 1)*g_decArgo_qcDef;
-      end
-      
       a_driftOcr.paramList = [a_driftOcr.paramList derivedParam];
-      if (~isempty(a_driftOcr.paramDataMode))
-         a_driftOcr.paramDataMode = [a_driftOcr.paramDataMode ' '];
-      end
    end
 end
 
@@ -391,30 +232,19 @@ for idP = 1:length(paramToDeriveList)
       paramToDerive = get_netcdf_param_attributes(paramToDeriveList{idP});
       derivedParam = get_netcdf_param_attributes(derivedParamList{idP});
       
-      downIrr412 = compute_DOWN_IRRADIANCE412_105_to_112_121_to_127( ...
+      downIrr412 = compute_DOWN_IRRADIANCE412_105_to_109( ...
          a_driftOcr.data(:, idF), ...
          paramToDerive.fillValue, derivedParam.fillValue);
       
       a_driftOcr.data(:, end+1) = downIrr412;
       if (isempty(a_driftOcr.dataQc))
-         a_driftOcr.dataQc = ones(size(a_driftOcr.data, 1), length(a_driftOcr.paramList))*g_decArgo_qcDef;
+         a_driftOcr.dataQc = ones(size(a_driftOcr.data, 1), size(a_driftOcr.data, 2)-1)*g_decArgo_qcDef;
       end
       downIrr412Qc = ones(size(a_driftOcr.data, 1), 1)*g_decArgo_qcDef;
       downIrr412Qc(find(downIrr412 ~= derivedParam.fillValue)) = g_decArgo_qcNoQc;
       a_driftOcr.dataQc(:, end+1) = downIrr412Qc;
-
-      if (~isempty(a_driftOcr.dataAdj))
-         a_driftOcr.dataAdj(:, end+1) = ones(size(a_driftOcr.data, 1), 1)*derivedParam.fillValue;
-         if (isempty(a_driftOcr.dataAdjQc))
-            a_driftOcr.dataAdjQc = ones(size(a_driftOcr.data, 1), length(a_driftOcr.paramList))*g_decArgo_qcDef;
-         end
-         a_driftOcr.dataAdjQc(:, end+1) = ones(size(a_driftOcr.data, 1), 1)*g_decArgo_qcDef;
-      end
       
       a_driftOcr.paramList = [a_driftOcr.paramList derivedParam];
-      if (~isempty(a_driftOcr.paramDataMode))
-         a_driftOcr.paramDataMode = [a_driftOcr.paramDataMode ' '];
-      end
    end
 end
 
@@ -431,30 +261,19 @@ for idP = 1:length(paramToDeriveList)
       paramToDerive = get_netcdf_param_attributes(paramToDeriveList{idP});
       derivedParam = get_netcdf_param_attributes(derivedParamList{idP});
       
-      downIrr490 = compute_DOWN_IRRADIANCE490_105_to_112_121_to_127( ...
+      downIrr490 = compute_DOWN_IRRADIANCE490_105_to_109( ...
          a_driftOcr.data(:, idF), ...
          paramToDerive.fillValue, derivedParam.fillValue);
       
       a_driftOcr.data(:, end+1) = downIrr490;
       if (isempty(a_driftOcr.dataQc))
-         a_driftOcr.dataQc = ones(size(a_driftOcr.data, 1), length(a_driftOcr.paramList))*g_decArgo_qcDef;
+         a_driftOcr.dataQc = ones(size(a_driftOcr.data, 1), size(a_driftOcr.data, 2)-1)*g_decArgo_qcDef;
       end
       downIrr490Qc = ones(size(a_driftOcr.data, 1), 1)*g_decArgo_qcDef;
       downIrr490Qc(find(downIrr490 ~= derivedParam.fillValue)) = g_decArgo_qcNoQc;
       a_driftOcr.dataQc(:, end+1) = downIrr490Qc;
       
-      if (~isempty(a_driftOcr.dataAdj))
-         a_driftOcr.dataAdj(:, end+1) = ones(size(a_driftOcr.data, 1), 1)*derivedParam.fillValue;
-         if (isempty(a_driftOcr.dataAdjQc))
-            a_driftOcr.dataAdjQc = ones(size(a_driftOcr.data, 1), length(a_driftOcr.paramList))*g_decArgo_qcDef;
-         end
-         a_driftOcr.dataAdjQc(:, end+1) = ones(size(a_driftOcr.data, 1), 1)*g_decArgo_qcDef;
-      end
-      
       a_driftOcr.paramList = [a_driftOcr.paramList derivedParam];
-      if (~isempty(a_driftOcr.paramDataMode))
-         a_driftOcr.paramDataMode = [a_driftOcr.paramDataMode ' '];
-      end
    end
 end
 
@@ -471,30 +290,19 @@ for idP = 1:length(paramToDeriveList)
       paramToDerive = get_netcdf_param_attributes(paramToDeriveList{idP});
       derivedParam = get_netcdf_param_attributes(derivedParamList{idP});
       
-      downPar = compute_DOWNWELLING_PAR_105_to_112_121_to_127( ...
+      downPar = compute_DOWNWELLING_PAR_105_to_109( ...
          a_driftOcr.data(:, idF), ...
          paramToDerive.fillValue, derivedParam.fillValue);
       
       a_driftOcr.data(:, end+1) = downPar;
       if (isempty(a_driftOcr.dataQc))
-         a_driftOcr.dataQc = ones(size(a_driftOcr.data, 1), length(a_driftOcr.paramList))*g_decArgo_qcDef;
+         a_driftOcr.dataQc = ones(size(a_driftOcr.data, 1), size(a_driftOcr.data, 2)-1)*g_decArgo_qcDef;
       end
       downParQc = ones(size(a_driftOcr.data, 1), 1)*g_decArgo_qcDef;
       downParQc(find(downPar ~= derivedParam.fillValue)) = g_decArgo_qcNoQc;
       a_driftOcr.dataQc(:, end+1) = downParQc;
       
-      if (~isempty(a_driftOcr.dataAdj))
-         a_driftOcr.dataAdj(:, end+1) = ones(size(a_driftOcr.data, 1), 1)*derivedParam.fillValue;
-         if (isempty(a_driftOcr.dataAdjQc))
-            a_driftOcr.dataAdjQc = ones(size(a_driftOcr.data, 1), length(a_driftOcr.paramList))*g_decArgo_qcDef;
-         end
-         a_driftOcr.dataAdjQc(:, end+1) = ones(size(a_driftOcr.data, 1), 1)*g_decArgo_qcDef;
-      end
-      
       a_driftOcr.paramList = [a_driftOcr.paramList derivedParam];
-      if (~isempty(a_driftOcr.paramDataMode))
-         a_driftOcr.paramDataMode = [a_driftOcr.paramDataMode ' '];
-      end
    end
 end
 
@@ -502,261 +310,7 @@ end
 a_driftOcr.derived = 1;
 o_driftOcr = a_driftOcr;
 
-return
-
-% ------------------------------------------------------------------------------
-% Compute derived parameters for the ECO2 sensor.
-%
-% SYNTAX :
-%  [o_driftEco2] = compute_drift_derived_parameters_for_ECO2( ...
-%    a_driftEco2, a_driftCtd)
-%
-% INPUT PARAMETERS :
-%   a_driftEco2 : input ECO2 drift profile structure
-%   a_driftCtd  : input CTD drift profile structure
-%
-% OUTPUT PARAMETERS :
-%   o_driftEco2 : output ECO3 drift profile structure
-%
-% EXAMPLES :
-%
-% SEE ALSO :
-% AUTHORS  : Jean-Philippe Rannou (Altran)(jean-philippe.rannou@altran.com)
-% ------------------------------------------------------------------------------
-% RELEASES :
-%   03/06/2018 - RNU - creation
-% ------------------------------------------------------------------------------
-function [o_driftEco2] = compute_drift_derived_parameters_for_ECO2( ...
-   a_driftEco2, a_driftCtd)
-
-% output parameters initialization
-o_driftEco2 = [];
-
-% global default values
-global g_decArgo_qcDef;
-global g_decArgo_qcNoQc;
-
-
-% list of parameters of the profile
-paramNameList = {a_driftEco2.paramList.name};
-
-% compute CHLA data and add them in the profile structure
-paramToDeriveList = [ ...
-   {'FLUORESCENCE_CHLA'} ...
-   ];
-derivedParamList = [ ...
-   {'CHLA'} ...
-   ];
-for idP = 1:length(paramToDeriveList)
-   idF = find(strcmp(paramToDeriveList{idP}, paramNameList) == 1, 1);
-   if (~isempty(idF))
-      paramToDerive = get_netcdf_param_attributes(paramToDeriveList{idP});
-      derivedParam = get_netcdf_param_attributes(derivedParamList{idP});
-      
-      chla = compute_CHLA_105_to_112_121_to_127_1121_to_28_1322_1323( ...
-         a_driftEco2.data(:, idF), ...
-         paramToDerive.fillValue, derivedParam.fillValue);
-      
-      a_driftEco2.data(:, end+1) = chla;
-      if (isempty(a_driftEco2.dataQc))
-         a_driftEco2.dataQc = ones(size(a_driftEco2.data, 1), length(a_driftEco2.paramList))*g_decArgo_qcDef;
-      end
-      chlaQc = ones(size(a_driftEco2.data, 1), 1)*g_decArgo_qcDef;
-      chlaQc(find(chla ~= derivedParam.fillValue)) = g_decArgo_qcNoQc;
-      a_driftEco2.dataQc(:, end+1) = chlaQc;
-      
-      if (~isempty(a_driftEco2.dataAdj))
-         a_driftEco2.dataAdj(:, end+1) = ones(size(a_driftEco2.data, 1), 1)*derivedParam.fillValue;
-         if (isempty(a_driftEco2.dataAdjQc))
-            a_driftEco2.dataAdjQc = ones(size(a_driftEco2.data, 1), length(a_driftEco2.paramList))*g_decArgo_qcDef;
-         end
-         a_driftEco2.dataAdjQc(:, end+1) = ones(size(a_driftEco2.data, 1), 1)*g_decArgo_qcDef;
-      end
-      
-      a_driftEco2.paramList = [a_driftEco2.paramList derivedParam];
-      if (~isempty(a_driftEco2.paramDataMode))
-         a_driftEco2.paramDataMode = [a_driftEco2.paramDataMode ' '];
-      end
-   end
-end
-
-if (isempty(a_driftCtd))
-   
-   % we have not been able to retrieve the associated CTD profile
-   paramToDeriveList = [ ...
-      {'BETA_BACKSCATTERING700'} ...
-      {'BETA_BACKSCATTERING532'} ...
-      ];
-   derivedParamList = [ ...
-      {'BBP700'} ...
-      {'BBP532'} ...
-      ];
-   for idP = 1:length(paramToDeriveList)
-      idF = find(strcmp(paramToDeriveList{idP}, paramNameList) == 1, 1);
-      if (~isempty(idF))
-         derivedParam = get_netcdf_param_attributes(derivedParamList{idP});
-         a_driftEco2.data(:, end+1) = ones(size(a_driftEco2.data, 1), 1)*derivedParam.fillValue;
-         if (~isempty(a_driftEco2.dataQc))
-            a_driftEco2.dataQc(:, end+1) = ones(size(a_driftEco2.data, 1), 1)*g_decArgo_qcDef;
-         end
-
-         if (~isempty(a_driftEco2.dataAdj))
-            a_driftEco2.dataAdj(:, end+1) = ones(size(a_driftEco2.data, 1), 1)*derivedParam.fillValue;
-            if (~isempty(a_driftEco2.dataAdjQc))
-               a_driftEco2.dataAdjQc(:, end+1) = ones(size(a_driftEco2.data, 1), 1)*g_decArgo_qcDef;
-            end
-         end
-         
-         a_driftEco2.paramList = [a_driftEco2.paramList derivedParam];
-         if (~isempty(a_driftEco2.paramDataMode))
-            a_driftEco2.paramDataMode = [a_driftEco2.paramDataMode ' '];
-         end
-      end
-   end
-   
-else
-   
-   % retrieve measured CTD data
-   paramNameListCtd = {a_driftCtd.paramList.name};
-   presId = find(strcmp('PRES', paramNameListCtd) == 1, 1);
-   tempId = find(strcmp('TEMP', paramNameListCtd) == 1, 1);
-   psalId = find(strcmp('PSAL', paramNameListCtd) == 1, 1);
-   ctdMeasDates = a_driftCtd.dates;
-   ctdMeasData = a_driftCtd.data(:, [presId tempId psalId]);
-   
-   % compute BBP700 data and add them in the profile structure
-   paramToDeriveList = [ ...
-      {'BETA_BACKSCATTERING700'} ...
-      ];
-   derivedParamList = [ ...
-      {'BBP700'} ...
-      ];
-   paramPres = get_netcdf_param_attributes('PRES');
-   paramTemp = get_netcdf_param_attributes('TEMP');
-   paramPsal = get_netcdf_param_attributes('PSAL');
-   for idP = 1:length(paramToDeriveList)
-      idF = find(strcmp(paramToDeriveList{idP}, paramNameList) == 1, 1);
-      if (~isempty(idF))
-         paramToDerive = get_netcdf_param_attributes(paramToDeriveList{idP});
-         derivedParam = get_netcdf_param_attributes(derivedParamList{idP});
-         
-         % compute BBP700 values
-         bbp700 = compute_drift_BBP( ...
-            a_driftEco2.data(:, idF), ...
-            paramToDerive.fillValue, ...
-            derivedParam.fillValue, ...
-            a_driftEco2.dates, ...
-            700, ...
-            ctdMeasDates, ctdMeasData, ...
-            paramPres.fillValue, ...
-            paramTemp.fillValue, ...
-            paramPsal.fillValue, ...
-            a_driftEco2);
-         
-         if (~isempty(bbp700))
-            a_driftEco2.data(:, end+1) = bbp700;
-            if (isempty(a_driftEco2.dataQc))
-               a_driftEco2.dataQc = ones(size(a_driftEco2.data, 1), length(a_driftEco2.paramList))*g_decArgo_qcDef;
-            end
-            bbp700Qc = ones(size(a_driftEco2.data, 1), 1)*g_decArgo_qcDef;
-            bbp700Qc(find(bbp700 ~= derivedParam.fillValue)) = g_decArgo_qcNoQc;
-            a_driftEco2.dataQc(:, end+1) = bbp700Qc;
-
-            if (~isempty(a_driftEco2.dataAdj))
-               a_driftEco2.dataAdj(:, end+1) = ones(size(a_driftEco2.data, 1), 1)*derivedParam.fillValue;
-               if (isempty(a_driftEco2.dataAdjQc))
-                  a_driftEco2.dataAdjQc = ones(size(a_driftEco2.data, 1), length(a_driftEco2.paramList))*g_decArgo_qcDef;
-               end
-               a_driftEco2.dataAdjQc(:, end+1) = ones(size(a_driftEco2.data, 1), 1)*g_decArgo_qcDef;
-            end
-         else
-            a_driftEco2.data(:, end+1) = ones(size(a_driftEco2.data, 1), 1)*derivedParam.fillValue;
-            if (~isempty(a_driftEco2.dataQc))
-               a_driftEco2.dataQc(:, end+1) = ones(size(a_driftEco2.data, 1), 1)*g_decArgo_qcDef;
-            end
-
-            if (~isempty(a_driftEco2.dataAdj))
-               a_driftEco2.dataAdj(:, end+1) = ones(size(a_driftEco2.data, 1), 1)*derivedParam.fillValue;
-               if (~isempty(a_driftEco2.dataAdjQc))
-                  a_driftEco2.dataAdjQc(:, end+1) = ones(size(a_driftEco2.data, 1), 1)*g_decArgo_qcDef;
-               end
-            end
-         end
-         a_driftEco2.paramList = [a_driftEco2.paramList derivedParam];
-         if (~isempty(a_driftEco2.paramDataMode))
-            a_driftEco2.paramDataMode = [a_driftEco2.paramDataMode ' '];
-         end
-      end
-   end
-   
-   % compute BBP532 data and add them in the profile structure
-   paramToDeriveList = [ ...
-      {'BETA_BACKSCATTERING532'} ...
-      ];
-   derivedParamList = [ ...
-      {'BBP532'} ...
-      ];
-   for idP = 1:length(paramToDeriveList)
-      idF = find(strcmp(paramToDeriveList{idP}, paramNameList) == 1, 1);
-      if (~isempty(idF))
-         paramToDerive = get_netcdf_param_attributes(paramToDeriveList{idP});
-         derivedParam = get_netcdf_param_attributes(derivedParamList{idP});
-         
-         % compute BBP532 values
-         bbp532 = compute_drift_BBP( ...
-            a_driftEco2.data(:, idF), ...
-            paramToDerive.fillValue, ...
-            derivedParam.fillValue, ...
-            a_driftEco2.dates, ...
-            532, ...
-            ctdMeasDates, ctdMeasData, ...
-            paramPres.fillValue, ...
-            paramTemp.fillValue, ...
-            paramPsal.fillValue, ...
-            a_driftEco2);
-         
-         if (~isempty(bbp532))
-            a_driftEco2.data(:, end+1) = bbp532;
-            if (isempty(a_driftEco2.dataQc))
-               a_driftEco2.dataQc = ones(size(a_driftEco2.data, 1), length(a_driftEco2.paramList))*g_decArgo_qcDef;
-            end
-            bbp532Qc = ones(size(a_driftEco2.data, 1), 1)*g_decArgo_qcDef;
-            bbp532Qc(find(bbp532 ~= derivedParam.fillValue)) = g_decArgo_qcNoQc;
-            a_driftEco2.dataQc(:, end+1) = bbp532Qc;
-
-            if (~isempty(a_driftEco2.dataAdj))
-               a_driftEco2.dataAdj(:, end+1) = ones(size(a_driftEco2.data, 1), 1)*derivedParam.fillValue;
-               if (isempty(a_driftEco2.dataAdjQc))
-                  a_driftEco2.dataAdjQc = ones(size(a_driftEco2.data, 1), length(a_driftEco2.paramList))*g_decArgo_qcDef;
-               end
-               a_driftEco2.dataAdjQc(:, end+1) = ones(size(a_driftEco2.data, 1), 1)*g_decArgo_qcDef;
-            end
-         else
-            a_driftEco2.data(:, end+1) = ones(size(a_driftEco2.data, 1), 1)*derivedParam.fillValue;
-            if (~isempty(a_driftEco2.dataQc))
-               a_driftEco2.dataQc(:, end+1) = ones(size(a_driftEco2.data, 1), 1)*g_decArgo_qcDef;
-            end
-
-            if (~isempty(a_driftEco2.dataAdj))
-               a_driftEco2.dataAdj(:, end+1) = ones(size(a_driftEco2.data, 1), 1)*derivedParam.fillValue;
-               if (~isempty(a_driftEco2.dataAdjQc))
-                  a_driftEco2.dataAdjQc(:, end+1) = ones(size(a_driftEco2.data, 1), 1)*g_decArgo_qcDef;
-               end
-            end
-         end
-         a_driftEco2.paramList = [a_driftEco2.paramList derivedParam];
-         if (~isempty(a_driftEco2.paramDataMode))
-            a_driftEco2.paramDataMode = [a_driftEco2.paramDataMode ' '];
-         end
-      end
-   end
-end
-
-% update output parameters
-a_driftEco2.derived = 1;
-o_driftEco2 = a_driftEco2;
-
-return
+return;
 
 % ------------------------------------------------------------------------------
 % Compute derived parameters for the ECO3 sensor.
@@ -807,29 +361,19 @@ for idP = 1:length(paramToDeriveList)
       paramToDerive = get_netcdf_param_attributes(paramToDeriveList{idP});
       derivedParam = get_netcdf_param_attributes(derivedParamList{idP});
       
-      chla = compute_CHLA_105_to_112_121_to_127_1121_to_28_1322_1323( ...
+      chla = compute_CHLA_105_to_109( ...
          a_driftEco3.data(:, idF), ...
          paramToDerive.fillValue, derivedParam.fillValue);
-
+      
       a_driftEco3.data(:, end+1) = chla;
       if (isempty(a_driftEco3.dataQc))
-         a_driftEco3.dataQc = ones(size(a_driftEco3.data, 1), length(a_driftEco3.paramList))*g_decArgo_qcDef;
+         a_driftEco3.dataQc = ones(size(a_driftEco3.data, 1), size(a_driftEco3.data, 2)-1)*g_decArgo_qcDef;
       end
       chlaQc = ones(size(a_driftEco3.data, 1), 1)*g_decArgo_qcDef;
       chlaQc(find(chla ~= derivedParam.fillValue)) = g_decArgo_qcNoQc;
       a_driftEco3.dataQc(:, end+1) = chlaQc;
-
-      if (~isempty(a_driftEco3.dataAdj))
-         a_driftEco3.dataAdj(:, end+1) = ones(size(a_driftEco3.data, 1), 1)*derivedParam.fillValue;
-         if (~isempty(a_driftEco3.dataAdjQc))
-            a_driftEco3.dataAdjQc(:, end+1) = ones(size(a_driftEco3.data, 1), 1)*g_decArgo_qcDef;
-         end
-      end
-
+      
       a_driftEco3.paramList = [a_driftEco3.paramList derivedParam];
-      if (~isempty(a_driftEco3.paramDataMode))
-         a_driftEco3.paramDataMode = [a_driftEco3.paramDataMode ' '];
-      end
    end
 end
 
@@ -852,18 +396,7 @@ if (isempty(a_driftCtd))
          if (~isempty(a_driftEco3.dataQc))
             a_driftEco3.dataQc(:, end+1) = ones(size(a_driftEco3.data, 1), 1)*g_decArgo_qcDef;
          end
-
-         if (~isempty(a_driftEco3.dataAdj))
-            a_driftEco3.dataAdj(:, end+1) = ones(size(a_driftEco3.data, 1), 1)*derivedParam.fillValue;
-            if (~isempty(a_driftEco3.dataAdjQc))
-               a_driftEco3.dataAdjQc(:, end+1) = ones(size(a_driftEco3.data, 1), 1)*g_decArgo_qcDef;
-            end
-         end
-
          a_driftEco3.paramList = [a_driftEco3.paramList derivedParam];
-         if (~isempty(a_driftEco3.paramDataMode))
-            a_driftEco3.paramDataMode = [a_driftEco3.paramDataMode ' '];
-         end
       end
    end
    
@@ -909,36 +442,18 @@ else
          if (~isempty(bbp700))
             a_driftEco3.data(:, end+1) = bbp700;
             if (isempty(a_driftEco3.dataQc))
-               a_driftEco3.dataQc = ones(size(a_driftEco3.data, 1), length(a_driftEco3.paramList))*g_decArgo_qcDef;
+               a_driftEco3.dataQc = ones(size(a_driftEco3.data, 1), size(a_driftEco3.data, 2)-1)*g_decArgo_qcDef;
             end
             bbp700Qc = ones(size(a_driftEco3.data, 1), 1)*g_decArgo_qcDef;
             bbp700Qc(find(bbp700 ~= derivedParam.fillValue)) = g_decArgo_qcNoQc;
             a_driftEco3.dataQc(:, end+1) = bbp700Qc;
-
-            if (~isempty(a_driftEco3.dataAdj))
-               a_driftEco3.dataAdj(:, end+1) = ones(size(a_driftEco3.data, 1), 1)*derivedParam.fillValue;
-               if (isempty(a_driftEco3.dataAdjQc))
-                  a_driftEco3.dataAdjQc = ones(size(a_driftEco3.data, 1), length(a_driftEco3.paramList))*g_decArgo_qcDef;
-               end
-               a_driftEco3.dataAdjQc(:, end+1) = ones(size(a_driftEco3.data, 1), 1)*g_decArgo_qcDef;
-            end
          else
             a_driftEco3.data(:, end+1) = ones(size(a_driftEco3.data, 1), 1)*derivedParam.fillValue;
             if (~isempty(a_driftEco3.dataQc))
                a_driftEco3.dataQc(:, end+1) = ones(size(a_driftEco3.data, 1), 1)*g_decArgo_qcDef;
             end
-
-            if (~isempty(a_driftEco3.dataAdj))
-               a_driftEco3.dataAdj(:, end+1) = ones(size(a_driftEco3.data, 1), 1)*derivedParam.fillValue;
-               if (~isempty(a_driftEco3.dataAdjQc))
-                  a_driftEco3.dataAdjQc(:, end+1) = ones(size(a_driftEco3.data, 1), 1)*g_decArgo_qcDef;
-               end
-            end
          end
          a_driftEco3.paramList = [a_driftEco3.paramList derivedParam];
-         if (~isempty(a_driftEco3.paramDataMode))
-            a_driftEco3.paramDataMode = [a_driftEco3.paramDataMode ' '];
-         end
       end
    end
    
@@ -971,36 +486,18 @@ else
          if (~isempty(bbp532))
             a_driftEco3.data(:, end+1) = bbp532;
             if (isempty(a_driftEco3.dataQc))
-               a_driftEco3.dataQc = ones(size(a_driftEco3.data, 1), length(a_driftEco3.paramList))*g_decArgo_qcDef;
+               a_driftEco3.dataQc = ones(size(a_driftEco3.data, 1), size(a_driftEco3.data, 2)-1)*g_decArgo_qcDef;
             end
             bbp532Qc = ones(size(a_driftEco3.data, 1), 1)*g_decArgo_qcDef;
             bbp532Qc(find(bbp532 ~= derivedParam.fillValue)) = g_decArgo_qcNoQc;
             a_driftEco3.dataQc(:, end+1) = bbp532Qc;
-
-            if (~isempty(a_driftEco3.dataAdj))
-               a_driftEco3.dataAdj(:, end+1) = ones(size(a_driftEco3.data, 1), 1)*derivedParam.fillValue;
-               if (isempty(a_driftEco3.dataAdjQc))
-                  a_driftEco3.dataAdjQc = ones(size(a_driftEco3.data, 1), length(a_driftEco3.paramList))*g_decArgo_qcDef;
-               end
-               a_driftEco3.dataAdjQc(:, end+1) = ones(size(a_driftEco3.data, 1), 1)*g_decArgo_qcDef;
-            end
          else
             a_driftEco3.data(:, end+1) = ones(size(a_driftEco3.data, 1), 1)*derivedParam.fillValue;
             if (~isempty(a_driftEco3.dataQc))
                a_driftEco3.dataQc(:, end+1) = ones(size(a_driftEco3.data, 1), 1)*g_decArgo_qcDef;
             end
-
-            if (~isempty(a_driftEco3.dataAdj))
-               a_driftEco3.dataAdj(:, end+1) = ones(size(a_driftEco3.data, 1), 1)*derivedParam.fillValue;
-               if (~isempty(a_driftEco3.dataAdjQc))
-                  a_driftEco3.dataAdjQc(:, end+1) = ones(size(a_driftEco3.data, 1), 1)*g_decArgo_qcDef;
-               end
-            end
          end
          a_driftEco3.paramList = [a_driftEco3.paramList derivedParam];
-         if (~isempty(a_driftEco3.paramDataMode))
-            a_driftEco3.paramDataMode = [a_driftEco3.paramDataMode ' '];
-         end
       end
    end
 end
@@ -1018,30 +515,19 @@ for idP = 1:length(paramToDeriveList)
       paramToDerive = get_netcdf_param_attributes(paramToDeriveList{idP});
       derivedParam = get_netcdf_param_attributes(derivedParamList{idP});
       
-      cdom = compute_CDOM_105_to_107_110_112_121_to_127_1121_to_28_1322_1323( ...
+      cdom = compute_CDOM_105_to_107( ...
          a_driftEco3.data(:, idF), ...
          paramToDerive.fillValue, derivedParam.fillValue);
       
       a_driftEco3.data(:, end+1) = cdom;
       if (isempty(a_driftEco3.dataQc))
-         a_driftEco3.dataQc = ones(size(a_driftEco3.data, 1), length(a_driftEco3.paramList))*g_decArgo_qcDef;
+         a_driftEco3.dataQc = ones(size(a_driftEco3.data, 1), size(a_driftEco3.data, 2)-1)*g_decArgo_qcDef;
       end
       cdomQc = ones(size(a_driftEco3.data, 1), 1)*g_decArgo_qcDef;
       cdomQc(find(cdom ~= derivedParam.fillValue)) = g_decArgo_qcNoQc;
       a_driftEco3.dataQc(:, end+1) = cdomQc;
-
-      if (~isempty(a_driftEco3.dataAdj))
-         a_driftEco3.dataAdj(:, end+1) = ones(size(a_driftEco3.data, 1), 1)*derivedParam.fillValue;
-         if (isempty(a_driftEco3.dataAdjQc))
-            a_driftEco3.dataAdjQc = ones(size(a_driftEco3.data, 1), length(a_driftEco3.paramList))*g_decArgo_qcDef;
-         end
-         a_driftEco3.dataAdjQc(:, end+1) = ones(size(a_driftEco3.data, 1), 1)*g_decArgo_qcDef;
-      end
-
+      
       a_driftEco3.paramList = [a_driftEco3.paramList derivedParam];
-      if (~isempty(a_driftEco3.paramDataMode))
-         a_driftEco3.paramDataMode = [a_driftEco3.paramDataMode ' '];
-      end
    end
 end
 
@@ -1049,7 +535,7 @@ end
 a_driftEco3.derived = 1;
 o_driftEco3 = a_driftEco3;
 
-return
+return;
 
 % ------------------------------------------------------------------------------
 % Compute BBP from the data provided by the ECO3 sensor.
@@ -1107,10 +593,10 @@ o_BBP = ones(length(a_BETA_BACKSCATTERING), 1)*a_BBP_fillValue;
 
 % assign the CTD data to the OPTODE measurements (timely closest association)
 ctdLinkData = assign_CTD_measurements(a_ctdDates, a_ctdData, a_BBP_dates);
-if (~isempty(ctdLinkData))
-   
+if (~isempty(ctdLinkData))   
+      
    if (a_lambda == 700)
-      o_BBP = compute_BBP700_105_to_112_121_to_127_1121_to_28_1322_1323( ...
+      o_BBP = compute_BBP700_105_to_109( ...
          a_BETA_BACKSCATTERING, ...
          a_BETA_BACKSCATTERING_fillValue, ...
          a_BBP_fillValue, ...
@@ -1128,7 +614,7 @@ if (~isempty(ctdLinkData))
          a_TEMP_fillValue, ...
          a_PSAL_fillValue);
    else
-      fprintf('WARNING: Float #%d Cycle #%d Profile #%d: BBP processing not implemented yet for lambda = %g - BBP drift measurements set to fill value\n', ...
+      fprintf('WARNING: Float #%d Cycle #%d Profile #%d: BBP processing not implemented yet for lambda = %g => BBP drift measurements set to fill value\n', ...
          g_decArgo_floatNum, ...
          a_driftEco3.cycleNumber, ...
          a_driftEco3.profileNumber, ...
@@ -1137,7 +623,7 @@ if (~isempty(ctdLinkData))
    
 end
 
-return
+return;
 
 % ------------------------------------------------------------------------------
 % Compute derived parameters for the ECO3 sensor.
@@ -1184,19 +670,19 @@ for idD = 1:length(paramToDeriveList)
    if (~isempty(idF))
       paramToDerive = get_netcdf_param_attributes(paramToDeriveList{idD});
       derivedParam = get_netcdf_param_attributes(derivedParamList{idD});
-      
-      chla = compute_CHLA_105_to_112_121_to_127_1121_to_28_1322_1323( ...
+
+      chla = compute_CHLA_105_to_109( ...
          a_driftEco3.data(:, idF), ...
          paramToDerive.fillValue, derivedParam.fillValue);
       
       a_driftEco3.data(:, end+1) = chla;
       if (isempty(a_driftEco3.dataQc))
-         a_driftEco3.dataQc = ones(size(a_driftEco3.data, 1), length(a_driftEco3.paramList))*g_decArgo_qcDef;
+         a_driftEco3.dataQc = ones(size(a_driftEco3.data, 1), size(a_driftEco3.data, 2)-1)*g_decArgo_qcDef;
       end
       chlaQc = ones(size(a_driftEco3.data, 1), 1)*g_decArgo_qcDef;
       chlaQc(find(chla ~= derivedParam.fillValue)) = g_decArgo_qcNoQc;
       a_driftEco3.dataQc(:, end+1) = chlaQc;
-      
+
       a_driftEco3.paramList = [a_driftEco3.paramList derivedParam];
    end
 end
@@ -1214,13 +700,13 @@ for idD = 1:length(paramToDeriveList)
       paramToDerive = get_netcdf_param_attributes(paramToDeriveList{idD});
       derivedParam = get_netcdf_param_attributes(derivedParamList{idD});
       
-      bbp700 = compute_BBP700_105_to_112_121_to_127_1121_to_28_1322_1323_V1( ...
+      bbp700 = compute_BBP700_105_to_109_V1( ...
          a_driftEco3.data(:, idF), ...
          paramToDerive.fillValue, derivedParam.fillValue);
       
       a_driftEco3.data(:, end+1) = bbp700;
       if (isempty(a_driftEco3.dataQc))
-         a_driftEco3.dataQc = ones(size(a_driftEco3.data, 1), length(a_driftEco3.paramList))*g_decArgo_qcDef;
+         a_driftEco3.dataQc = ones(size(a_driftEco3.data, 1), size(a_driftEco3.data, 2)-1)*g_decArgo_qcDef;
       end
       bbp700Qc = ones(size(a_driftEco3.data, 1), 1)*g_decArgo_qcDef;
       bbp700Qc(find(bbp700 ~= derivedParam.fillValue)) = g_decArgo_qcNoQc;
@@ -1249,7 +735,7 @@ for idD = 1:length(paramToDeriveList)
       
       a_driftEco3.data(:, end+1) = bbp532;
       if (isempty(a_driftEco3.dataQc))
-         a_driftEco3.dataQc = ones(size(a_driftEco3.data, 1), length(a_driftEco3.paramList))*g_decArgo_qcDef;
+         a_driftEco3.dataQc = ones(size(a_driftEco3.data, 1), size(a_driftEco3.data, 2)-1)*g_decArgo_qcDef;
       end
       bbp532Qc = ones(size(a_driftEco3.data, 1), 1)*g_decArgo_qcDef;
       bbp532Qc(find(bbp532 ~= derivedParam.fillValue)) = g_decArgo_qcNoQc;
@@ -1272,13 +758,13 @@ for idP = 1:length(paramToDeriveList)
       paramToDerive = get_netcdf_param_attributes(paramToDeriveList{idP});
       derivedParam = get_netcdf_param_attributes(derivedParamList{idP});
       
-      cdom = compute_CDOM_105_to_107_110_112_121_to_127_1121_to_28_1322_1323( ...
+      cdom = compute_CDOM_105_to_107( ...
          a_driftEco3.data(:, idF), ...
          paramToDerive.fillValue, derivedParam.fillValue);
       
       a_driftEco3.data(:, end+1) = cdom;
       if (isempty(a_driftEco3.dataQc))
-         a_driftEco3.dataQc = ones(size(a_driftEco3.data, 1), length(a_driftEco3.paramList))*g_decArgo_qcDef;
+         a_driftEco3.dataQc = ones(size(a_driftEco3.data, 1), size(a_driftEco3.data, 2)-1)*g_decArgo_qcDef;
       end
       cdomQc = ones(size(a_driftEco3.data, 1), 1)*g_decArgo_qcDef;
       cdomQc(find(cdom ~= derivedParam.fillValue)) = g_decArgo_qcNoQc;
@@ -1292,18 +778,17 @@ end
 a_driftEco3.derived = 1;
 o_driftEco3 = a_driftEco3;
 
-return
+return;
 
 % ------------------------------------------------------------------------------
 % Compute derived parameters for the SUNA sensor.
 %
 % SYNTAX :
-%  [o_driftSuna] = compute_drift_derived_parameters_for_SUNA(a_driftSuna, a_driftCtd, a_decoderId)
+%  [o_driftSuna] = compute_drift_derived_parameters_for_SUNA(a_driftSuna, a_driftCtd)
 %
 % INPUT PARAMETERS :
 %   a_driftSuna : input SUNA drift profile structure
 %   a_driftCtd  : input CTD drift profile structure
-%   a_decoderId : float decoder Id
 %
 % OUTPUT PARAMETERS :
 %   o_driftSuna : output SUNA drift profile structure
@@ -1316,7 +801,7 @@ return
 % RELEASES :
 %   06/01/2014 - RNU - creation
 % ------------------------------------------------------------------------------
-function [o_driftSuna] = compute_drift_derived_parameters_for_SUNA(a_driftSuna, a_driftCtd, a_decoderId)
+function [o_driftSuna] = compute_drift_derived_parameters_for_SUNA(a_driftSuna, a_driftCtd)
 
 % output parameters initialization
 o_driftSuna = [];
@@ -1324,9 +809,6 @@ o_driftSuna = [];
 % global default values
 global g_decArgo_qcDef;
 global g_decArgo_qcNoQc;
-
-% lists of managed decoders
-global g_decArgo_decoderIdListNkeCts5Usea;
 
 FITLM_MATLAB_FUNCTION_NOT_AVAILABLE = 0;
 
@@ -1350,195 +832,84 @@ else
    ctdMeasData = a_driftCtd.data(:, [presId tempId psalId]);
 end
 
-% if the fitlm Matlab function is available, compute NITRATE data from
-% transmitted spectrum and add them in the profile structure
-if (~FITLM_MATLAB_FUNCTION_NOT_AVAILABLE)
-   if (~ismember(a_decoderId, [110, 113, 127]))
-      
-      % compute NITRATE
-      paramToDeriveList = [ ...
-         {'UV_INTENSITY_NITRATE'} {'UV_INTENSITY_DARK_NITRATE'} ...
-         ];
-      derivedParamList = [ ...
-         {'NITRATE'} ...
-         ];
-      paramPres = get_netcdf_param_attributes('PRES');
-      paramTemp = get_netcdf_param_attributes('TEMP');
-      paramPsal = get_netcdf_param_attributes('PSAL');
-      for idP = 1:size(paramToDeriveList, 1)
-         idF1 = find(strcmp(paramToDeriveList{idP, 1}, paramNameList) == 1, 1);
-         idF2 = find(strcmp(paramToDeriveList{idP, 2}, paramNameList) == 1, 1);
-         if (~isempty(idF1) && ~isempty(idF2))
-            paramToDerive1 = get_netcdf_param_attributes(paramToDeriveList{idP, 1});
-            paramToDerive2 = get_netcdf_param_attributes(paramToDeriveList{idP, 2});
-            derivedParam = get_netcdf_param_attributes(derivedParamList{idP});
-            
-            nitrate = compute_drift_NITRATE_1xx_5_to_9_11_12_14_15_21_to_26_28( ...
-               a_driftSuna.data(:, idF1:idF1+a_driftSuna.paramNumberOfSubLevels-1), ...
-               a_driftSuna.data(:, idF2), ...
-               paramToDerive1.fillValue, ...
-               paramToDerive2.fillValue, ...
-               derivedParam.fillValue, ...
-               a_driftSuna.dates, ctdMeasDates, ctdMeasData, ...
-               paramPres.fillValue, ...
-               paramTemp.fillValue, ...
-               paramPsal.fillValue, ...
-               a_driftSuna, a_decoderId);
-            
-            % store NITRATE
-            a_driftSuna.data(:, end+1) = nitrate;
-            if (isempty(a_driftSuna.dataQc))
-               a_driftSuna.dataQc = ones(size(a_driftSuna.data, 1), length(a_driftSuna.paramList))*g_decArgo_qcDef;
-            end
-            nitrateQc = ones(size(a_driftSuna.data, 1), 1)*g_decArgo_qcDef;
-            nitrateQc(find(nitrate ~= derivedParam.fillValue)) = g_decArgo_qcNoQc;
-            a_driftSuna.dataQc(:, end+1) = nitrateQc;
-
-            if (~isempty(a_driftSuna.dataAdj))
-               a_driftSuna.dataAdj(:, end+1) = ones(size(a_driftSuna.data, 1), 1)*derivedParam.fillValue;
-               if (isempty(a_driftSuna.dataAdjQc))
-                  a_driftSuna.dataAdjQc = ones(size(a_driftSuna.data, 1), length(a_driftSuna.paramList))*g_decArgo_qcDef;
-               end
-               a_driftSuna.dataAdjQc(:, end+1) = ones(size(a_driftSuna.data, 1), 1)*g_decArgo_qcDef;
-            end
-
-            a_driftSuna.paramList = [a_driftSuna.paramList derivedParam];
-            if (~isempty(a_driftSuna.paramDataMode))
-               a_driftSuna.paramDataMode = [a_driftSuna.paramDataMode ' '];
-            end
+% compute NITRATE data and add them in the profile structure
+if (FITLM_MATLAB_FUNCTION_NOT_AVAILABLE)
+   paramToDeriveList = [ ...
+      {'MOLAR_NITRATE'} ...
+      ];
+   derivedParamList = [ ...
+      {'NITRATE'} ...
+      ];
+   paramPres = get_netcdf_param_attributes('PRES');
+   paramTemp = get_netcdf_param_attributes('TEMP');
+   paramPsal = get_netcdf_param_attributes('PSAL');
+   for idD = 1:length(paramToDeriveList)
+      idF = find(strcmp(paramToDeriveList{idD}, paramNameList) == 1, 1);
+      if (~isempty(idF))
+         paramToDerive = get_netcdf_param_attributes(paramToDeriveList{idD});
+         derivedParam = get_netcdf_param_attributes(derivedParamList{idD});
+         
+         nitrate = compute_drift_NITRATE_105_to_109( ...
+            a_driftSuna.data(:, idF), ...
+            paramToDerive.fillValue, derivedParam.fillValue, ...
+            a_driftSuna.dates, ctdMeasDates, ctdMeasData, ...
+            paramPres.fillValue, ...
+            paramTemp.fillValue, ...
+            paramPsal.fillValue);
+         
+         a_driftSuna.data(:, end+1) = nitrate;
+         if (isempty(a_driftSuna.dataQc))
+            a_driftSuna.dataQc = ones(size(a_driftSuna.data, 1), size(a_driftSuna.data, 2)-1)*g_decArgo_qcDef;
          end
-      end
-   else
-      
-      % compute NITRATE and BISULFIDE
-      paramToDeriveList = [ ...
-         {'UV_INTENSITY_NITRATE'} {'UV_INTENSITY_DARK_NITRATE'} ...
-         ];
-      derivedParamList = [ ...
-         {'NITRATE'} {'BISULFIDE'} ...
-         ];
-      paramPres = get_netcdf_param_attributes('PRES');
-      paramTemp = get_netcdf_param_attributes('TEMP');
-      paramPsal = get_netcdf_param_attributes('PSAL');
-      for idP = 1:size(paramToDeriveList, 1)
-         idF1 = find(strcmp(paramToDeriveList{idP, 1}, paramNameList) == 1, 1);
-         idF2 = find(strcmp(paramToDeriveList{idP, 2}, paramNameList) == 1, 1);
-         if (~isempty(idF1) && ~isempty(idF2))
-            paramToDerive1 = get_netcdf_param_attributes(paramToDeriveList{idP, 1});
-            paramToDerive2 = get_netcdf_param_attributes(paramToDeriveList{idP, 2});
-            derivedParam1 = get_netcdf_param_attributes(derivedParamList{idP, 1});
-            derivedParam2 = get_netcdf_param_attributes(derivedParamList{idP, 2});
-            
-            [nitrate, bisulfide] = compute_drift_NITRATE_BISULFIDE_from_spectrum_110_113_127( ...
-               a_driftSuna.data(:, idF1:idF1+a_driftSuna.paramNumberOfSubLevels-1), ...
-               a_driftSuna.data(:, idF2), ...
-               paramToDerive1.fillValue, ...
-               paramToDerive2.fillValue, ...
-               derivedParam1.fillValue, ...
-               derivedParam2.fillValue, ...
-               a_driftSuna.dates, ctdMeasDates, ctdMeasData, ...
-               paramPres.fillValue, ...
-               paramTemp.fillValue, ...
-               paramPsal.fillValue, ...
-               a_driftSuna);
-            
-            % store NITRATE
-            a_driftSuna.data(:, end+1) = nitrate;
-            if (isempty(a_driftSuna.dataQc))
-               a_driftSuna.dataQc = ones(size(a_driftSuna.data, 1), length(a_driftSuna.paramList))*g_decArgo_qcDef;
-            end
-            nitrateQc = ones(size(a_driftSuna.data, 1), 1)*g_decArgo_qcDef;
-            nitrateQc(find(nitrate ~= derivedParam1.fillValue)) = g_decArgo_qcNoQc;
-            a_driftSuna.dataQc(:, end+1) = nitrateQc;
-
-            if (~isempty(a_driftSuna.dataAdj))
-               a_driftSuna.dataAdj(:, end+1) = ones(size(a_driftSuna.data, 1), 1)*derivedParam1.fillValue;
-               if (isempty(a_driftSuna.dataAdjQc))
-                  a_driftSuna.dataAdjQc = ones(size(a_driftSuna.data, 1), length(a_driftSuna.paramList))*g_decArgo_qcDef;
-               end
-               a_driftSuna.dataAdjQc(:, end+1) = ones(size(a_driftSuna.data, 1), 1)*g_decArgo_qcDef;
-            end
-            
-            a_driftSuna.paramList = [a_driftSuna.paramList derivedParam1];
-            if (~isempty(a_driftSuna.paramDataMode))
-               a_driftSuna.paramDataMode = [a_driftSuna.paramDataMode ' '];
-            end
-            
-            % store BISULFIDE
-            a_driftSuna.data(:, end+1) = bisulfide;
-            if (isempty(a_driftSuna.dataQc))
-               a_driftSuna.dataQc = ones(size(a_driftSuna.data, 1), length(a_driftSuna.paramList))*g_decArgo_qcDef;
-            end
-            bisulfideQc = ones(size(a_driftSuna.data, 1), 1)*g_decArgo_qcDef;
-            bisulfideQc(find(bisulfide ~= derivedParam2.fillValue)) = g_decArgo_qcNoQc;
-            a_driftSuna.dataQc(:, end+1) = bisulfideQc;
-
-            if (~isempty(a_driftSuna.dataAdj))
-               a_driftSuna.dataAdj(:, end+1) = ones(size(a_driftSuna.data, 1), 1)*derivedParam2.fillValue;
-               if (isempty(a_driftSuna.dataAdjQc))
-                  a_driftSuna.dataAdjQc = ones(size(a_driftSuna.data, 1), length(a_driftSuna.paramList))*g_decArgo_qcDef;
-               end
-               a_driftSuna.dataAdjQc(:, end+1) = ones(size(a_driftSuna.data, 1), 1)*g_decArgo_qcDef;
-            end
-            
-            a_driftSuna.paramList = [a_driftSuna.paramList derivedParam2];
-            if (~isempty(a_driftSuna.paramDataMode))
-               a_driftSuna.paramDataMode = [a_driftSuna.paramDataMode ' '];
-            end
-         end
+         nitrateQc = ones(size(a_driftSuna.data, 1), 1)*g_decArgo_qcDef;
+         nitrateQc(find(nitrate ~= derivedParam.fillValue)) = g_decArgo_qcNoQc;
+         a_driftSuna.dataQc(:, end+1) = nitrateQc;
+         
+         a_driftSuna.paramList = [a_driftSuna.paramList derivedParam];
       end
    end
-else
-   
-   if (~ismember(a_decoderId, g_decArgo_decoderIdListNkeCts5Usea))
-      
-      % if the fitlm Matlab function is not available, compute NITRATE data from
-      % transmitted MOLAR_NITRATE and add them in the profile structure
-      paramToDeriveList = [ ...
-         {'MOLAR_NITRATE'} ...
-         ];
-      derivedParamList = [ ...
-         {'NITRATE'} ...
-         ];
-      paramPres = get_netcdf_param_attributes('PRES');
-      paramTemp = get_netcdf_param_attributes('TEMP');
-      paramPsal = get_netcdf_param_attributes('PSAL');
-      for idD = 1:length(paramToDeriveList)
-         idF = find(strcmp(paramToDeriveList{idD}, paramNameList) == 1, 1);
-         if (~isempty(idF))
-            paramToDerive = get_netcdf_param_attributes(paramToDeriveList{idD});
-            derivedParam = get_netcdf_param_attributes(derivedParamList{idD});
-            
-            nitrate = compute_drift_NITRATE_1xx_5_to_9_11_12_14_15_21_to_25( ...
-               a_driftSuna.data(:, idF), ...
-               paramToDerive.fillValue, derivedParam.fillValue, ...
-               a_driftSuna.dates, ctdMeasDates, ctdMeasData, ...
-               paramPres.fillValue, ...
-               paramTemp.fillValue, ...
-               paramPsal.fillValue, ...
-               a_driftSuna);
-            
-            a_driftSuna.data(:, end+1) = nitrate;
-            if (isempty(a_driftSuna.dataQc))
-               a_driftSuna.dataQc = ones(size(a_driftSuna.data, 1), length(a_driftSuna.paramList))*g_decArgo_qcDef;
-            end
-            nitrateQc = ones(size(a_driftSuna.data, 1), 1)*g_decArgo_qcDef;
-            nitrateQc(find(nitrate ~= derivedParam.fillValue)) = g_decArgo_qcNoQc;
-            a_driftSuna.dataQc(:, end+1) = nitrateQc;
+end
 
-            if (~isempty(a_driftSuna.dataAdj))
-               a_driftSuna.dataAdj(:, end+1) = ones(size(a_driftSuna.data, 1), 1)*derivedParam.fillValue;
-               if (isempty(a_driftSuna.dataAdjQc))
-                  a_driftSuna.dataAdjQc = ones(size(a_driftSuna.data, 1), length(a_driftSuna.paramList))*g_decArgo_qcDef;
-               end
-               a_driftSuna.dataAdjQc(:, end+1) = ones(size(a_driftSuna.data, 1), 1)*g_decArgo_qcDef;
-            end
-            
-            a_driftSuna.paramList = [a_driftSuna.paramList derivedParam];
-            if (~isempty(a_driftSuna.paramDataMode))
-               a_driftSuna.paramDataMode = [a_driftSuna.paramDataMode ' '];
-            end
+% compute NITRATE data and add them in the profile structure
+if (~FITLM_MATLAB_FUNCTION_NOT_AVAILABLE)
+   paramToDeriveList = [ ...
+      {'UV_INTENSITY_NITRATE'} {'UV_INTENSITY_DARK_NITRATE'} ...
+      ];
+   derivedParamList = [ ...
+      {'NITRATE'} ...
+      ];
+   paramPres = get_netcdf_param_attributes('PRES');
+   paramTemp = get_netcdf_param_attributes('TEMP');
+   paramPsal = get_netcdf_param_attributes('PSAL');
+   for idP = 1:size(paramToDeriveList, 1)
+      idF1 = find(strcmp(paramToDeriveList{idP, 1}, paramNameList) == 1, 1);
+      idF2 = find(strcmp(paramToDeriveList{idP, 2}, paramNameList) == 1, 1);
+      if (~isempty(idF1) && ~isempty(idF2))
+         paramToDerive1 = get_netcdf_param_attributes(paramToDeriveList{idP, 1});
+         paramToDerive2 = get_netcdf_param_attributes(paramToDeriveList{idP, 2});
+         derivedParam = get_netcdf_param_attributes(derivedParamList{idP});
+         
+         nitrate = compute_drift_NITRATE_BIS_105_to_109( ...
+            a_driftSuna.data(:, idF1:idF1+a_driftSuna.paramNumberOfSubLevels-1), ...
+            a_driftSuna.data(:, idF2), ...
+            paramToDerive1.fillValue, ...
+            paramToDerive2.fillValue, ...
+            derivedParam.fillValue, ...
+            a_driftSuna.dates, ctdMeasDates, ctdMeasData, ...
+            paramPres.fillValue, ...
+            paramTemp.fillValue, ...
+            paramPsal.fillValue, ...
+            a_driftSuna);
+         
+         a_driftSuna.data(:, end+1) = nitrate;
+         if (isempty(a_driftSuna.dataQc))
+            a_driftSuna.dataQc = ones(size(a_driftSuna.data, 1), size(a_driftSuna.data, 2)-1)*g_decArgo_qcDef;
          end
+         nitrateQc = ones(size(a_driftSuna.data, 1), 1)*g_decArgo_qcDef;
+         nitrateQc(find(nitrate ~= derivedParam.fillValue)) = g_decArgo_qcNoQc;
+         a_driftSuna.dataQc(:, end+1) = nitrateQc;
+         
+         a_driftSuna.paramList = [a_driftSuna.paramList derivedParam];
       end
    end
 end
@@ -1547,7 +918,7 @@ end
 a_driftSuna.derived = 1;
 o_driftSuna = a_driftSuna;
 
-return
+return;
 
 % ------------------------------------------------------------------------------
 % Compute derived parameters for the OPTODE sensor.
@@ -1589,29 +960,16 @@ paramNameList = {a_driftOptode.paramList.name};
 if (isempty(a_driftCtd))
    
    % we have not been able to retrieve the associated CTD profile
-   if (ismember('C1PHASE_DOXY', paramNameList) && ...
-         ismember('C2PHASE_DOXY', paramNameList) && ...
-         ismember('TEMP_DOXY', paramNameList))
-      derivedParamList = [ ...
-         {'DOXY'} ...
-         ];
-      for idP = 1:length(derivedParamList)
-         derivedParam = get_netcdf_param_attributes(derivedParamList{idP});
-         a_driftOptode.data(:, end+1) = ones(size(a_driftOptode.data, 1), 1)*derivedParam.fillValue;
-         if (~isempty(a_driftOptode.dataQc))
-            a_driftOptode.dataQc(:, end+1) = ones(size(a_driftOptode.data, 1), 1)*g_decArgo_qcDef;
-         end
-         if (~isempty(a_driftOptode.dataAdj))
-            a_driftOptode.dataAdj(:, end+1) = ones(size(a_driftOptode.data, 1), 1)*derivedParam.fillValue;
-            if (~isempty(a_driftOptode.dataAdjQc))
-               a_driftOptode.dataAdjQc(:, end+1) = ones(size(a_driftOptode.data, 1), 1)*g_decArgo_qcDef;
-            end
-         end
-         a_driftOptode.paramList = [a_driftOptode.paramList derivedParam];
-         if (~isempty(a_driftOptode.paramDataMode))
-            a_driftOptode.paramDataMode = [a_driftOptode.paramDataMode ' '];
-         end
+   derivedParamList = [ ...
+      {'DOXY'} ...
+      ];
+   for idP = 1:length(derivedParamList)
+      derivedParam = get_netcdf_param_attributes(derivedParamList{idP});
+      a_driftOptode.data(:, end+1) = ones(size(a_driftOptode.data, 1), 1)*derivedParam.fillValue;
+      if (~isempty(a_driftOptode.dataQc))
+         a_driftOptode.dataQc(:, end+1) = ones(size(a_driftOptode.data, 1), 1)*g_decArgo_qcDef;
       end
+      a_driftOptode.paramList = [a_driftOptode.paramList derivedParam];
    end
 else
    
@@ -1644,7 +1002,7 @@ else
          derivedParam = get_netcdf_param_attributes(derivedParamList{idD});
          
          % compute DOXY values
-         [doxy, ptsForDoxy] = compute_drift_DOXY( ...
+         doxy = compute_drift_DOXY( ...
             a_driftOptode.data(:, idF1), ...
             a_driftOptode.data(:, idF2), ...
             a_driftOptode.data(:, idF3), ...
@@ -1661,26 +1019,13 @@ else
          
          a_driftOptode.data(:, end+1) = doxy;
          if (isempty(a_driftOptode.dataQc))
-            a_driftOptode.dataQc = ones(size(a_driftOptode.data, 1), length(a_driftOptode.paramList))*g_decArgo_qcDef;
+            a_driftOptode.dataQc = ones(size(a_driftOptode.data, 1), size(a_driftOptode.data, 2)-1)*g_decArgo_qcDef;
          end
          doxyQc = ones(size(a_driftOptode.data, 1), 1)*g_decArgo_qcDef;
          doxyQc(find(doxy ~= derivedParam.fillValue)) = g_decArgo_qcNoQc;
          a_driftOptode.dataQc(:, end+1) = doxyQc;
-
-         if (~isempty(a_driftOptode.dataAdj))
-            a_driftOptode.dataAdj(:, end+1) = ones(size(a_driftOptode.data, 1), 1)*derivedParam.fillValue;
-            if (isempty(a_driftOptode.dataAdjQc))
-               a_driftOptode.dataAdjQc = ones(size(a_driftOptode.data, 1), length(a_driftOptode.paramList))*g_decArgo_qcDef;
-            end
-            a_driftOptode.dataAdjQc(:, end+1) = ones(size(a_driftOptode.data, 1), 1)*g_decArgo_qcDef;
-         end
-
-         a_driftOptode.ptsForDoxy = ptsForDoxy;
          
          a_driftOptode.paramList = [a_driftOptode.paramList derivedParam];
-         if (~isempty(a_driftOptode.paramDataMode))
-            a_driftOptode.paramDataMode = [a_driftOptode.paramDataMode ' '];
-         end
       end
    end
 end
@@ -1689,13 +1034,13 @@ end
 a_driftOptode.derived = 1;
 o_driftOptode = a_driftOptode;
 
-return
+return;
 
 % ------------------------------------------------------------------------------
 % Compute DOXY from the data provided by the OPTODE sensor.
 %
 % SYNTAX :
-%  [o_DOXY, o_ptsForDoxy] = compute_drift_DOXY( ...
+%  [o_DOXY] = compute_drift_DOXY( ...
 %    a_C1PHASE_DOXY, a_C2PHASE_DOXY, a_TEMP_DOXY, ...
 %    a_C1PHASE_DOXY_fillValue, a_C2PHASE_DOXY_fillValue, a_TEMP_DOXY_fillValue, ...
 %    a_DOXY_fillValue, ...
@@ -1722,8 +1067,7 @@ return
 %   a_decoderId              : float decoder Id
 %
 % OUTPUT PARAMETERS :
-%   o_DOXY       : output drift DOXY data
-%   o_ptsForDoxy : PTS data used to compute DOXY
+%   o_DOXY    : output drift DOXY data
 %
 % EXAMPLES :
 %
@@ -1733,7 +1077,7 @@ return
 % RELEASES :
 %   06/24/2014 - RNU - creation
 % ------------------------------------------------------------------------------
-function [o_DOXY, o_ptsForDoxy] = compute_drift_DOXY( ...
+function [o_DOXY] = compute_drift_DOXY( ...
    a_C1PHASE_DOXY, a_C2PHASE_DOXY, a_TEMP_DOXY, ...
    a_C1PHASE_DOXY_fillValue, a_C2PHASE_DOXY_fillValue, a_TEMP_DOXY_fillValue, ...
    a_DOXY_fillValue, ...
@@ -1744,7 +1088,6 @@ function [o_DOXY, o_ptsForDoxy] = compute_drift_DOXY( ...
 
 % output parameters initialization
 o_DOXY = ones(length(a_C1PHASE_DOXY), 1)*a_DOXY_fillValue;
-o_ptsForDoxy = [];
 
 % current float WMO number
 global g_decArgo_floatNum;
@@ -1752,7 +1095,7 @@ global g_decArgo_floatNum;
 
 % assign the CTD data to the OPTODE measurements (timely closest association)
 ctdLinkData = assign_CTD_measurements(a_ctdDates, a_ctdData, a_DOXY_dates);
-if (~isempty(ctdLinkData))
+if (~isempty(ctdLinkData))   
    
    switch (a_decoderId)
       
@@ -1774,12 +1117,11 @@ if (~isempty(ctdLinkData))
             a_PSAL_fillValue, ...
             a_DOXY_fillValue, ...
             a_driftOptode);
-         o_ptsForDoxy = ctdLinkData;
 
-      case {107, 109, 110, 111, 113, 114, 115, 121, 122, 124, 126, 127, 128, 129}
+      case {107, 109}
          
          % compute DOXY values using the Stern-Volmer equation
-         o_DOXY = compute_DOXY_1xx_7_9_to_11_13_to_15_21_22_24_26_to_29( ...
+         o_DOXY = compute_DOXY_107_109( ...
             a_C1PHASE_DOXY, ...
             a_C2PHASE_DOXY, ...
             a_TEMP_DOXY, ...
@@ -1794,392 +1136,15 @@ if (~isempty(ctdLinkData))
             a_PSAL_fillValue, ...
             a_DOXY_fillValue, ...
             a_driftOptode);
-         o_ptsForDoxy = ctdLinkData;
-
-      case {112, 123, 125}
-         
-         % compute DOXY values using the Aanderaa standard calibration method
-         % + an additional two-point adjustment
-         o_DOXY(idNoNan) = compute_DOXY_112_123_125( ...
-            a_C1PHASE_DOXY, ...
-            a_C2PHASE_DOXY, ...
-            a_TEMP_DOXY, ...
-            a_C1PHASE_DOXY_fillValue, ...
-            a_C2PHASE_DOXY_fillValue, ...
-            a_TEMP_DOXY_fillValue, ...
-            ctdLinkData(:, 1), ...
-            ctdLinkData(:, 2), ...
-            ctdLinkData(:, 3), ...
-            a_PRES_fillValue, ...
-            a_TEMP_fillValue, ...
-            a_PSAL_fillValue, ...
-            a_DOXY_fillValue, ...
-            a_driftOptode);
-         o_ptsForDoxy = ctdLinkData;
 
       otherwise
-         fprintf('WARNING: Float #%d Cycle #%d Profile #%d: DOXY processing not implemented yet for decoderId #%d - DOXY drift measurements set to fill value\n', ...
+         fprintf('WARNING: Float #%d Cycle #%d Profile #%d: DOXY processing not implemented yet for decoderId #%d => DOXY drift measurements set to fill value\n', ...
             g_decArgo_floatNum, ...
             a_driftOptode.cycleNumber, ...
             a_driftOptode.profileNumber, ...
             a_decoderId);
-         
+
    end
 end
-
-return
-
-% ------------------------------------------------------------------------------
-% Compute derived parameters for the TRANSISTOR_PH sensor.
-%
-% SYNTAX :
-%  [o_driftTransPh] = compute_drift_derived_parameters_for_TRANSISTOR_PH( ...
-%    a_driftTRansPh, a_driftCtd)
-%
-% INPUT PARAMETERS :
-%   a_driftTRansPh : input TRANSISTOR_PH drift profile structure
-%   a_driftCtd     : input CTD drift profile structure
-%
-% OUTPUT PARAMETERS :
-%   o_driftTransPh : output TRANSISTOR_PH drift profile structure
-%
-% EXAMPLES :
-%
-% SEE ALSO :
-% AUTHORS  : Jean-Philippe Rannou (Altran)(jean-philippe.rannou@altran.com)
-% ------------------------------------------------------------------------------
-% RELEASES :
-%   06/11/2019 - RNU - creation
-% ------------------------------------------------------------------------------
-function [o_driftTransPh] = compute_drift_derived_parameters_for_TRANSISTOR_PH( ...
-   a_driftTRansPh, a_driftCtd)
-
-% output parameters initialization
-o_driftTransPh = [];
-
-% global default values
-global g_decArgo_qcDef;
-global g_decArgo_qcNoQc;
-
-
-% list of parameters of the profile
-paramNameList = {a_driftTRansPh.paramList.name};
-
-if (isempty(a_driftCtd))
-   
-   % we have not been able to retrieve the associated CTD profile
-   if (ismember('VRS_PH', paramNameList))
-      derivedParamList = [ ...
-         {'PH_IN_SITU_FREE'} ...
-         {'PH_IN_SITU_TOTAL'} ...
-         ];
-      for idP = 1:length(derivedParamList)
-         derivedParam = get_netcdf_param_attributes(derivedParamList{idP});
-         a_driftTRansPh.data(:, end+1) = ones(size(a_driftTRansPh.data, 1), 1)*derivedParam.fillValue;
-         if (~isempty(a_driftTRansPh.dataQc))
-            a_driftTRansPh.dataQc(:, end+1) = ones(size(a_driftTRansPh.data, 1), 1)*g_decArgo_qcDef;
-         end
-
-         if (~isempty(a_driftTRansPh.dataAdj))
-            a_driftTRansPh.dataAdj(:, end+1) = ones(size(a_driftTRansPh.data, 1), 1)*derivedParam.fillValue;
-            if (~isempty(a_driftTRansPh.dataAdjQc))
-               a_driftTRansPh.dataAdjQc(:, end+1) = ones(size(a_driftTRansPh.data, 1), 1)*g_decArgo_qcDef;
-            end
-         end
-
-         a_driftTRansPh.paramList = [a_driftTRansPh.paramList derivedParam];
-         if (~isempty(a_driftTRansPh.paramDataMode))
-            a_driftTRansPh.paramDataMode = [a_driftTRansPh.paramDataMode ' '];
-         end
-      end
-   end
-   
-else
-   
-   % retrieve measured CTD data
-   paramNameListCtd = {a_driftCtd.paramList.name};
-   presId = find(strcmp('PRES', paramNameListCtd) == 1, 1);
-   tempId = find(strcmp('TEMP', paramNameListCtd) == 1, 1);
-   psalId = find(strcmp('PSAL', paramNameListCtd) == 1, 1);
-   ctdMeasDates = a_driftCtd.dates;
-   ctdMeasData = a_driftCtd.data(:, [presId tempId psalId]);
-
-   % compute PH_IN_SITU_FREE and PH_IN_SITU_TOTAL data and add them in the
-   % profile structure
-   paramToDeriveList = [ ...
-      {'VRS_PH'} ...
-      ];
-   derivedParamList = [ ...
-      {'PH_IN_SITU_FREE'} ...
-      {'PH_IN_SITU_TOTAL'} ...
-      ];
-   paramPres = get_netcdf_param_attributes('PRES');
-   paramTemp = get_netcdf_param_attributes('TEMP');
-   paramPsal = get_netcdf_param_attributes('PSAL');
-   for idP = 1:length(paramToDeriveList)
-      idF = find(strcmp(paramToDeriveList{idP}, paramNameList) == 1, 1);
-      if (~isempty(idF))
-         paramToDerive = get_netcdf_param_attributes(paramToDeriveList{idP});
-         derivedParam1 = get_netcdf_param_attributes(derivedParamList{idP, 1});
-         derivedParam2 = get_netcdf_param_attributes(derivedParamList{idP, 2});
-         
-         % compute PH_IN_SITU_FREE and PH_IN_SITU_TOTAL values
-         [phInSituFree, phInSituTotal] = compute_drift_PH( ...
-            a_driftTRansPh.data(:, idF), ...
-            paramToDerive.fillValue, ...
-            derivedParam1.fillValue, ...
-            derivedParam2.fillValue, ...
-            a_driftTRansPh.dates, ...
-            ctdMeasDates, ctdMeasData, ...
-            paramPres.fillValue, ...
-            paramTemp.fillValue, ...
-            paramPsal.fillValue, ...
-            a_driftTRansPh);
-         
-         % for CTS5 floats the derived parameter could be already in the list of
-         % parameters => we should first look for it
-         
-         idFDerivedParam1 = find(strcmp({a_driftTRansPh.paramList.name}, derivedParamList{idP, 1}), 1);
-         if (isempty(idFDerivedParam1))
-            a_driftTRansPh.data(:, end+1) = ones(size(a_driftTRansPh.data, 1), 1)*derivedParam1.fillValue;
-            if (isempty(a_driftTRansPh.dataQc))
-               a_driftTRansPh.dataQc = ones(size(a_driftTRansPh.data, 1), length(a_driftTRansPh.paramList))*g_decArgo_qcDef;
-            else
-               a_driftTRansPh.dataQc(:, end+1) = ones(size(a_driftTRansPh.data, 1), 1)*g_decArgo_qcDef;
-            end
-
-            if (~isempty(a_driftTRansPh.dataAdj))
-               a_driftTRansPh.dataAdj(:, end+1) = ones(size(a_driftTRansPh.data, 1), 1)*derivedParam1.fillValue;
-               if (isempty(a_driftTRansPh.dataAdjQc))
-                  a_driftTRansPh.dataAdjQc = ones(size(a_driftTRansPh.data, 1), length(a_driftTRansPh.paramList))*g_decArgo_qcDef;
-               end
-               a_driftTRansPh.dataAdjQc(:, end+1) = ones(size(a_driftTRansPh.data, 1), 1)*g_decArgo_qcDef;
-            end
-            
-            a_driftTRansPh.paramList = [a_driftTRansPh.paramList derivedParam1];
-            if (~isempty(a_driftTRansPh.paramDataMode))
-               a_driftTRansPh.paramDataMode = [a_driftTRansPh.paramDataMode ' '];
-            end
-            derivedParam1Id = size(a_driftTRansPh.data, 2);
-         else
-            if (isempty(a_driftTRansPh.paramNumberWithSubLevels))
-               derivedParam1Id = idFDerivedParam1;
-            else
-               idF = find(a_driftTRansPh.paramNumberWithSubLevels < idFDerivedParam1);
-               if (isempty(idF))
-                  derivedParam1Id = idFDerivedParam1;
-               else
-                  derivedParam1Id = idFDerivedParam1 + sum(a_driftTRansPh.paramNumberOfSubLevels(idF)) - length(idF);
-               end
-            end
-         end
-         
-         idFDerivedParam2 = find(strcmp({a_driftTRansPh.paramList.name}, derivedParamList{idP, 2}), 1);
-         if (isempty(idFDerivedParam2))
-            a_driftTRansPh.data(:, end+1) = ones(size(a_driftTRansPh.data, 1), 1)*derivedParam2.fillValue;
-            if (isempty(a_driftTRansPh.dataQc))
-               a_driftTRansPh.dataQc = ones(size(a_driftTRansPh.data, 1), length(a_driftTRansPh.paramList))*g_decArgo_qcDef;
-            else
-               a_driftTRansPh.dataQc(:, end+1) = ones(size(a_driftTRansPh.data, 1), 1)*g_decArgo_qcDef;
-            end
-
-            if (~isempty(a_driftTRansPh.dataAdj))
-               a_driftTRansPh.dataAdj(:, end+1) = ones(size(a_driftTRansPh.data, 1), 1)*derivedParam2.fillValue;
-               if (isempty(a_driftTRansPh.dataAdjQc))
-                  a_driftTRansPh.dataAdjQc = ones(size(a_driftTRansPh.data, 1), length(a_driftTRansPh.paramList))*g_decArgo_qcDef;
-               end
-               a_driftTRansPh.dataAdjQc(:, end+1) = ones(size(a_driftTRansPh.data, 1), 1)*g_decArgo_qcDef;
-            end
-
-            a_driftTRansPh.paramList = [a_driftTRansPh.paramList derivedParam2];
-            if (~isempty(a_driftTRansPh.paramDataMode))
-               a_driftTRansPh.paramDataMode = [a_driftTRansPh.paramDataMode ' '];
-            end
-            derivedParam2Id = size(a_driftTRansPh.data, 2);
-         else
-            if (isempty(a_driftTRansPh.paramNumberWithSubLevels))
-               derivedParam2Id = idFDerivedParam2;
-            else
-               idF = find(a_driftTRansPh.paramNumberWithSubLevels < idFDerivedParam2);
-               if (isempty(idF))
-                  derivedParam2Id = idFDerivedParam2;
-               else
-                  derivedParam2Id = idFDerivedParam2 + sum(a_driftTRansPh.paramNumberOfSubLevels(idF)) - length(idF);
-               end
-            end
-         end
-         
-         if (~isempty(phInSituFree))
-            a_driftTRansPh.data(:, derivedParam1Id) = phInSituFree;
-            phInSituFreeQc = ones(size(a_driftTRansPh.data, 1), 1)*g_decArgo_qcDef;
-            phInSituFreeQc(find(phInSituFree ~= derivedParam1.fillValue)) = g_decArgo_qcNoQc;
-            a_driftTRansPh.dataQc(:, derivedParam1Id) = phInSituFreeQc;
-         end
-         
-         if (~isempty(phInSituTotal))
-            a_driftTRansPh.data(:, derivedParam2Id) = phInSituTotal;
-            phInSituFreeQc = ones(size(a_driftTRansPh.data, 1), 1)*g_decArgo_qcDef;
-            phInSituFreeQc(find(phInSituTotal ~= derivedParam2.fillValue)) = g_decArgo_qcNoQc;
-            a_driftTRansPh.dataQc(:, derivedParam2Id) = phInSituFreeQc;
-         end
-      end
-   end
-end
-
-% update output parameters
-a_driftTRansPh.derived = 1;
-o_driftTransPh = a_driftTRansPh;
-
-return
-
-% ------------------------------------------------------------------------------
-% Compute PH_IN_SITU_FREE and PH_IN_SITU_TOTAL from the data provided by the
-% TRANSISTOR_PH sensor.
-%
-% SYNTAX :
-%  [o_PH_IN_SITU_FREE, o_PH_IN_SITU_TOTAL] = compute_drift_PH( ...
-%    a_VRS_PH, ...
-%    a_VRS_PH_fillValue, ...
-%    a_PH_IN_SITU_FREE_fillValue, a_PH_IN_SITU_TOTAL_fillValue, ...
-%    a_VRS_PH_dates, ...
-%    a_ctdDates, a_ctdData, ...
-%    a_PRES_fillValue, a_TEMP_fillValue, a_PSAL_fillValue, ...
-%    a_driftTransPh)
-%
-% INPUT PARAMETERS :
-%   a_VRS_PH                     : input VRS_PH data
-%   a_VRS_PH_fillValue           : fill value for input VRS_PH data
-%   a_PH_IN_SITU_FREE_fillValue  : fill value for output PH_IN_SITU_FREE data
-%   a_PH_IN_SITU_TOTAL_fillValue : fill value for output PH_IN_SITU_TOTAL data
-%   a_VRS_PH_dates               : dates of VRS_PH data
-%   a_ctdDates                   : dates of ascociated CTD (P, T, S) data
-%   a_ctdData                    : ascociated CTD (P, T, S) data
-%   a_PRES_fillValue             : fill value for input PRES data
-%   a_TEMP_fillValue             : fill value for input TEMP data
-%   a_PSAL_fillValue             : fill value for input PSAL data
-%   a_driftTransPh               : input TRANSISTOR_PH drift profile structure
-%
-% OUTPUT PARAMETERS :
-%   o_PH_IN_SITU_FREE  : output PH_IN_SITU_FREE data
-%   o_PH_IN_SITU_TOTAL : output PH_IN_SITU_TOTAL data
-%
-% EXAMPLES :
-%
-% SEE ALSO :
-% AUTHORS  : Jean-Philippe Rannou (Altran)(jean-philippe.rannou@altran.com)
-% ------------------------------------------------------------------------------
-% RELEASES :
-%   06/11/2019 - RNU - creation
-% ------------------------------------------------------------------------------
-function [o_PH_IN_SITU_FREE, o_PH_IN_SITU_TOTAL] = compute_drift_PH( ...
-   a_VRS_PH, ...
-   a_VRS_PH_fillValue, ...
-   a_PH_IN_SITU_FREE_fillValue, a_PH_IN_SITU_TOTAL_fillValue, ...
-   a_VRS_PH_dates, ...
-   a_ctdDates, a_ctdData, ...
-   a_PRES_fillValue, a_TEMP_fillValue, a_PSAL_fillValue, ...
-   a_driftTransPh)
-
-% output parameters initialization
-o_PH_IN_SITU_FREE = ones(length(a_VRS_PH), 1)*a_PH_IN_SITU_FREE_fillValue;
-o_PH_IN_SITU_TOTAL = ones(length(a_VRS_PH), 1)*a_PH_IN_SITU_TOTAL_fillValue;
-
-
-% assign the CTD data to the OPTODE measurements (timely closest association)
-ctdLinkData = assign_CTD_measurements(a_ctdDates, a_ctdData, a_VRS_PH_dates);
-if (~isempty(ctdLinkData))
-   
-   % compute PH_IN_SITU_FREE and PH_IN_SITU_TOTAL values
-   [o_PH_IN_SITU_FREE, o_PH_IN_SITU_TOTAL] = compute_PH_111_113_114_115_123( ...
-      a_VRS_PH, ...
-      a_VRS_PH_fillValue, ...
-      ctdLinkData(:, 1), ...
-      ctdLinkData(:, 2), ...
-      ctdLinkData(:, 3), ...
-      a_PRES_fillValue, ...
-      a_TEMP_fillValue, ...
-      a_PSAL_fillValue, ...
-      a_PH_IN_SITU_FREE_fillValue, a_PH_IN_SITU_TOTAL_fillValue, ...
-      a_driftTransPh);
-end
-
-return
-
-% ------------------------------------------------------------------------------
-% Compute derived parameters for the MPE sensor.
-%
-% SYNTAX :
-%  [o_driftMpe] = compute_drift_derived_parameters_for_MPE(a_driftMpe)
-%
-% INPUT PARAMETERS :
-%   a_driftMpe : input MPE drift profile structure
-%
-% OUTPUT PARAMETERS :
-%   o_driftMpe : output MPE drift profile structure
-%
-% EXAMPLES :
-%
-% SEE ALSO :
-% AUTHORS  : Jean-Philippe Rannou (Altran)(jean-philippe.rannou@altran.com)
-% ------------------------------------------------------------------------------
-% RELEASES :
-%   11/18/2021 - RNU - creation
-% ------------------------------------------------------------------------------
-function [o_driftMpe] = compute_drift_derived_parameters_for_MPE(a_driftMpe)
-
-% output parameters initialization
-o_driftMpe = [];
-
-% global default values
-global g_decArgo_qcDef;
-global g_decArgo_qcNoQc;
-
-
-% list of parameters of the drift profile
-paramNameList = {a_driftMpe.paramList.name};
-
-% compute DOWNWELLING_PAR data and add them in the profile structure
-paramToDeriveList = [ ...
-   {'VOLTAGE_DOWNWELLING_PAR'} ...
-   ];
-derivedParamList = [ ...
-   {'DOWNWELLING_PAR2'} ...
-   ];
-for idP = 1:length(paramToDeriveList)
-   idF = find(strcmp(paramToDeriveList{idP}, paramNameList) == 1, 1);
-   if (~isempty(idF))
-      paramToDerive = get_netcdf_param_attributes(paramToDeriveList{idP});
-      derivedParam = get_netcdf_param_attributes(derivedParamList{idP});
-      
-      downPar = compute_DOWNWELLING_PAR_mpe_128_129( ...
-         a_driftMpe.data(:, idF), ...
-         paramToDerive.fillValue, derivedParam.fillValue);
-      
-      a_driftMpe.data(:, end+1) = downPar;
-      if (isempty(a_driftMpe.dataQc))
-         a_driftMpe.dataQc = ones(size(a_driftMpe.data, 1), length(a_driftMpe.paramList))*g_decArgo_qcDef;
-      end
-      downParQc = ones(size(a_driftMpe.data, 1), 1)*g_decArgo_qcDef;
-      downParQc(find(downPar ~= derivedParam.fillValue)) = g_decArgo_qcNoQc;
-      a_driftMpe.dataQc(:, end+1) = downParQc;
-
-      if (~isempty(a_driftMpe.dataAdj))
-         a_driftMpe.dataAdj(:, end+1) = ones(size(a_driftMpe.data, 1), 1)*derivedParam.fillValue;
-         if (isempty(a_driftMpe.dataAdjQc))
-            a_driftMpe.dataAdjQc = ones(size(a_driftMpe.data, 1), length(a_driftMpe.paramList))*g_decArgo_qcDef;
-         end
-         a_driftMpe.dataAdjQc(:, end+1) = ones(size(a_driftMpe.data, 1), 1)*g_decArgo_qcDef;
-      end
-      
-      a_driftMpe.paramList = [a_driftMpe.paramList derivedParam];
-      if (~isempty(a_driftMpe.paramDataMode))
-         a_driftMpe.paramDataMode = [a_driftMpe.paramDataMode ' '];
-      end
-   end
-end
-
-% update output parameters
-a_driftMpe.derived = 1;
-o_driftMpe = a_driftMpe;
-
-return
+               
+return;

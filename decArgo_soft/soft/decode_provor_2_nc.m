@@ -42,16 +42,13 @@ global g_decArgo_outputCsvFileId;
 global g_decArgo_floatListFileName;
 global g_decArgo_dirOutputLogFile;
 
-global g_decArgo_processRemainingBuffers;
-g_decArgo_processRemainingBuffers = 1;
-
 
 % create list of floats to be decoded
 if (nargin == 0)
    % float list is given in configuration file
    if ~(exist(g_decArgo_floatListFileName, 'file') == 2)
       fprintf('ERROR: Float file list not found: %s\n', g_decArgo_floatListFileName);
-      return
+      return;
    end
 
    floatList = load(g_decArgo_floatListFileName);
@@ -79,4 +76,4 @@ decode_provor(floatList);
 
 diary off;
 
-return
+return;

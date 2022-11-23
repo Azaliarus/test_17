@@ -3,11 +3,10 @@
 %
 % SYNTAX :
 %  print_data_in_csv_file_ir_sbd2_FLBB_mean_stdMed( ...
-%    a_decoderId, a_cycleNum, a_profNum, a_phaseNum, ...
+%    a_cycleNum, a_profNum, a_phaseNum, ...
 %    a_dataFLBBMean, a_dataFLBBStdMed)
 %
 % INPUT PARAMETERS :
-%   a_decoderId      : float decoder Id
 %   a_cycleNum       : cycle number of the packet
 %   a_profNum        : profile number of the packet
 %   a_phaseNum       : phase number of the packet
@@ -25,7 +24,7 @@
 %   12/01/2014 - RNU - creation
 % ------------------------------------------------------------------------------
 function print_data_in_csv_file_ir_sbd2_FLBB_mean_stdMed( ...
-   a_decoderId, a_cycleNum, a_profNum, a_phaseNum, ...
+   a_cycleNum, a_profNum, a_phaseNum, ...
    a_dataFLBBMean, a_dataFLBBStdMed)
 
 % current float WMO number
@@ -90,11 +89,11 @@ if (isempty(idDataStdMed))
       (dataMean(:, 5) == 0));
    dataMean(idDel, :) = [];
 
-   dataMean(:, 3) = sensor_2_value_for_pressure_ir_rudics_sbd2(dataMean(:, 3), a_decoderId);
+   dataMean(:, 3) = sensor_2_value_for_pressure_ir_rudics_sbd2(dataMean(:, 3));
    dataMean(:, 4) = sensor_2_value_for_chloroA_ir_rudics_sbd2(dataMean(:, 4));
    dataMean(:, 5) = sensor_2_value_for_backscat_ir_rudics_sbd2(dataMean(:, 5));
    paramCHLA = get_netcdf_param_attributes('CHLA');
-   dataMean(:, 6) = compute_CHLA_301_1015_1101_1105_1110_1111_1112(dataMean(:, 4), g_decArgo_chloroADef, paramCHLA.fillValue);
+   dataMean(:, 6) = compute_CHLA_301(dataMean(:, 4), g_decArgo_chloroADef, paramCHLA.fillValue);
 
    for idL = 1:size(dataMean, 1)
       if (dataMean(idL, 1) ~= g_decArgo_dateDef)
@@ -169,9 +168,9 @@ else
                if (~isempty(idF))
                   idOk = idOk(idF);
                else
-                  fprintf('WARNING: Float #%d Cycle #%d: cannot fit FLBB standard deviation and median data with associated mean data - standard deviation and median data ignored\n', ...
+                  fprintf('WARNING: Float #%d Cycle #%d: cannot fit FLBB standard deviation and median data with associated mean data => standard deviation and median data ignored\n', ...
                      g_decArgo_floatNum, a_cycleNum);
-                  continue
+                  continue;
                end
             end
             data(idOk, 6:9) = dataStdMed(idL, 2:5);
@@ -181,7 +180,7 @@ else
          end
       end
 
-      data(:, 3) = sensor_2_value_for_pressure_ir_rudics_sbd2(data(:, 3), a_decoderId);
+      data(:, 3) = sensor_2_value_for_pressure_ir_rudics_sbd2(data(:, 3));
       data(:, 4) = sensor_2_value_for_chloroA_ir_rudics_sbd2(data(:, 4));
       data(:, 5) = sensor_2_value_for_backscat_ir_rudics_sbd2(data(:, 5));
       data(:, 6) = sensor_2_value_for_chloroA_ir_rudics_sbd2(data(:, 6));
@@ -189,7 +188,7 @@ else
       data(:, 8) = sensor_2_value_for_chloroA_ir_rudics_sbd2(data(:, 8));
       data(:, 9) = sensor_2_value_for_backscat_ir_rudics_sbd2(data(:, 9));
       paramCHLA = get_netcdf_param_attributes('CHLA');
-      data(:, 10) = compute_CHLA_301_1015_1101_1105_1110_1111_1112(data(:, 4), g_decArgo_chloroADef, paramCHLA.fillValue);
+      data(:, 10) = compute_CHLA_301(data(:, 4), g_decArgo_chloroADef, paramCHLA.fillValue);
 
       for idL = 1:size(data, 1)
          if (data(idL, 1) ~= g_decArgo_dateDef)
@@ -210,4 +209,4 @@ else
    end
 end
 
-return
+return;

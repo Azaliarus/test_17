@@ -49,7 +49,7 @@ if (nargin == 0)
    % floats to process come from floatListFileName
    if ~(exist(floatListFileName, 'file') == 2)
       fprintf('File not found: %s\n', floatListFileName);
-      return
+      return;
    end
    
    fprintf('Floats from list: %s\n', floatListFileName);
@@ -65,7 +65,7 @@ end
    listLaunchDate, listLaunchLon, listLaunchLat, ...
    listRefDay, listEndDate, listDmFlag] = get_floats_info(floatInformationFileName);
 if (isempty(numWmo))
-   return
+   return;
 end
 
 % copy SBD files
@@ -79,19 +79,11 @@ for idFloat = 1:nbFloats
    % find the login name of the float
    [logName] = find_login_name(floatNum, numWmo, loginName);
    if (isempty(logName))
-      return
+      return;
    end
-   
-   % find the decoder ID of the float
-   idF = find(floatNum == numWmo);
-   if (isempty(idF))
-      fprintf('No decoder Id for float : %d\n', floatNum);
-      return
-   end
-   floatDecId = listDecId(idF);
    
    % create the output directory of this float
-   floatOutputDirName = [outputDirName '/' logName '_' floatNumStr];
+   floatOutputDirName = [outputDirName '/' logName];
    if ~(exist(floatOutputDirName, 'dir') == 7)
       mkdir(floatOutputDirName);
    end
@@ -100,9 +92,7 @@ for idFloat = 1:nbFloats
       mkdir(floatOutputDirName);
    end
    
-   sbdFile = [dir([inputDirName '/' logName '/' sprintf('*_%s_*.b64', logName)]); ...
-      dir([inputDirName '/' logName '/' sprintf('*_%s_*.bin', logName)])];
-
+   sbdFile = dir([inputDirName '/' logName '/' sprintf('*_%s_*.b*.sbd', logName)]);
    for idFile = 1:length(sbdFile)
       %    for idFile = 1:min(100,length(sbdFile))
       sbdFileName = sbdFile(idFile).name;
@@ -114,17 +104,17 @@ for idFloat = 1:nbFloats
          % updated
          sbdFileOut = dir(sbdFilePathNameOut);
          if (~strcmp(sbdFile(idFile).date, sbdFileOut.date))
-            copy_file(sbdFilePathName, sbdFilePathNameOut);
+            copy_file(sbdFilePathName, floatOutputDirName);
             fprintf('%s => copy\n', sbdFileName);
          else
             fprintf('%s => unchanged\n', sbdFileName);
          end
       else
          % copy the file if it doesn't exist
-         copy_file(sbdFilePathName, sbdFilePathNameOut);
+         copy_file(sbdFilePathName, floatOutputDirName);
          fprintf('%s => copy\n', sbdFileName);
       end
    end
 end
 
-return
+return;

@@ -1,6 +1,7 @@
 % ------------------------------------------------------------------------------
-% Compute the profile location of a given cycle from Iridium locations.
-% Only Iridium locations with a CEP radius < 5 are used.
+% Compute the profile location of a given cycle from Iridium locations (used
+% only when no GPS fixes are available), as specifieed in the trajectory DAC
+% cookbook.
 %
 % SYNTAX :
 %  [o_locDate, o_locLon, o_locLat, o_locQc, o_lastCycleFlag] = ...
@@ -31,6 +32,7 @@ function [o_locDate, o_locLon, o_locLat, o_locQc, o_lastCycleFlag] = ...
 
 % QC flag values (char)
 global g_decArgo_qcStrGood;
+global g_decArgo_qcStrProbablyGood;
 
 % output parameters initialization
 o_locDate = [];
@@ -40,34 +42,28 @@ o_locQc = [];
 o_lastCycleFlag = [];
 
 
-% use the Iridium fixes associated to the current cycle with a CEP radius < 5
-
 % process the contents of the Iridium mail associated to the current cycle
-idFCyNum = find(([a_iridiumMailData.cycleNumber] == a_cycleNumber) & ...
-   ([a_iridiumMailData.cepRadius] ~= 0) & ([a_iridiumMailData.cepRadius] < 5));
+idFCyNum = find([a_iridiumMailData.cycleNumber] == a_cycleNumber);
 if (~isempty(idFCyNum))
    timeList = [a_iridiumMailData(idFCyNum).timeOfSessionJuld];
    latList = [a_iridiumMailData(idFCyNum).unitLocationLat];
    lonList = [a_iridiumMailData(idFCyNum).unitLocationLon];
    radiusList = [a_iridiumMailData(idFCyNum).cepRadius];
-      
-   % longitudes must be in the [-180, 180[ interval
-   % (see cycle #18 of float #6903190)
-   idToShift = find(lonList >= 180);
-   lonList(idToShift) = lonList(idToShift) - 360;
-
-   if (~isempty(timeList))
-      weight = 1./(radiusList.*radiusList);
-      o_locDate = mean(timeList);
-      o_locLon = sum(lonList.*weight)/sum(weight);
-      o_locLat = sum(latList.*weight)/sum(weight);
+   
+   weight = 1./(radiusList.*radiusList);
+   o_locDate = mean(timeList);
+   o_locLon = sum(lonList.*weight)/sum(weight);
+   o_locLat = sum(latList.*weight)/sum(weight);
+   if (mean(radiusList) < 5)
       o_locQc = g_decArgo_qcStrGood;
-      
-      o_lastCycleFlag = 0;
-      if (a_cycleNumber == max([a_iridiumMailData.cycleNumber]))
-         o_lastCycleFlag = 1;
-      end
+   else
+      o_locQc = g_decArgo_qcStrProbablyGood;
+   end
+   
+   o_lastCycleFlag = 0;
+   if (a_cycleNumber == max([a_iridiumMailData.cycleNumber]))
+      o_lastCycleFlag = 1;
    end
 end
 
-return
+return;

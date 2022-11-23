@@ -54,7 +54,7 @@ firstFileLastDate = argosDataDate(firstFileLastDateId);
 fIdIn = fopen(a_filePathName, 'r');
 if (fIdIn == -1)
    fprintf('ERROR: Error while opening file : %s\n', a_filePathName);
-   return
+   return;
 end
 
 text = [];
@@ -99,12 +99,12 @@ while (1)
       satDateList = [];
       dataDateList = [];
 
-      break
+      break;
    end
    
    % empty line
    if (strcmp(deblank(line), ''))
-      continue
+      continue;
    end
    
    if (isempty(text))
@@ -293,7 +293,7 @@ if (g_decArgo_realtimeFlag == 1)
             tmpArgosIdDirectory, ...
             message);
          o_ok = 0;
-         return
+         return;
       end
    end
    mkdir(tmpArgosIdDirectory);
@@ -306,7 +306,7 @@ if (g_decArgo_realtimeFlag == 1)
       % move the input Argos file
       [~, fileName, fileExt] = fileparts(a_filePathName);
       filePathNameToDelete = [outputDir '/' fileName '_TO_DELETE' fileExt];
-      move_file(a_filePathName, filePathNameToDelete);
+      movefile(a_filePathName, filePathNameToDelete);
    else
       
       filePathNameToDelete = '';
@@ -316,7 +316,7 @@ else
    % move the input Argos file
    [outputDir, fileName, fileExt] = fileparts(a_filePathName);
    filePathNameToDelete = [outputDir '/' fileName '_TO_DELETE' fileExt];
-   move_file(a_filePathName, filePathNameToDelete);
+   movefile(a_filePathName, filePathNameToDelete);
 end
 
 % create the new Argos files
@@ -334,14 +334,14 @@ for idF = 1:2
    if (exist(outputFilePathName, 'file') == 2)
       fprintf('ERROR: Argos cycle file already exist: %s\n', ...
          outputFilePathName);
-      return
+      return;
    else
       
       % store the data in the output file
       fIdOut = fopen(outputFilePathName, 'wt');
       if (fIdOut == -1)
          fprintf('ERROR: Unable to open file: %s\n', outputFilePathName);
-         return
+         return;
       end
       
       for id = 1:length(text)
@@ -358,4 +358,4 @@ if (~isempty(filePathNameToDelete))
    delete(filePathNameToDelete);
 end
 
-return
+return;

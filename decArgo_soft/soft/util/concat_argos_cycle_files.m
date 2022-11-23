@@ -58,7 +58,7 @@ if ((nargin == 0) || (nargin > 4))
    fprintf('   concat_argos_cycle_files(WMO)                       => concat all Argos cycle files of float #WMO\n');
    fprintf('where start_date and end_date are provided as strings present in the Argos cycle file names (format: ''yyyy-mm-dd-HH-MM-SS'')\n');
    fprintf('aborted ...\n');
-   return
+   return;
 else
    firstDate = [];
    lastDate = [];
@@ -75,7 +75,7 @@ else
       if (firstDate > lastDate)
          fprintf('Start and end dates should be chronolocally sorted!\n');
          fprintf('aborted ...\n');
-         return
+         return;
       end
    end
    
@@ -96,8 +96,8 @@ end
 
 % check the input directory
 if ~(exist(DIR_INPUT_ARGOS_FILES, 'dir') == 7)
-   fprintf('ERROR: The Argos cycle files directory %s does not exist - exit\n', DIR_INPUT_ARGOS_FILES);
-   return
+   fprintf('ERROR: The Argos cycle files directory %s does not exist => exit\n', DIR_INPUT_ARGOS_FILES);
+   return;
 end
 
 % get floats information
@@ -109,8 +109,8 @@ end
 % find current float Argos Id
 idF = find(listWmoNum == floatNum, 1);
 if (isempty(idF))
-   fprintf('ERROR: No information on float #%d - exit\n', floatNum);
-   return
+   fprintf('ERROR: No information on float #%d => exit\n', floatNum);
+   return;
 end
 floatArgosId = str2num(listArgosId{idF});
 
@@ -156,15 +156,15 @@ for idFile = 1:length(argosFiles)
          end
       end
    else
-      fprintf('ERROR: Not expected file name: %s - file not considered\n', argosFileName);
+      fprintf('ERROR: Not expected file name: %s => file not considered\n', argosFileName);
    end
 end
 
 if ~((nargin == 1) || ...
    ((nargin == 2) && (fileFound == 1)) || ...
       ((nargin == 3) && (fileFound == 2)))
-   fprintf('ERROR: Check that provided date(s) is(are) part of the Argos cycle file name - exit\n');
-   return
+   fprintf('ERROR: Check that provided date(s) is(are) part of the Argos cycle file name => exit\n');
+   return;
 end
 
 % chronologically sort the files
@@ -236,4 +236,4 @@ end
 fprintf('DONT''T FORGET to set the cycle number of the resulting file\n');
 fprintf('done\n');
 
-return
+return;

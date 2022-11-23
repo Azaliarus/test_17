@@ -48,12 +48,6 @@ usedConfNum = g_decArgo_floatConfig.USE.CONFIG;
 
 % find the id of the concerned configuration
 idUsedConf = find((usedCy == a_cycleNum) & (usedProf == a_profNum));
-% if (isempty(idUsedConf))
-%    idUsedConf = find((usedCy == a_cycleNum-1) & (usedProf == a_profNum));
-%    if (isempty(idUsedConf))
-%       idUsedConf = find((usedCy == a_cycleNum-2) & (usedProf == a_profNum));
-%    end
-% end
 idConf = find(configNum == usedConfNum(idUsedConf));
 
 % find the treatment types and the depth zone thresholds
@@ -83,4 +77,4 @@ for id = 1:4
    end
 end
 
-return
+return;

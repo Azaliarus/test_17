@@ -23,11 +23,28 @@
 % ------------------------------------------------------------------------------
 function create_argos_cycle_files(varargin)
 
-% DIR_INPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\Apex_set3\102015_ori_cycle_split\';
-% DIR_OUTPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\Apex_set3\102015_ori_cycle2\';
-DIR_INPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\IN\APEX_ARGOS_APF11\IN\ori_split\';
-DIR_OUTPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\IN\APEX_ARGOS_APF11\IN\ori_cycle\';
-
+% DIR_INPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\IN\split_apex_062608\ori_split\';
+% DIR_OUTPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\IN\split_apex_062608\ori_split_cycle\';
+% DIR_INPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\IN\split_apex_061609\in_split\';
+% DIR_OUTPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\IN\split_apex_061609\in_split_cycle\';
+% DIR_INPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\IN\split_apex_021009\in_split\';
+% DIR_OUTPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\IN\split_apex_021009\in_split_cycle\';
+% DIR_INPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\IN\split_apex_061810\in_split\';
+% DIR_OUTPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\IN\split_apex_061810\in_split_cycle\';
+% DIR_INPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\IN\split_apex_061810\118188\in_split\';
+% DIR_OUTPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\IN\split_apex_061810\118188\in_split_cycle\';
+% DIR_INPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\ArgosApex_processing_20160208\historical_processing\';
+% DIR_OUTPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\ArgosApex_processing_20160208\historical_processing_cycle\';
+% DIR_INPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\rerun\ori_split\';
+% DIR_OUTPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\rerun\ori_split_cycle\';
+% DIR_INPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\IN\ARN\ori_split\';
+% DIR_OUTPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\IN\ARN\ori_split_cycle\';
+% DIR_INPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\ArgosApex_processing_20160823\historical_processing\';
+% DIR_OUTPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\ArgosApex_processing_20160823\historical_processing_cycle\';
+% DIR_INPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\ArgosApex_processing_20160823\split_raw_sans_doubles_FINAL_119Apex\';
+% DIR_OUTPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\ArgosApex_processing_20160823\fichiers_cycle_non_identifiés_119Apex\';
+DIR_INPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\ArgosApex_processing_20160914\base_traitements_20160823\';
+DIR_OUTPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\ArgosApex_processing_20160914\base_traitements_20160823_cycle\';
 
 % directory to store the log file
 DIR_LOG_FILE = 'C:\Users\jprannou\_RNU\DecArgo_soft\work\log\';
@@ -70,7 +87,7 @@ if (nargin == 0)
    % floats to process come from floatListFileName
    if ~(exist(floatListFileName, 'file') == 2)
       fprintf('File not found: %s\n', floatListFileName);
-      return
+      return;
    end
    
    fprintf('Floats from list: %s\n', floatListFileName);
@@ -110,7 +127,7 @@ for idFloat = 1:nbFloats
    if (isempty(idF))
       fprintf('ERROR: No information on float #%d\n', floatNum);
       fprintf('(nothing done)\n');
-      continue
+      continue;
    end
    floatArgosId = str2num(listArgosId{idF});
    argosIdListAll(idFloat) = floatArgosId;
@@ -138,7 +155,7 @@ for idFloat = 1:nbFloats
    if (isempty(idF))
       fprintf('ERROR: No information on float #%d\n', floatNum);
       fprintf('(nothing done)\n');
-      continue
+      continue;
    end
    floatArgosId = str2num(listArgosId{idF});
    
@@ -150,7 +167,7 @@ for idFloat = 1:nbFloats
    dirInputFloat = [DIR_INPUT_ARGOS_FILES '/' sprintf('%06d', floatArgosId) '/'];
    if (~isdir(dirInputFloat))
       fprintf('WARNING: No Argos data for float #%d\n', floatNum);
-      continue
+      continue;
    end
       
    % collect dates in the Argos files of the float
@@ -179,10 +196,10 @@ for idFloat = 1:nbFloats
 
             floatArgosDate = [floatArgosDate; argosDate];
          else
-            fprintf('WARNING: Empty file (%s) - not considered\n', argosFileName);
+            fprintf('WARNING: Empty file (%s) => not considered\n', argosFileName);
          end
       else
-         fprintf('WARNING: Not expected file name %s - not considered\n', argosFileName);
+         fprintf('WARNING: Not expected file name %s => not considered\n', argosFileName);
       end
    end
 
@@ -226,7 +243,7 @@ for idFloat = 1:nbFloats
          fIdIn = fopen(argosFileNames{idFile}, 'r');
          if (fIdIn == -1)
             fprintf('Error while opening file : %s\n', argosFileNames{idFile});
-            return
+            return;
          end
 
          text = [];
@@ -252,7 +269,7 @@ for idFloat = 1:nbFloats
                      fIdOut = fopen(fileNameList{fileNum}, 'a');
                      if (fIdOut == -1)
                         fprintf('ERROR: Unable to open file: %s\n', fileNameList{fileNum});
-                        return
+                        return;
                      end
 
                      for id = 1:length(text)
@@ -262,7 +279,7 @@ for idFloat = 1:nbFloats
                      fclose(fIdOut);
 
                   else
-                     fprintf('INFO: Argos data without dates - not considered\n');
+                     fprintf('INFO: Argos data without dates => not considered\n');
                      for id = 1:length(text)
                         fprintf('%s\n', text{id});
                      end
@@ -270,12 +287,12 @@ for idFloat = 1:nbFloats
                   end
                end
 
-               break
+               break;
             end
 
             % empty line
             if (strcmp(deblank(line), ''))
-               continue
+               continue;
             end
 
             % look for satellite pass header
@@ -297,7 +314,7 @@ for idFloat = 1:nbFloats
                      fIdOut = fopen(fileNameList{fileNum}, 'a');
                      if (fIdOut == -1)
                         fprintf('ERROR: Unable to open file: %s\n', fileNameList{fileNum});
-                        return
+                        return;
                      end
 
                      for id = 1:length(text)
@@ -307,7 +324,7 @@ for idFloat = 1:nbFloats
                      fclose(fIdOut);
 
                   else
-                     fprintf('INFO: Argos data without dates - not considered\n');
+                     fprintf('INFO: Argos data without dates => not considered\n');
                      for id = 1:length(text)
                         fprintf('%s\n', text{id});
                      end
@@ -369,4 +386,4 @@ fprintf('done (Elapsed time is %.1f seconds)\n', ellapsedTime);
 
 diary off;
 
-return
+return;

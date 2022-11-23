@@ -27,7 +27,7 @@ DIR_INPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\IN\archive_cycle_co_20150409\';
 DIR_OUTPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\OUT\test\';
 
 % directory to store the log file
-DIR_LOG_FILE = 'C:\Users\jprannou\_RNU\DecArgo_soft\work\log\';
+DIR_LOG_FILE = 'C:\Users\jprannou\_RNU\DecArgo_soft\work\'; 
 
 % mode processing flags
 global g_decArgo_realtimeFlag;
@@ -53,7 +53,7 @@ if (nargin == 0)
    % floats to process come from floatListFileName
    if ~(exist(floatListFileName, 'file') == 2)
       fprintf('File not found: %s\n', floatListFileName);
-      return
+      return;
    end
    
    fprintf('Floats from list: %s\n', floatListFileName);
@@ -100,7 +100,7 @@ for idFloat = 1:nbFloats
    if (isempty(idF))
       fprintf('ERROR: No information on float #%d\n', floatNum);
       fprintf('(nothing done)\n');
-      continue
+      continue;
    end
    floatArgosId = str2num(listArgosId{idF});
    
@@ -144,4 +144,4 @@ fprintf('done (Elapsed time is %.1f seconds)\n', ellapsedTime);
 
 diary off;
 
-return
+return;

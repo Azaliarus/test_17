@@ -25,10 +25,9 @@ DIR_INPUT_NC_FILES = 'C:\Users\jprannou\_DATA\OUT\nc_output_decArgo\';
 
 % default list of floats to convert
 FLOAT_LIST_FILE_NAME = 'C:\Users\jprannou\_RNU\DecArgo_soft\lists\arvor_cm.txt';
-FLOAT_LIST_FILE_NAME = 'C:\Users\jprannou\_RNU\DecArgo_soft\lists\arvor_5.45.txt';
 
 % directory to store the log file
-DIR_LOG_FILE = 'C:\Users\jprannou\_RNU\DecArgo_soft\work\log\';
+DIR_LOG_FILE = 'C:\Users\jprannou\_RNU\DecArgo_soft\work\';
 
 % default values initialization
 init_default_values;
@@ -46,7 +45,7 @@ if (nargin == 0)
    % floats to process come from floatListFileName
    if ~(exist(floatListFileName, 'file') == 2)
       fprintf('ERROR: File not found: %s\n', floatListFileName);
-      return
+      return;
    end
    
    fprintf('Floats from list: %s\n', floatListFileName);
@@ -76,48 +75,48 @@ for idFloat = 1:nbFloats
    floatNumStr = num2str(floatNum);
    fprintf('%03d/%03d %s\n', idFloat, nbFloats, floatNumStr);
    
-   ncFileDirRef = [DIR_INPUT_NC_FILES '/' num2str(floatNum) '/'];
+   ncFileDir = [DIR_INPUT_NC_FILES '/' num2str(floatNum) '/'];
    
-   if (exist(ncFileDirRef, 'dir') == 7)
+   if (exist(ncFileDir, 'dir') == 7)
       
       % convert multi-profile c file
       profFileName = sprintf('%d_prof.nc', floatNum);
-      profFilePathName = [ncFileDirRef profFileName];
+      profFilePathName = [ncFileDir profFileName];
       
       if (exist(profFilePathName, 'file') == 2)
          
          outputFileName = [profFileName(1:end-3) '.csv'];
-         outputFilePathName = [ncFileDirRef outputFileName];
+         outputFilePathName = [ncFileDir outputFileName];
          cFileFlag = 1;
          nc_prof_2_csv_file(profFilePathName, outputFilePathName, floatNum, COMPARISON_MODE, WRITE_QC_FLAG, cFileFlag);
       end
       
       % convert multi-profile b file
       profFileName = sprintf('%d_Bprof.nc', floatNum);
-      profFilePathName = [ncFileDirRef profFileName];
+      profFilePathName = [ncFileDir profFileName];
       
       if (exist(profFilePathName, 'file') == 2)
          
          outputFileName = [profFileName(1:end-3) '.csv'];
-         outputFilePathName = [ncFileDirRef outputFileName];
+         outputFilePathName = [ncFileDir outputFileName];
          cFileFlag = 0;
          nc_prof_2_csv_file(profFilePathName, outputFilePathName, floatNum, COMPARISON_MODE, WRITE_QC_FLAG, cFileFlag);
       end
       
       % convert multi-profile m file
       profFileName = sprintf('%d_Mprof.nc', floatNum);
-      profFilePathName = [ncFileDirRef profFileName];
+      profFilePathName = [ncFileDir profFileName];
       
       if (exist(profFilePathName, 'file') == 2)
          
          outputFileName = [profFileName(1:end-3) '.csv'];
-         outputFilePathName = [ncFileDirRef outputFileName];
+         outputFilePathName = [ncFileDir outputFileName];
          cFileFlag = 0;
          nc_prof_2_csv_file(profFilePathName, outputFilePathName, floatNum, COMPARISON_MODE, WRITE_QC_FLAG, cFileFlag);
       end
       
       % convert mono-profile files
-      ncFileDir = [ncFileDirRef '/profiles/'];
+      ncFileDir = [ncFileDir '/profiles/'];
       
       if (exist(ncFileDir, 'dir') == 7)
          
@@ -125,9 +124,6 @@ for idFloat = 1:nbFloats
          for idFile = 1:length(ncFiles)
             
             ncFileName = ncFiles(idFile).name;
-            if (ncFileName(1) == 'S')
-               continue
-            end
             ncFilePathName = [ncFileDir '/' ncFileName];
             
             outputFileName = [ncFileName(1:end-3) '.csv'];
@@ -142,29 +138,8 @@ for idFloat = 1:nbFloats
          fprintf('WARNING: Directory not found: %s\n', ncFileDir);
       end
       
-      % convert mono-profile aux files
-      ncAuxFileDir = [ncFileDirRef '/auxiliary/profiles/'];
-      
-      if (exist(ncAuxFileDir, 'dir') == 7)
-         
-         ncFiles = dir([ncAuxFileDir '*_aux.nc']);
-         for idFile = 1:length(ncFiles)
-            
-            ncFileName = ncFiles(idFile).name;
-            if (ncFileName(1) == 'S')
-               continue
-            end
-            ncFilePathName = [ncAuxFileDir '/' ncFileName];
-            
-            outputFileName = [ncFileName(1:end-3) '.csv'];
-            outputFilePathName = [ncAuxFileDir outputFileName];
-            cFileFlag = -1;
-            nc_prof_2_csv_file(ncFilePathName, outputFilePathName, floatNum, COMPARISON_MODE, WRITE_QC_FLAG, cFileFlag);
-         end
-      end
-      
    else
-      fprintf('WARNING: Directory not found: %s\n', ncFileDirRef);
+      fprintf('WARNING: Directory not found: %s\n', ncFileDir);
    end
 end
 
@@ -173,7 +148,7 @@ fprintf('done (Elapsed time is %.1f seconds)\n', ellapsedTime);
 
 diary off;
 
-return
+return;
 
 % ------------------------------------------------------------------------------
 % Convert one NetCDF profile file contents in CSV format.
@@ -219,14 +194,14 @@ fprintf('Converting: %s to %s\n', inputFileName, ourputFileName);
 fCdf = netcdf.open(a_inputPathFileName, 'NC_NOWRITE');
 if (isempty(fCdf))
    fprintf('ERROR: Unable to open NetCDF input file: %s\n', a_inputPathFileName);
-   return
+   return;
 end
 
 % create CSV file
 fidOut = fopen(a_outputPathFileName, 'wt');
 if (fidOut == -1)
    fprintf('ERROR: Unable to create output file: %s\n', a_outputPathFileName);
-   return
+   return;
 end
 
 % dimensions
@@ -321,10 +296,8 @@ for idVar = 1:length(varList)
       varValue = netcdf.getVar(fCdf, netcdf.inqVarID(fCdf, varList{idVar}));
       fprintf(fidOut, ' %d; ; ; %s; %s\n', a_floatNum, varList{idVar}, strtrim(varValue));
    else
-      if (a_cfileFlag ~= -1)
-         fprintf('WARNING: Variable %s is missing in file %s\n', ...
-            varList{idVar}, inputFileName);
-      end
+      fprintf('WARNING: Variable %s is missing in file %s\n', ...
+         varList{idVar}, inputFileName);
    end
 end
 
@@ -488,7 +461,7 @@ paramList2 = [ ...
    ];
 sufixList = [{''} {'_STD'} {'_MED'}];
 paramList = [];
-if (a_cfileFlag <= 0)
+if (a_cfileFlag == 0)
    for idP = 1:length(paramList2)
       if (var_is_present_dec_argo(fCdf, paramList2{idP}))
          paramList = [paramList {paramList2{idP}}];
@@ -553,7 +526,6 @@ if (a_writeQcFlag == 0)
       else
          if ~((a_cfileFlag == 0) && ...
                (strcmp(paramList{idParam}, 'PRES') || ...
-               strcmp(paramList{idParam}, 'PRES2') || ...
                strcmp(paramList{idParam}(end-3:end), '_STD') || ...
                strcmp(paramList{idParam}(end-3:end), '_MED')))
             fprintf('WARNING: Variable %s is missing in file %s\n', ...
@@ -567,7 +539,7 @@ if (a_writeQcFlag == 0)
    for idP = 1:nProf
       fprintf(fidOut, ' WMO; Cy#; N_PROF; PROFILE_META-DATA\n');
       
-      fprintf(fidOut, ' %d; %d; %d; VERTICAL_SAMPLING_SCHEME;"%s"\n', ...
+      fprintf(fidOut, ' %d; %d; %d; VERTICAL_SAMPLING_SCHEME; %s\n', ...
          a_floatNum, cycleNumber(idP), idP, ...
          strtrim(verticalSamplingScheme(:, idP)'));
       fprintf(fidOut, ' %d; %d; %d; CONFIG_MISSION_NUMBER; %d\n', ...
@@ -612,7 +584,7 @@ if (a_writeQcFlag == 0)
       for idParam = 1:nParam
          parameterName = strtrim(stationParameters(:, idParam, idP)');
          if (isempty(parameterName))
-            continue
+            continue;
          end
          
          for idS = 1:length(sufixList)
@@ -637,7 +609,7 @@ if (a_writeQcFlag == 0)
          end
          
          if (a_cfileFlag == 0)
-            if (strcmp(parameterName, 'PRES') || strcmp(parameterName, 'PRES2'))
+            if (strcmp(parameterName, 'PRES'))
                for idP2 = 1:length(paramList2)
                   paramName = paramList2{idP2};
                   
@@ -665,7 +637,7 @@ if (a_writeQcFlag == 0)
       for idParam = 1:nParam
          parameterName = strtrim(stationParameters(:, idParam, idP)');
          if (isempty(parameterName))
-            continue
+            continue;
          end
          
          for idS = 1:length(sufixList)
@@ -693,7 +665,7 @@ if (a_writeQcFlag == 0)
          end
          
          if (a_cfileFlag == 0)
-            if (strcmp(parameterName, 'PRES') || strcmp(parameterName, 'PRES2'))
+            if (strcmp(parameterName, 'PRES'))
                for idP2 = 1:length(paramList2)
                   paramName = paramList2{idP2};
                   
@@ -725,7 +697,7 @@ if (a_writeQcFlag == 0)
       for idParam = 1:nParam
          parameterName = strtrim(stationParameters(:, idParam, idP)');
          if (isempty(parameterName))
-            continue
+            continue;
          end
          
          for idS = 1:length(sufixList)
@@ -752,7 +724,7 @@ if (a_writeQcFlag == 0)
          end
          
          if (a_cfileFlag == 0)
-            if (strcmp(parameterName, 'PRES') || strcmp(parameterName, 'PRES2'))
+            if (strcmp(parameterName, 'PRES'))
                for idP2 = 1:length(paramList2)
                   paramName = paramList2{idP2};
                   
@@ -777,7 +749,7 @@ if (a_writeQcFlag == 0)
       end
       
       fprintf(fidOut, ' WMO; Cy#; N_PROF; PROFILE_MEAS\n');
-      for idLev = 1:size(data, 1)
+      for idLev = 1:size(data, 1);
          if (sum(data(idLev, :) == dataFillValue) ~= size(data, 2))
             fprintf(fidOut, ' %d; %d; %d; MEAS #%d', ...
                a_floatNum, cycleNumber(idP), idP, idLev);
@@ -818,17 +790,12 @@ else
          
          if ((a_cfileFlag == 0) && ...
                (strcmp(paramList{idParam}, 'PRES') || ...
-               strcmp(paramList{idParam}, 'PRES2') || ...
                strcmp(paramList{idParam}(end-3:end), '_STD') || ...
                strcmp(paramList{idParam}(end-3:end), '_MED')))
             paramDataQc = [paramDataQc {''}];
          else
-            if (var_is_present_dec_argo(fCdf, [paramList{idParam} '_QC']))
-               varQcValue = netcdf.getVar(fCdf, netcdf.inqVarID(fCdf, [paramList{idParam} '_QC']));
-               paramDataQc = [paramDataQc {varQcValue}];
-            else
-               paramDataQc = [paramDataQc {''}];
-            end
+            varQcValue = netcdf.getVar(fCdf, netcdf.inqVarID(fCdf, [paramList{idParam} '_QC']));
+            paramDataQc = [paramDataQc {varQcValue}];
          end
       else
          fprintf('WARNING: Variable %s is missing in file %s\n', ...
@@ -845,7 +812,6 @@ else
       else
          if ~((a_cfileFlag == 0) && ...
                (strcmp(paramList{idParam}, 'PRES') || ...
-               strcmp(paramList{idParam}, 'PRES2') || ...
                strcmp(paramList{idParam}(end-3:end), '_STD') || ...
                strcmp(paramList{idParam}(end-3:end), '_MED')))
             fprintf('WARNING: Variable %s is missing in file %s\n', ...
@@ -859,7 +825,7 @@ else
    for idP = 1:nProf
       fprintf(fidOut, ' WMO; Cy#; N_PROF; PROFILE_META-DATA\n');
       
-      fprintf(fidOut, ' %d; %d; %d; VERTICAL_SAMPLING_SCHEME;"%s"\n', ...
+      fprintf(fidOut, ' %d; %d; %d; VERTICAL_SAMPLING_SCHEME; %s\n', ...
          a_floatNum, cycleNumber(idP), idP, ...
          strtrim(verticalSamplingScheme(:, idP)'));
       fprintf(fidOut, ' %d; %d; %d; CONFIG_MISSION_NUMBER; %d\n', ...
@@ -904,7 +870,7 @@ else
       for idParam = 1:nParam
          parameterName = strtrim(stationParameters(:, idParam, idP)');
          if (isempty(parameterName))
-            continue
+            continue;
          end
          
          for idS = 1:length(sufixList)
@@ -924,7 +890,6 @@ else
                end
                if ~((a_cfileFlag == 0) && ...
                      (strcmp(paramName, 'PRES') || ...
-                     strcmp(paramName, 'PRES2') || ...
                      strcmp(paramName(end-3:end), '_STD') || ...
                      strcmp(paramName(end-3:end), '_MED')))
                   fprintf(fidOut, '; QC');
@@ -936,7 +901,7 @@ else
          end
          
          if (a_cfileFlag == 0)
-            if (strcmp(parameterName, 'PRES') || strcmp(parameterName, 'PRES2'))
+            if (strcmp(parameterName, 'PRES'))
                for idP2 = 1:length(paramList2)
                   paramName = paramList2{idP2};
                   
@@ -954,7 +919,6 @@ else
                      end
                      if ~((a_cfileFlag == 0) && ...
                            (strcmp(paramName, 'PRES') || ...
-                           strcmp(paramName, 'PRES2') || ...
                            strcmp(paramName(end-3:end), '_STD') || ...
                            strcmp(paramName(end-3:end), '_MED')))
                         fprintf(fidOut, '; QC');
@@ -971,7 +935,7 @@ else
       for idParam = 1:nParam
          parameterName = strtrim(stationParameters(:, idParam, idP)');
          if (isempty(parameterName))
-            continue
+            continue;
          end
          
          for idS = 1:length(sufixList)
@@ -1000,7 +964,7 @@ else
          end
          
          if (a_cfileFlag == 0)
-            if (strcmp(parameterName, 'PRES') || strcmp(parameterName, 'PRES2'))
+            if (strcmp(parameterName, 'PRES'))
                for idP2 = 1:length(paramList2)
                   paramName = paramList2{idP2};
                   
@@ -1033,7 +997,7 @@ else
       for idParam = 1:nParam
          parameterName = strtrim(stationParameters(:, idParam, idP)');
          if (isempty(parameterName))
-            continue
+            continue;
          end
          
          for idS = 1:length(sufixList)
@@ -1070,7 +1034,7 @@ else
          end
          
          if (a_cfileFlag == 0)
-            if (strcmp(parameterName, 'PRES') || strcmp(parameterName, 'PRES2'))
+            if (strcmp(parameterName, 'PRES'))
                for idP2 = 1:length(paramList2)
                   paramName = paramList2{idP2};
                   
@@ -1366,4 +1330,4 @@ fclose(fidOut);
 
 netcdf.close(fCdf);
 
-return
+return;

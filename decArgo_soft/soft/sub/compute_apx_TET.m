@@ -6,11 +6,10 @@
 % possible).
 %
 % SYNTAX :
-%  [o_timeData] = compute_apx_TET(a_timeData, a_decoderId)
+%  [o_timeData] = compute_apx_TET(a_timeData)
 %
 % INPUT PARAMETERS :
-%   a_timeData  : input cycle time data structure
-%   a_decoderId : float decoder Id
+%   a_timeData : input cycle time data structure
 %
 % OUTPUT PARAMETERS :
 %   o_timeData : updated cycle time data structure
@@ -23,7 +22,7 @@
 % RELEASES :
 %   09/22/2015 - RNU - creation
 % ------------------------------------------------------------------------------
-function [o_timeData] = compute_apx_TET(a_timeData, a_decoderId)
+function [o_timeData] = compute_apx_TET(a_timeData)
 
 % output parameters initialization
 o_timeData = a_timeData;
@@ -39,9 +38,7 @@ global g_decArgo_dateDef;
 
 
 % estimate TET and clock drift from LMTs
-if (~ismember(a_decoderId, [1021 1022]))
-   o_timeData = estimate_TET(o_timeData);
-end
+o_timeData = estimate_TET(o_timeData);
 
 % configuration information
 dpfFloatFlag = o_timeData.configParam.dpfFloatFlag;
@@ -53,59 +50,55 @@ end
 if (o_timeData.configParam.downTimeEndProvidedFlag)
 
    % interpolate DOWN_TIME end to fill missing ones
-   if (~ismember(a_decoderId, [1021 1022]))
-      idUsed = find([o_timeData.cycleNum] > dpfFloatFlag);
-      cycleNumber = o_timeData.cycleNum(idUsed);
-      downTimeEnd = [o_timeData.cycleTime(idUsed).downTimeEndFloat];
+   idUsed = find([o_timeData.cycleNum] > dpfFloatFlag);
+   cycleNumber = o_timeData.cycleNum(idUsed);
+   downTimeEnd = [o_timeData.cycleTime(idUsed).downTimeEndFloat];
+   
+   idNotDated = find(downTimeEnd == g_decArgo_dateDef);
+   if (~isempty(idNotDated))
+      idUsed2 = find(downTimeEnd ~= g_decArgo_dateDef);
+      cycleNumberUsed = cycleNumber(idUsed2);
+      downTimeEndUsed = downTimeEnd(idUsed2);
       
-      idNotDated = find(downTimeEnd == g_decArgo_dateDef);
-      if (~isempty(idNotDated))
-         idUsed2 = find(downTimeEnd ~= g_decArgo_dateDef);
-         cycleNumberUsed = cycleNumber(idUsed2);
-         downTimeEndUsed = downTimeEnd(idUsed2);
-         
-         if (length(cycleNumberUsed) > 1)
-            downTimeEndInterp = interp1(cycleNumberUsed, downTimeEndUsed, cycleNumber(idNotDated), 'linear');
-            downTimeEndInterp(find(isnan(downTimeEndInterp))) = g_decArgo_dateDef;
-            downTimeEndInterp = num2cell(downTimeEndInterp);
-            [o_timeData.cycleTime(idUsed(idNotDated)).downTimeEndFloat] = deal(downTimeEndInterp{:});
-            [o_timeData.cycleTime(idUsed(idNotDated)).downTimeEndFloatStatus] = deal(g_JULD_STATUS_3);
-         end
+      if (length(cycleNumberUsed) > 1)
+         downTimeEndInterp = interp1(cycleNumberUsed, downTimeEndUsed, cycleNumber(idNotDated), 'linear');
+         downTimeEndInterp(find(isnan(downTimeEndInterp))) = g_decArgo_dateDef;
+         downTimeEndInterp = num2cell(downTimeEndInterp);
+         [o_timeData.cycleTime(idUsed(idNotDated)).downTimeEndFloat] = deal(downTimeEndInterp{:});
+         [o_timeData.cycleTime(idUsed(idNotDated)).downTimeEndFloatStatus] = deal(g_JULD_STATUS_3);
       end
    end
    
    % compute float clock drift from DOWN_TIME end
-   if (~ismember(a_decoderId, [1021 1022]))
-      idUsed = find([o_timeData.cycleNum] > dpfFloatFlag);
-      cycleNumber = o_timeData.cycleNum(idUsed);
-      downTimeEnd = [o_timeData.cycleTime(idUsed).downTimeEndFloat];
-      idDated = find(downTimeEnd ~= g_decArgo_dateDef);
-      if (length(idDated) > 1)
-         cycleNumber = cycleNumber(idDated);
-         downTimeEnd = downTimeEnd(idDated);
-         
-         % linearly fit the DOWN_TIME ends (in a least squares sense) to estimate clock drift
-         cycleTime = o_timeData.configParam.cycleTime;
-         cycleTimes = ones(max(cycleNumber), 1)*cycleTime;
-         xVal = compute_duration(cycleNumber, cycleNumber(1), cycleTimes);
-         yVal = downTimeEnd;
-         polyCoef = polyfit(xVal, yVal, 1);
-         
-         tabVal = polyval(polyCoef, compute_duration(cycleNumber, cycleNumber(1), cycleTimes));
-         % the estimated clock drift (clock drift = float time - UTC time)
-         % clock drift is > 0 when the float RTC is too late and then a positive
-         % offset should be substracted to float times
-         % here we are fitting DOWN_TIME ends (i.e. float times), thus
-         clockOffset = (tabVal(end) - (cycleNumber(end)-cycleNumber(1))*cycleTime/24 - tabVal(1))*86400;
-         clockDrift = clockOffset/abs(tabVal(1) - tabVal(end))*365;
-         fprintf('clock drift from DOWN_TIME end: %s per year\n', format_time_dec_argo(clockDrift/3600));
-         if (~isempty(o_timeData.clockDriftInSecPerYear))
-            o_timeData.clockDriftInSecPerYear = o_timeData.clockDriftInSecPerYear + clockDrift;
-            fprintf('clock drift USED: %s per year\n', format_time_dec_argo(o_timeData.clockDriftInSecPerYear/3600));
-         end
+   idUsed = find([o_timeData.cycleNum] > dpfFloatFlag);
+   cycleNumber = o_timeData.cycleNum(idUsed);
+   downTimeEnd = [o_timeData.cycleTime(idUsed).downTimeEndFloat];
+   idDated = find(downTimeEnd ~= g_decArgo_dateDef);
+   if (length(idDated) > 1)
+      cycleNumber = cycleNumber(idDated);
+      downTimeEnd = downTimeEnd(idDated);
+      
+      % linearly fit the DOWN_TIME ends (in a least squares sense) to estimate clock drift
+      cycleTime = o_timeData.configParam.cycleTime;
+      cycleTimes = ones(max(cycleNumber), 1)*cycleTime;
+      xVal = compute_duration(cycleNumber, cycleNumber(1), cycleTimes);
+      yVal = downTimeEnd;
+      polyCoef = polyfit(xVal, yVal, 1);
+      
+      tabVal = polyval(polyCoef, compute_duration(cycleNumber, cycleNumber(1), cycleTimes));
+      % the estimated clock drift (clock drift = float time - UTC time)
+      % clock drift is > 0 when the float RTC is too late and then a positive
+      % offset should be substracted to float times
+      % here we are fitting DOWN_TIME ends (i.e. float times), thus
+      clockOffset = (tabVal(end) - (cycleNumber(end)-cycleNumber(1))*cycleTime/24 - tabVal(1))*86400;
+      clockDrift = clockOffset/abs(tabVal(1) - tabVal(end))*365;
+      fprintf('clock drift from DOWN_TIME end: %s per year\n', format_time_dec_argo(clockDrift/3600));
+      if (~isempty(o_timeData.clockDriftInSecPerYear))
+         o_timeData.clockDriftInSecPerYear = o_timeData.clockDriftInSecPerYear + clockDrift;
+         fprintf('clock drift USED: %s per year\n', format_time_dec_argo(o_timeData.clockDriftInSecPerYear/3600));
       end
    end
-      
+   
    % if UP_TIME is unknown, estimate it
    upTime = o_timeData.configParam.upTime;
    %    fprintf('UP_TIME config: %d hours\n', upTime);
@@ -116,7 +109,7 @@ if (o_timeData.configParam.downTimeEndProvidedFlag)
       if (~isempty(upTime))
          fprintf('UP_TIME estimated: %d hours\n', upTime);
       else
-         fprintf('WARNING: Float #%d: UP_TIME is unknown and cannot be estimated - TET (= DOWN_TIME end + UP_TIME) is not computed\n', ...
+         fprintf('WARNING: Float #%d: UP_TIME is unknown and cannot be estimated => TET (= DOWN_TIME end + UP_TIME) is not computed\n', ...
             g_decArgo_floatNum);
       end
    end
@@ -153,7 +146,7 @@ if (o_timeData.configParam.downTimeEndProvidedFlag)
    end
 end
 
-return
+return;
 
 % ------------------------------------------------------------------------------
 % Estimate UP_TIME configuration parameter value.
@@ -199,7 +192,7 @@ idDated = find((tabTet ~= g_decArgo_dateDef) & (downTimeEnd ~= g_decArgo_dateDef
 [o_timeData.configParam.upTime, ~] = select_a_value(round((tabTet(idDated)-downTimeEnd(idDated))*24));
 o_timeData.configParam.downTime = o_timeData.configParam.cycleTime - o_timeData.configParam.upTime;
 
-return
+return;
 
 % ------------------------------------------------------------------------------
 % Estimate TET from LMTs (and estimate the RTC clock drift if possible).
@@ -254,7 +247,7 @@ lastMsgTime = [o_timeData.cycleTime(idUsed).lastMsgTime];
 cycleTimes = ones(max(cycleNumber), 1)*cycleTime;
 
 if (isempty(cycleNumber))
-   return
+   return;
 end
 
 % estimate TET from the max envelope of the LMTs (without clock drift estimation)
@@ -269,7 +262,7 @@ lmtOfNotDated = [o_timeData.cycleTime(idNotDated).lastMsgTime];
 lmtOfNotDated = num2cell(lmtOfNotDated);
 [o_timeData.cycleTime(idNotDated).transEndTime2] = deal(lmtOfNotDated{:});
 
-% if there is enough cycles, we estimate the TETs taking into account the clock
+% if there is enouch cycles, we estimate the TETs taking into account the clock
 % drift
 
 if (length(cycleNumber) >= NB_CYCLE_MIN)
@@ -312,7 +305,7 @@ if (length(cycleNumber) >= NB_CYCLE_MIN)
                   % convex envelope
                   idStart = idCheck;
                   stop = 0;
-                  break
+                  break;
                end
             end
          end
@@ -380,7 +373,7 @@ if (length(cycleNumber) >= NB_CYCLE_MIN)
    clockDrift = clockOffset/abs(tabTet2(1) - tabTet2(end))*365;
    if (clockDrift/60 > MAX_CLOCK_DRIFT)
       % the algorithm failed (there is probably a jump of the RTC)
-      fprintf('WARNING: Float #%d: estimated clock drift (%s per year) > MAX_CLOCK_DRIFT (= %s per year)>  - TET cannot be estimated\n', ...
+      fprintf('WARNING: Float #%d: estimated clock drift (%s per year) > MAX_CLOCK_DRIFT (= %s per year)>  => TET cannot be estimated\n', ...
          g_decArgo_floatNum, ...
          format_time_dec_argo(clockDrift/3600), ...
          format_time_dec_argo(MAX_CLOCK_DRIFT/60));
@@ -397,7 +390,7 @@ if (length(cycleNumber) >= NB_CYCLE_MIN)
    end
 end
 
-return
+return;
 
 % ------------------------------------------------------------------------------
 % Compute durations between cycles.
@@ -438,4 +431,4 @@ end
 
 o_duration = o_duration/24;
 
-return
+return;

@@ -27,7 +27,7 @@ global g_NTP_PRINT;
 
 global g_NTP_ID_FLOAT;
 global g_NTP_FLOAT_LIST;
-global g_NTP_nbCycles;
+global g_NTP_nbCyles;
 global g_NTP_PROF_NUM;
 
 global g_NTP_NAME_PARAM1;
@@ -35,39 +35,47 @@ global g_NTP_NAME_PARAM2;
 
 % g_NTP_NAME_PARAM1 = 'TURBIDITY';
 % g_NTP_NAME_PARAM1 = 'CHLA';
-% g_NTP_NAME_PARAM1 = 'BPHASE_DOXY';
+% g_NTP_NAME_PARAM1 = 'RPHASE_DOXY';
 g_NTP_NAME_PARAM1 = 'TEMP';
-% g_NTP_NAME_PARAM1 = 'DOWNWELLING_PAR';
-% g_NTP_NAME_PARAM1 = 'FLUORESCENCE_CDOM';
-% g_NTP_NAME_PARAM1 = 'TEMP_DOXY';
 % g_NTP_NAME_PARAM1 = 'NITRATE';
-% g_NTP_NAME_PARAM1 = 'FREQUENCY_DOXY';
-% g_NTP_NAME_PARAM1 = 'PH_IN_SITU_FREE';
-% g_NTP_NAME_PARAM1 = 'DOXY';
-% g_NTP_NAME_PARAM1 = 'CHLA';
 
 % g_NTP_NAME_PARAM2 = 'TURBIDITY';
-% g_NTP_NAME_PARAM2 = 'BBP700';
+% g_NTP_NAME_PARAM2 = 'CHLA2';
 % g_NTP_NAME_PARAM2 = 'TEMP_DOXY';
 g_NTP_NAME_PARAM2 = 'PSAL';
-% g_NTP_NAME_PARAM2 = 'DOWNWELLING_PAR2';
-% g_NTP_NAME_PARAM2 = 'CDOM';
 % g_NTP_NAME_PARAM2 = 'NITRATE';
 % g_NTP_NAME_PARAM2 = 'DOXY';
-% g_NTP_NAME_PARAM2 = 'PH_IN_SITU_TOTAL';
-% g_NTP_NAME_PARAM2 = 'CHLA';
-% g_NTP_NAME_PARAM2 = 'BBP700';
 
 % top directory of NetCDF files to plot
 g_NTP_NC_DIR = 'C:\Users\jprannou\_DATA\OUT\nc_output_decArgo\';
-% g_NTP_NC_DIR = 'C:\Users\jprannou\_DATA\Conversion_en_3.1_20220822\';
-% g_NTP_NC_DIR = 'E:\202110-ArgoData\coriolis\';
+% g_NTP_NC_DIR = 'C:\Users\jprannou\_DATA\OUT\nc_output_decArgo_ref_apx_bascule\';
+% g_NTP_NC_DIR = 'C:\Users\jprannou\Desktop\ftp\';
 
 % directory to store pdf output
 g_NTP_PDF_DIR = 'C:\Users\jprannou\_RNU\DecArgo_soft\work\';
 
 % default list of floats to plot
-FLOAT_LIST_FILE_NAME = 'C:\Users\jprannou\_RNU\DecArgo_soft\lists\tmp.txt';
+% FLOAT_LIST_FILE_NAME = 'C:\Users\jprannou\_RNU\DecArgo_soft\lists\tmp.txt';
+% FLOAT_LIST_FILE_NAME = 'C:\Users\jprannou\_RNU\DecArgo_soft\lists\_apex_argos_071412.txt';
+% FLOAT_LIST_FILE_NAME = 'C:\Users\jprannou\_RNU\DecArgo_soft\lists\_apex_argos_062608.txt';
+% FLOAT_LIST_FILE_NAME = 'C:\Users\jprannou\_RNU\DecArgo_soft\lists\_apex_argos_061609.txt';
+% FLOAT_LIST_FILE_NAME = 'C:\Users\jprannou\_RNU\DecArgo_soft\lists\new_062608.txt';
+% FLOAT_LIST_FILE_NAME = 'C:\Users\jprannou\_RNU\DecArgo_soft\lists\_apex_argos_093008.txt';
+% FLOAT_LIST_FILE_NAME = 'C:\Users\jprannou\_RNU\DecArgo_soft\lists\_apex_argos_061810.txt';
+% FLOAT_LIST_FILE_NAME = 'C:\Users\jprannou\_RNU\DecArgo_soft\lists\_apex_argos_021208.txt';
+FLOAT_LIST_FILE_NAME = 'C:\Users\jprannou\_RNU\DecArgo_soft\lists\_apex_argos_032213.txt';
+% FLOAT_LIST_FILE_NAME = 'C:\Users\jprannou\_RNU\DecArgo_soft\lists\_apex_argos_110613.txt';
+% FLOAT_LIST_FILE_NAME = 'C:\Users\jprannou\_RNU\DecArgo_soft\lists\_apex_argos_090413.txt';
+% FLOAT_LIST_FILE_NAME = 'C:\Users\jprannou\_RNU\DecArgo_soft\lists\_apex_argos_110813.txt';
+% FLOAT_LIST_FILE_NAME = 'C:\Users\jprannou\_RNU\DecArgo_soft\lists\_apex_argos_082213.txt';
+% FLOAT_LIST_FILE_NAME = 'C:\Users\jprannou\_RNU\DecArgo_soft\lists\_apex_argos_082213_1.txt';
+% % FLOAT_LIST_FILE_NAME = 'C:\Users\jprannou\_RNU\DecArgo_soft\lists\_apex_argos_matlab_all.txt';
+% FLOAT_LIST_FILE_NAME = 'C:\Users\jprannou\_RNU\DecArgo_soft\lists\_nova.txt';
+% FLOAT_LIST_FILE_NAME = 'C:\Users\jprannou\_RNU\DecArgo_soft\lists\_nova_dova.txt';
+% FLOAT_LIST_FILE_NAME = 'C:\Users\jprannou\_RNU\DecArgo_soft\lists\_dova.txt';
+% FLOAT_LIST_FILE_NAME = 'C:\Users\jprannou\_RNU\DecArgo_soft\lists\tmp_all.txt';
+% FLOAT_LIST_FILE_NAME = 'C:\Users\jprannou\_RNU\DecArgo_soft\lists\arvor_arn_ir.txt';
+% FLOAT_LIST_FILE_NAME = 'C:\Users\jprannou\_RNU\DecArgo_soft\lists\arvor_4.54.txt';
 
 % number of cycles to plot
 g_NTP_DEFAULT_NB_CYCLES = 5;
@@ -108,7 +116,7 @@ if (nargin == 0)
    floatListFileName = FLOAT_LIST_FILE_NAME;
    if ~(exist(floatListFileName, 'file') == 2)
       fprintf('ERROR: File not found: %s\n', floatListFileName);
-      return
+      return;
    end
    
    fprintf('Floats from list: %s\n', floatListFileName);
@@ -121,7 +129,7 @@ end
 g_NTP_FLOAT_LIST = floatList;
 
 % number of cycles to plot
-g_NTP_nbCycles = g_NTP_DEFAULT_NB_CYCLES;
+g_NTP_nbCyles = g_NTP_DEFAULT_NB_CYCLES;
 
 % creation of the figure and its associated callback
 screenSize = get(0, 'ScreenSize');
@@ -132,7 +140,7 @@ g_NTP_FIG_HANDLE = figure('KeyPressFcn', @change_plot, ...
 % plot the first set of profiles of the first float
 plot_pt_ps(0, 0);
 
-return
+return;
 
 % ------------------------------------------------------------------------------
 % Plot the profiles of 2 parameters for a given float and set of cycles.
@@ -173,7 +181,7 @@ global g_NTP_tabParam1Qc;
 global g_NTP_tabParam2;
 global g_NTP_tabParam2Qc;
 global g_NTP_idCycle;
-global g_NTP_nbCycles;
+global g_NTP_nbCyles;
 global g_NTP_PROF_NUM;
 
 global g_NTP_NAME_PARAM1;
@@ -221,14 +229,14 @@ if (a_idFloat ~= g_NTP_ID_FLOAT)
    paramPres = get_netcdf_param_attributes_3_1('PRES');
    param1Struct = get_netcdf_param_attributes_3_1(g_NTP_NAME_PARAM1);
    g_NTP_UNITS_PARAM1 = param1Struct.units;
-   if ((param1Struct.paramType == 'c') || (param1Struct.paramType == 'j'))
+   if (param1Struct.paramType == 'c')
       param1File = 'c';
    else
       param1File = 'b';
    end
    param2Struct = get_netcdf_param_attributes_3_1(g_NTP_NAME_PARAM2);
    g_NTP_UNITS_PARAM2 = param2Struct.units;
-   if ((param2Struct.paramType == 'c') || (param2Struct.paramType == 'j'))
+   if (param2Struct.paramType == 'c')
       param2File = 'c';
    else
       param2File = 'b';
@@ -248,8 +256,6 @@ if (a_idFloat ~= g_NTP_ID_FLOAT)
          wantedCVars ...
          {g_NTP_NAME_PARAM1} ...
          {[g_NTP_NAME_PARAM1 '_QC']} ...
-         {[g_NTP_NAME_PARAM1 '_ADJUSTED']} ...
-         {[g_NTP_NAME_PARAM1 '_ADJUSTED_QC']} ...
          ];
    end
    if (param2File == 'c')
@@ -257,8 +263,6 @@ if (a_idFloat ~= g_NTP_ID_FLOAT)
          wantedCVars ...
          {g_NTP_NAME_PARAM2} ...
          {[g_NTP_NAME_PARAM2 '_QC']} ...
-         {[g_NTP_NAME_PARAM2 '_ADJUSTED']} ...
-         {[g_NTP_NAME_PARAM2 '_ADJUSTED_QC']} ...
          ];
    end
    wantedBVars = [ ...
@@ -273,8 +277,6 @@ if (a_idFloat ~= g_NTP_ID_FLOAT)
          wantedBVars ...
          {g_NTP_NAME_PARAM1} ...
          {[g_NTP_NAME_PARAM1 '_QC']} ...
-         {[g_NTP_NAME_PARAM1 '_ADJUSTED']} ...
-         {[g_NTP_NAME_PARAM1 '_ADJUSTED_QC']} ...
          ];
    end
    if (param2File ~= 'c')
@@ -282,11 +284,9 @@ if (a_idFloat ~= g_NTP_ID_FLOAT)
          wantedBVars ...
          {g_NTP_NAME_PARAM2} ...
          {[g_NTP_NAME_PARAM2 '_QC']} ...
-         {[g_NTP_NAME_PARAM2 '_ADJUSTED']} ...
-         {[g_NTP_NAME_PARAM2 '_ADJUSTED_QC']} ...
          ];
    end
-
+   
    % arrays to store the data
    tabCycles1 = [];
    tabPres1 = [];
@@ -332,23 +332,10 @@ if (a_idFloat ~= g_NTP_ID_FLOAT)
          if (param1File == 'c')
             idVal = find(strcmp(g_NTP_NAME_PARAM1, profData(1:2:end)) == 1, 1);
             profParam1 = profData{2*idVal};
-
+            
             idVal = find(strcmp([g_NTP_NAME_PARAM1 '_QC'], profData(1:2:end)) == 1, 1);
             profParam1Qc = profData{2*idVal};
-
-            idVal = find(strcmp([g_NTP_NAME_PARAM1 '_ADJUSTED'], profData(1:2:end)) == 1, 1);
-            profParamAdj1 = profData{2*idVal};
-
-            idVal = find(strcmp([g_NTP_NAME_PARAM1 '_ADJUSTED_QC'], profData(1:2:end)) == 1, 1);
-            profParamAdj1Qc = profData{2*idVal};
-
-            for idProf = 1:size(profParam1, 2)
-               if (any(profParamAdj1(:, idProf) ~= param1Struct.fillValue))
-                  profParam1(:, idProf) = profParam1(:, idProf);
-                  profParam1Qc(:, idProf) = profParamAdj1Qc(:, idProf);
-               end
-            end
-
+            
             idProf = find(profDir == 'A');
             tabCycles1 = cycleNumberProf(idProf);
             tabPres1 = profPres(:, idProf);
@@ -364,19 +351,6 @@ if (a_idFloat ~= g_NTP_ID_FLOAT)
             idVal = find(strcmp([g_NTP_NAME_PARAM2 '_QC'], profData(1:2:end)) == 1, 1);
             profParam2Qc = profData{2*idVal};
             
-            idVal = find(strcmp([g_NTP_NAME_PARAM2 '_ADJUSTED'], profData(1:2:end)) == 1, 1);
-            profParamAdj2 = profData{2*idVal};
-
-            idVal = find(strcmp([g_NTP_NAME_PARAM2 '_ADJUSTED_QC'], profData(1:2:end)) == 1, 1);
-            profParamAdj2Qc = profData{2*idVal};
-
-            for idProf = 1:size(profParam2, 2)
-               if (any(profParamAdj2(:, idProf) ~= param1Struct.fillValue))
-                  profParam2(:, idProf) = profParam2(:, idProf);
-                  profParam2Qc(:, idProf) = profParamAdj2Qc(:, idProf);
-               end
-            end
-
             idProf = find(profDir == 'A');
             tabCycles2 = cycleNumberProf(idProf);
             tabPres2 = profPres(:, idProf);
@@ -395,7 +369,7 @@ if (a_idFloat ~= g_NTP_ID_FLOAT)
             
             profFileName = profFileNames(idFile).name;
             if (profFileName(1) == 'B')
-               continue
+               continue;
             end
             
             profFileName = [g_NTP_NC_DIR '/' floatNumStr '/profiles/' profFileNames(idFile).name];
@@ -425,28 +399,15 @@ if (a_idFloat ~= g_NTP_ID_FLOAT)
             
             idVal = find(strcmp('PRES_QC', profData(1:2:end)) == 1, 1);
             profPresQc = profData{2*idVal};
-
+            
             if (param1File == 'c')
-
+               
                idVal = find(strcmp(g_NTP_NAME_PARAM1, profData(1:2:end)) == 1, 1);
                profParam1 = profData{2*idVal};
-
+               
                idVal = find(strcmp([g_NTP_NAME_PARAM1 '_QC'], profData(1:2:end)) == 1, 1);
                profParam1Qc = profData{2*idVal};
-
-               idVal = find(strcmp([g_NTP_NAME_PARAM1 '_ADJUSTED'], profData(1:2:end)) == 1, 1);
-               profParamAdj1 = profData{2*idVal};
-
-               idVal = find(strcmp([g_NTP_NAME_PARAM1 '_ADJUSTED_QC'], profData(1:2:end)) == 1, 1);
-               profParamAdj1Qc = profData{2*idVal};
-
-               for idProf = 1:size(profParam1, 2)
-                  if (any(profParamAdj1(:, idProf) ~= param1Struct.fillValue))
-                     profParam1(:, idProf) = profParam1(:, idProf);
-                     profParam1Qc(:, idProf) = profParamAdj1Qc(:, idProf);
-                  end
-               end
-
+               
                pres1 = [];
                profNum = '';
                for idProf = 1:inputNProf
@@ -455,12 +416,12 @@ if (a_idFloat ~= g_NTP_ID_FLOAT)
                      if (strcmp(param, g_NTP_NAME_PARAM1))
                         if (idProf >= g_NTP_PROF_NUM)
                            profNum = idProf;
-                           break
+                           break;
                         end
                      end
                   end
                   if (~isempty(profNum))
-                     break
+                     break;
                   end
                end
                if ((~isempty(profNum)) && (profDir(profNum) == 'A'))
@@ -514,28 +475,15 @@ if (a_idFloat ~= g_NTP_ID_FLOAT)
                   end
                end
             end
-
+            
             if (param2File == 'c')
-
+               
                idVal = find(strcmp(g_NTP_NAME_PARAM2, profData(1:2:end)) == 1, 1);
                profParam2 = profData{2*idVal};
-
+               
                idVal = find(strcmp([g_NTP_NAME_PARAM2 '_QC'], profData(1:2:end)) == 1, 1);
                profParam2Qc = profData{2*idVal};
-
-               idVal = find(strcmp([g_NTP_NAME_PARAM2 '_ADJUSTED'], profData(1:2:end)) == 1, 1);
-               profParamAdj2 = profData{2*idVal};
-
-               idVal = find(strcmp([g_NTP_NAME_PARAM2 '_ADJUSTED_QC'], profData(1:2:end)) == 1, 1);
-               profParamAdj2Qc = profData{2*idVal};
-
-               for idProf = 1:size(profParam2, 2)
-                  if (any(profParamAdj2(:, idProf) ~= param1Struct.fillValue))
-                     profParam2(:, idProf) = profParam2(:, idProf);
-                     profParam2Qc(:, idProf) = profParamAdj2Qc(:, idProf);
-                  end
-               end
-
+               
                pres2 = [];
                %                   profNum = '';
                %                   for idProf = 1:inputNProf
@@ -543,11 +491,11 @@ if (a_idFloat ~= g_NTP_ID_FLOAT)
                %                         param = deblank(stationParameters(:, idParam, idProf)');
                %                         if (strcmp(param, g_NTP_NAME_PARAM2))
                %                            profNum = idProf;
-               %                            break
+               %                            break;
                %                         end
                %                      end
                %                      if (~isempty(profNum))
-               %                         break
+               %                         break;
                %                      end
                %                   end
 
@@ -639,31 +587,18 @@ if (a_idFloat ~= g_NTP_ID_FLOAT)
             
             idVal = find(strcmp('PRES', profData(1:2:end)) == 1, 1);
             profPres = profData{2*idVal};
-
+            
             %             idVal = find(strcmp('PRES_QC', profData(1:2:end)) == 1, 1);
             %             profPresQc = profData{2*idVal};
-
+                        
             if (param1File ~= 'c')
-
+               
                idVal = find(strcmp(g_NTP_NAME_PARAM1, profData(1:2:end)) == 1, 1);
                profParam1 = profData{2*idVal};
-
+               
                idVal = find(strcmp([g_NTP_NAME_PARAM1 '_QC'], profData(1:2:end)) == 1, 1);
                profParam1Qc = profData{2*idVal};
-
-               idVal = find(strcmp([g_NTP_NAME_PARAM1 '_ADJUSTED'], profData(1:2:end)) == 1, 1);
-               profParamAdj1 = profData{2*idVal};
-
-               idVal = find(strcmp([g_NTP_NAME_PARAM1 '_ADJUSTED_QC'], profData(1:2:end)) == 1, 1);
-               profParamAdj1Qc = profData{2*idVal};
-
-               for idProf = 1:size(profParam1, 2)
-                  if (any(profParamAdj1(:, idProf) ~= param1Struct.fillValue))
-                     profParam1(:, idProf) = profParam1(:, idProf);
-                     profParam1Qc(:, idProf) = profParamAdj1Qc(:, idProf);
-                  end
-               end
-
+               
                pres1 = [];
                profNum = '';
                for idProf = 1:inputNProf
@@ -671,11 +606,11 @@ if (a_idFloat ~= g_NTP_ID_FLOAT)
                      param = deblank(stationParameters(:, idParam, idProf)');
                      if (strcmp(param, g_NTP_NAME_PARAM1))
                         profNum = idProf;
-                        break
+                        break;
                      end
                   end
                   if (~isempty(profNum))
-                     break
+                     break;
                   end
                end
                if ((~isempty(profNum)) && (profDir(profNum) == 'A'))
@@ -729,44 +664,31 @@ if (a_idFloat ~= g_NTP_ID_FLOAT)
                   end
                end
             end
-
+            
             if (param2File ~= 'c')
-
+               
                idVal = find(strcmp(g_NTP_NAME_PARAM2, profData(1:2:end)) == 1, 1);
                profParam2 = profData{2*idVal};
-
+               
                idVal = find(strcmp([g_NTP_NAME_PARAM2 '_QC'], profData(1:2:end)) == 1, 1);
                profParam2Qc = profData{2*idVal};
-
-               idVal = find(strcmp([g_NTP_NAME_PARAM2 '_ADJUSTED'], profData(1:2:end)) == 1, 1);
-               profParamAdj2 = profData{2*idVal};
-
-               idVal = find(strcmp([g_NTP_NAME_PARAM2 '_ADJUSTED_QC'], profData(1:2:end)) == 1, 1);
-               profParamAdj2Qc = profData{2*idVal};
-
-               for idProf = 1:size(profParam2, 2)
-                  if (any(profParamAdj2(:, idProf) ~= param1Struct.fillValue))
-                     profParam2(:, idProf) = profParam2(:, idProf);
-                     profParam2Qc(:, idProf) = profParamAdj2Qc(:, idProf);
-                  end
-               end
-
+               
                pres2 = [];
-               %                if (~exist('profNum', 'var'))
-               profNum = '';
-               for idProf = 1:inputNProf
-                  for idParam = 1:inputNParam
-                     param = deblank(stationParameters(:, idParam, idProf)');
-                     if (strcmp(param, g_NTP_NAME_PARAM2))
-                        profNum = idProf;
-                        break
+               if (~exist('profNum', 'var'))
+                  profNum = '';
+                  for idProf = 1:inputNProf
+                     for idParam = 1:inputNParam
+                        param = deblank(stationParameters(:, idParam, idProf)');
+                        if (strcmp(param, g_NTP_NAME_PARAM2))
+                           profNum = idProf;
+                           break;
+                        end
+                     end
+                     if (~isempty(profNum))
+                        break;
                      end
                   end
-                  if (~isempty(profNum))
-                     break
-                  end
                end
-               %                end
                
                if ((~isempty(profNum)) && (profDir(profNum) == 'A'))
                   tabCycles2 = [tabCycles2; cycleNumberProf(profNum)];
@@ -886,7 +808,7 @@ if (isempty(g_NTP_cycles))
       length(g_NTP_FLOAT_LIST), ...
       num2str(g_NTP_FLOAT_LIST(a_idFloat+1)));
    title(label, 'FontSize', 14);
-   return
+   return;
 end
 
 param1Axes = subplot(1, 2, 1);
@@ -901,11 +823,11 @@ minPres1 = g_NTP_PARAM_PRES_FILL_VAL;
 maxPres1 = -g_NTP_PARAM_PRES_FILL_VAL;
 
 [maxMesAscProf, ~] = size(g_NTP_tabPres1);
-xParam1Data = ones(maxMesAscProf, g_NTP_nbCycles)*g_NTP_NAME_PARAM1_FILL_VAL;
-xParam1DataQc = repmat(' ', maxMesAscProf, g_NTP_nbCycles);
-yParam1Data = ones(maxMesAscProf, g_NTP_nbCycles)*g_NTP_PARAM_PRES_FILL_VAL;
-yParam1DataQc = repmat(' ', maxMesAscProf, g_NTP_nbCycles);
-for idCy = 1:g_NTP_nbCycles
+xParam1Data = ones(maxMesAscProf, g_NTP_nbCyles)*g_NTP_NAME_PARAM1_FILL_VAL;
+xParam1DataQc = repmat(' ', maxMesAscProf, g_NTP_nbCyles);
+yParam1Data = ones(maxMesAscProf, g_NTP_nbCyles)*g_NTP_PARAM_PRES_FILL_VAL;
+yParam1DataQc = repmat(' ', maxMesAscProf, g_NTP_nbCyles);
+for idCy = 1:g_NTP_nbCyles
    if (a_idCycle+1+idCy-1 <= length(g_NTP_cycles))
       xParam1Data(:, idCy) = g_NTP_tabParam1(:, a_idCycle+1+idCy-1);
       xParam1DataQc(:, idCy) = g_NTP_tabParam1Qc(:, a_idCycle+1+idCy-1);
@@ -929,7 +851,7 @@ if (~isempty(param1Data))
       end
    end
    
-   for idCy = 1:g_NTP_nbCycles
+   for idCy = 1:g_NTP_nbCyles
       if (a_idCycle+1+idCy-1 <= length(g_NTP_cycles))
          xParam1 = xParam1Data(:, idCy);
          xParam1Qc = xParam1DataQc(:, idCy);
@@ -984,11 +906,11 @@ minPres2 = g_NTP_PARAM_PRES_FILL_VAL;
 maxPres2 = -g_NTP_PARAM_PRES_FILL_VAL;
 
 [maxMesAscProf, ~] = size(g_NTP_tabPres2);
-xParam2Data = ones(maxMesAscProf, g_NTP_nbCycles)*g_NTP_NAME_PARAM2_FILL_VAL;
-xParam2DataQc = repmat(' ', maxMesAscProf, g_NTP_nbCycles);
-yParam2Data = ones(maxMesAscProf, g_NTP_nbCycles)*g_NTP_PARAM_PRES_FILL_VAL;
-yParam2DataQc = repmat(' ', maxMesAscProf, g_NTP_nbCycles);
-for idCy = 1:g_NTP_nbCycles
+xParam2Data = ones(maxMesAscProf, g_NTP_nbCyles)*g_NTP_NAME_PARAM2_FILL_VAL;
+xParam2DataQc = repmat(' ', maxMesAscProf, g_NTP_nbCyles);
+yParam2Data = ones(maxMesAscProf, g_NTP_nbCyles)*g_NTP_PARAM_PRES_FILL_VAL;
+yParam2DataQc = repmat(' ', maxMesAscProf, g_NTP_nbCyles);
+for idCy = 1:g_NTP_nbCyles
    if (a_idCycle+1+idCy-1 <= length(g_NTP_cycles))
       xParam2Data(:, idCy) = g_NTP_tabParam2(:, a_idCycle+1+idCy-1);
       xParam2DataQc(:, idCy) = g_NTP_tabParam2Qc(:, a_idCycle+1+idCy-1);
@@ -1012,7 +934,7 @@ if (~isempty(param2Data))
       end
    end
    
-   for idCy = 1:g_NTP_nbCycles
+   for idCy = 1:g_NTP_nbCyles
       if (a_idCycle+1+idCy-1 <= length(g_NTP_cycles))
          xParam2 = xParam2Data(:, idCy);
          xParam2Qc = xParam2DataQc(:, idCy);
@@ -1133,7 +1055,7 @@ set(get(param2Axes, 'YLabel'), 'String', 'Pressure (dbar)');
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % plot title
 
-idLastCycleNum = a_idCycle+1+g_NTP_nbCycles-1;
+idLastCycleNum = a_idCycle+1+g_NTP_nbCyles-1;
 if (idLastCycleNum <= length(g_NTP_cycles))
    lastCycleNum = g_NTP_cycles(idLastCycleNum);
 else
@@ -1151,14 +1073,13 @@ suptitle(label);
 % pdf output management
 
 if (g_NTP_PRINT)
-   orient tall
    orient landscape
-   print('-dpdf', [g_NTP_PDF_DIR '/' sprintf('nc_trace_param_%s_%03d_%03d', num2str(g_NTP_FLOAT_LIST(a_idFloat+1)), g_NTP_cycles(a_idCycle+1), g_NTP_cycles(a_idCycle+1+g_NTP_nbCycles-1)) '.pdf']);
+   print('-dpdf', [g_NTP_PDF_DIR '/' sprintf('nc_trace_param_%s_%03d_%03d', num2str(g_NTP_FLOAT_LIST(a_idFloat+1)), g_NTP_cycles(a_idCycle+1), g_NTP_cycles(a_idCycle+1+g_NTP_nbCyles-1)) '.pdf']);
    g_NTP_PRINT = 0;
    orient portrait
 end
 
-return
+return;
 
 % ------------------------------------------------------------------------------
 % Callback de gestion des tracés:
@@ -1246,7 +1167,7 @@ global g_NTP_DEFAULT_NB_CYCLES;
 global g_NTP_PRINT;
 
 global g_NTP_ID_FLOAT g_NTP_FLOAT_LIST;
-global g_NTP_idCycle g_NTP_nbCycles;
+global g_NTP_idCycle g_NTP_nbCyles;
 global g_NTP_cycles;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1268,8 +1189,8 @@ elseif (strcmp(a_eventData.Key, 'rightarrow'))
    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
    % previous set of profiles
 elseif (strcmp(a_eventData.Key, 'uparrow'))
-   if (g_NTP_idCycle - g_NTP_nbCycles >= 0)
-      g_NTP_idCycle = g_NTP_idCycle - g_NTP_nbCycles;
+   if (g_NTP_idCycle - g_NTP_nbCyles >= 0)
+      g_NTP_idCycle = g_NTP_idCycle - g_NTP_nbCyles;
    else
       g_NTP_idCycle = 0;
    end
@@ -1278,45 +1199,42 @@ elseif (strcmp(a_eventData.Key, 'uparrow'))
    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
    % next set of profiles
 elseif (strcmp(a_eventData.Key, 'downarrow'))
-   if (g_NTP_idCycle + g_NTP_nbCycles + 1 <= length(g_NTP_cycles))
-      g_NTP_idCycle = g_NTP_idCycle + g_NTP_nbCycles;
+   if (g_NTP_idCycle + g_NTP_nbCyles + 1 <= length(g_NTP_cycles))
+      g_NTP_idCycle = g_NTP_idCycle + g_NTP_nbCyles;
    end
    plot_pt_ps(g_NTP_ID_FLOAT, g_NTP_idCycle);
    
    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
    % decrease the number of profiles per set
 elseif (strcmp(a_eventData.Character, '-'))
-   if (g_NTP_nbCycles > 1)
-      g_NTP_nbCycles = g_NTP_nbCycles - 1;
+   if (g_NTP_nbCyles > 1)
+      g_NTP_nbCyles = g_NTP_nbCyles - 1;
    end
-   fprintf('Plot of %d profiles per set\n', g_NTP_nbCycles);
+   fprintf('Plot of %d profiles per set\n', g_NTP_nbCyles);
    plot_pt_ps(g_NTP_ID_FLOAT, g_NTP_idCycle);
    
    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
    % increase the number of profiles per set
 elseif (strcmp(a_eventData.Character, '+'))
-   if (g_NTP_nbCycles < length(g_NTP_cycles))
-      g_NTP_nbCycles = g_NTP_nbCycles + 1;
+   if (g_NTP_nbCyles < length(g_NTP_cycles))
+      g_NTP_nbCyles = g_NTP_nbCyles + 1;
    end
-   fprintf('Plot of %d profiles per set\n', g_NTP_nbCycles);
+   fprintf('Plot of %d profiles per set\n', g_NTP_nbCyles);
    plot_pt_ps(g_NTP_ID_FLOAT, g_NTP_idCycle);
    
    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
    % plot all the profiles of the float
 elseif (strcmp(a_eventData.Key, 'a'))
-   g_NTP_nbCycles = length(g_NTP_cycles);
-   fprintf('Plot of %d profiles per set\n', g_NTP_nbCycles);
+   g_NTP_nbCyles = length(g_NTP_cycles);
+   fprintf('Plot of %d profiles per set\n', g_NTP_nbCyles);
    plot_pt_ps(g_NTP_ID_FLOAT, 0);
    
    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
    % back to plot the default number of displacements per set
 elseif (strcmp(a_eventData.Key, 'd'))
-   g_NTP_nbCycles = g_NTP_DEFAULT_NB_CYCLES;
-   fprintf('Plot of %d profiles per set\n', g_NTP_nbCycles);
+   g_NTP_nbCyles = g_NTP_DEFAULT_NB_CYCLES;
+   fprintf('Plot of %d profiles per set\n', g_NTP_nbCyles);
    plot_pt_ps(g_NTP_ID_FLOAT, 0);
-   
-   fprintf('\nCurrent configuration:\n');
-   fprintf('NB PROFILES / SET: %d\n', g_NTP_nbCycles);
    
    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
    % pdf output file generation
@@ -1343,8 +1261,8 @@ elseif (strcmp(a_eventData.Key, 'h'))
    fprintf('Escape: exit\n\n');
    
    fprintf('Current configuration:\n');
-   fprintf('NB PROFILES / SET: %d\n', g_NTP_nbCycles);
+   fprintf('NB PROFILES / SET: %d\n', g_NTP_nbCyles);
 end
 
-return
+return;
 

@@ -30,22 +30,14 @@ function process_argos_data_prv(varargin)
 DIR_INPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\IN\tmp_process_prv\IN\';
 DIR_INPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\IN\test_20160225\argos\';
 DIR_INPUT_ARGOS_FILES = 'C:\Users\jprannou\Desktop\reprocess_argos_error_cls_header\DATA\IN\';
-DIR_INPUT_ARGOS_FILES = 'C:\Users\jprannou\_RNU\DecArgo_soft\work\tmp\ori\';
-DIR_INPUT_ARGOS_FILES = 'C:\Users\jprannou\_RNU\DecArgo_soft\work\TEMP3\ori\';
-DIR_INPUT_ARGOS_FILES = 'C:\Users\jprannou\_RNU\DecArgo_soft\work\SOS_VB_20170627\IN\';
-DIR_INPUT_ARGOS_FILES = 'C:\Users\jprannou\Desktop\TMP\IN\';
-DIR_INPUT_ARGOS_FILES = 'C:\Users\jprannou\_RNU\DecArgo_soft\work\TEMPO\IN\';
-DIR_INPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\TMP\IN\';
+DIR_INPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\IN\ARN\IN\';
 
 % output directory (at the end of the process, it will contain one directory for
 % each step of the process and a 'FINAL' directory for the final step)
 DIR_OUTPUT = 'C:\Users\jprannou\_DATA\IN\tmp_process_prv\OUT\';
 DIR_OUTPUT = 'C:\Users\jprannou\_DATA\IN\test_20160225\argos_out\';
 DIR_OUTPUT = 'C:\Users\jprannou\Desktop\reprocess_argos_error_cls_header\DATA\OUT\';
-DIR_OUTPUT = 'C:\Users\jprannou\_RNU\DecArgo_soft\work\TEMP3\ori_out\';
-DIR_OUTPUT = 'C:\Users\jprannou\Desktop\TMP\OUT\';
-DIR_OUTPUT = 'C:\Users\jprannou\_RNU\DecArgo_soft\work\TEMPO\OUT\';
-DIR_OUTPUT = 'C:\Users\jprannou\_DATA\TMP\OUT\';
+DIR_OUTPUT = 'C:\Users\jprannou\_DATA\IN\ARN\OUT\';
 
 % directory to store the log files
 DIR_LOG_FILE = 'C:\Users\jprannou\_RNU\DecArgo_soft\work\log\';
@@ -72,7 +64,7 @@ if (nargin == 0)
    % floats to process come from floatListFileName
    if ~(exist(floatListFileName, 'file') == 2)
       fprintf('File not found: %s\n', floatListFileName);
-      return
+      return;
    end
    
    fprintf('Floats from list: %s\n', floatListFileName);
@@ -95,34 +87,34 @@ diary(logFile);
 tic;
 
 % create output directory
-% if (exist(DIR_OUTPUT, 'dir') == 7)
-%    rmdir(DIR_OUTPUT, 's');
-%    fprintf('INFO: Removing directory: %s\n', DIR_OUTPUT);
-% end
-% mkdir(DIR_OUTPUT);
+if (exist(DIR_OUTPUT, 'dir') == 7)
+   rmdir(DIR_OUTPUT, 's');
+   fprintf('INFO: Removing directory: %s\n', DIR_OUTPUT);
+end
+mkdir(DIR_OUTPUT);
 fprintf('INFO: Creating directory: %s\n', DIR_OUTPUT);
 
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% % STEP 1: split the data by satellite passes
-% fprintf('STEP 1: split the data by satellite passes\n');
-% dirOutStep1 = [DIR_OUTPUT '/STEP1/'];
-% [ok] = split_argos_cycles_bis(floatList, DIR_INPUT_ARGOS_FILES, dirOutStep1);
-% if (ok == 0)
-%    fprintf('ERROR: In step1 - exit\n');
-%    return
-% end
-% 
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% % STEP 2: delete identical satellite passes
-% fprintf('\nSTEP 2: delete identical satellite passes\n');
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% STEP 1: split the data by satellite passes
+fprintf('STEP 1: split the data by satellite passes\n');
+dirOutStep1 = [DIR_OUTPUT '/STEP1/'];
+[ok] = split_argos_cycles_bis(floatList, DIR_INPUT_ARGOS_FILES, dirOutStep1);
+if (ok == 0)
+   fprintf('ERROR: In step1 => exit\n');
+   return;
+end
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% STEP 2: delete identical satellite passes
+fprintf('\nSTEP 2: delete identical satellite passes\n');
 dirOutStep2 = [DIR_OUTPUT '/STEP2/'];
-% % duplicate the input directory in the output one
-% copy_file(dirOutStep1, dirOutStep2);
-% [ok] = delete_double_argos_split_bis(dirOutStep2);
-% if (ok == 0)
-%    fprintf('ERROR: In step2 - exit\n');
-%    return
-% end
+% duplicate the input directory in the output one
+copyfile(dirOutStep1, dirOutStep2);
+[ok] = delete_double_argos_split_bis(dirOutStep2);
+if (ok == 0)
+   fprintf('ERROR: In step2 => exit\n');
+   return;
+end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % STEP 3: create cycle files
@@ -130,8 +122,8 @@ fprintf('\nSTEP 3: create cycle files\n');
 dirOutStep3 = [DIR_OUTPUT '/STEP3/'];
 [ok] = create_argos_cycle_files_bis(floatList, dirOutStep2, dirOutStep3);
 if (ok == 0)
-   fprintf('ERROR: In step3 - exit\n');
-   return
+   fprintf('ERROR: In step3 => exit\n');
+   return;
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -140,8 +132,8 @@ fprintf('\nSTEP 4: correct CLS headers\n');
 dirOutStep4 = [DIR_OUTPUT '/STEP4/'];
 [ok] = co_cls_correct_argos_raw_file_bis(dirOutStep3, dirOutStep4);
 if (ok == 0)
-   fprintf('ERROR: In step4 - exit\n');
-   return
+   fprintf('ERROR: In step4 => exit\n');
+   return;
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -152,11 +144,11 @@ mkdir(dirOutStep5);
 % create temporary directory
 mkdir([dirOutStep5 '/IN/']);
 % duplicate the input directory in the output one
-copy_file(dirOutStep4, [dirOutStep5 '/IN/']);
+copyfile(dirOutStep4, [dirOutStep5 '/IN/']);
 [ok] = move_and_rename_prv_argos_files_bis(floatList, [dirOutStep5 '/IN/'], dirOutStep5);
 if (ok == 0)
-   fprintf('ERROR: In step5 - exit\n');
-   return
+   fprintf('ERROR: In step5 => exit\n');
+   return;
 end
 rmdir([dirOutStep5 '/IN/'], 's');
 
@@ -165,7 +157,7 @@ fprintf('done (Elapsed time is %.1f seconds)\n', ellapsedTime);
 
 diary off;
 
-return
+return;
 
 % ------------------------------------------------------------------------------
 % Split Argos cycle files (one file for each satellite pass).
@@ -192,7 +184,7 @@ o_ok = 1;
 
 if (nargin ~= 3)
    o_ok = 0;
-   return
+   return;
 end
 
 % floats to process
@@ -202,7 +194,7 @@ floatList = varargin{1};
 DIR_INPUT_ARGOS_FILES = varargin{2};
 DIR_OUTPUT_ARGOS_FILES = varargin{3};
 
-% number of cycle files to process per run
+% number of cyle files to process per run
 NB_FILES_PER_RUN = 10000;
 
 % mode processing flags
@@ -238,15 +230,15 @@ end
 nbFloats = length(floatList);
 argosIdList = [];
 for idFloat = 1:nbFloats
-   
+
    floatNum = floatList(idFloat);
-   
+
    % find current float Argos Id
    idF = find(listWmoNum == floatNum, 1);
    if (isempty(idF))
       fprintf('ERROR: No information on float #%d\n', floatNum);
       fprintf('(nothing done)\n');
-      continue
+      continue;
    end
    floatArgosId = str2num(listArgosId{idF});
    argosIdList = [argosIdList; floatArgosId];
@@ -261,20 +253,20 @@ idFile = 1;
 filePathNames = [];
 nbFiles = 0;
 while (~stop)
-   
+
    fileName = files(idFile).name;
    filePathName = [DIR_INPUT_ARGOS_FILES '/' fileName];
-   
+
    fprintf('%03d/%03d %s\n', idFile, nbFilesTot, fileName);
-   
+
    if (exist(filePathName, 'file') == 2)
-      
+
       filePathNames{end+1} = filePathName;
       nbFiles = nbFiles + 1;
       if (nbFiles == NB_FILES_PER_RUN)
-         
+
          fprintf('\nProcessing one set of %d files\n', nbFiles);
-         
+
          tic;
          tmpName = ['./tmp_' datestr(now, 'yyyymmddTHHMMSS') '.mat'];
          save(tmpName, 'filePathNames');
@@ -286,21 +278,21 @@ while (~stop)
          ellapsedTime = toc;
          delete(tmpName);
          fprintf('done (Elapsed time is %.1f seconds)\n', ellapsedTime);
-         
+
          clear filePathNames;
          filePathNames = [];
          nbFiles = 0;
-         
+
       end
-      
+
    end
-   
+
    idFile = idFile + 1;
    if (idFile > nbFilesTot)
       if (nbFiles > 0)
-         
+
          fprintf('\nProcessing one set of %d files\n', nbFiles);
-         
+
          tic;
          tmpName = ['./tmp_' datestr(now, 'yyyymmddTHHMMSS') '.mat'];
          save(tmpName, 'filePathNames');
@@ -312,18 +304,18 @@ while (~stop)
          ellapsedTime = toc;
          delete(tmpName);
          fprintf('done (Elapsed time is %.1f seconds)\n', ellapsedTime);
-         
+
          clear filePathNames;
          filePathNames = [];
          nbFiles = 0;
-         
+
       end
-      
+
       stop = 1;
    end
 end
 
-return
+return;
 
 % ------------------------------------------------------------------------------
 % Find and delete identical split files (one file for each satellite pass)
@@ -350,7 +342,7 @@ o_ok = 1;
 
 if (nargin ~= 1)
    o_ok = 0;
-   return
+   return;
 end
 
 % input and output directory
@@ -361,35 +353,35 @@ DIR_INPUT_OUTPUT_ARGOS_FILES = varargin{1};
 dirs = dir(DIR_INPUT_OUTPUT_ARGOS_FILES);
 nbDirs = length(dirs);
 for idDir = 1:nbDirs
-   
+
    dirName = dirs(idDir).name;
    dirPathName = [DIR_INPUT_OUTPUT_ARGOS_FILES '/' dirName];
-   
+
    if (isdir(dirPathName))
       if ~(strcmp(dirName, '.') || strcmp(dirName, '..'))
          
          fprintf('%03d/%03d Processing directory %s\n', idDir, nbDirs, dirName);
-         
+
          % look for possible duplicated files
          fileList = [];
          files = dir(dirPathName);
          nbFiles = length(files);
          for idFile = 1:nbFiles
-            
+
             fileName = files(idFile).name;
             if ~(strcmp(fileName, '.') || strcmp(fileName, '..'))
                fileList{end+1} = fileName(1:end-7);
             end
          end
          fileList = unique(fileList);
-         
+
          % process possible duplicated files
          nbFiles = length(fileList);
          for idFile = 1:nbFiles
             stop = 0;
             while (~stop)
                if (length(dir([dirPathName '/' fileList{idFile} '*'])) > 1)
-                  
+
                   dFiles = dir([dirPathName '/' fileList{idFile} '*']);
                   if (length(fileList{idFile}) == 7)
                      idDel = [];
@@ -406,27 +398,27 @@ for idDir = 1:nbDirs
                   nbDFiles = length(dFiles);
                   for id1 = 1:nbDFiles
                      for id2 = id1+1:nbDFiles
-                        
+
                         % compare the 2 file contents
-                        
+
                         fileName1 = [dirPathName '/' dFiles(id1).name];
                         fid1 = fopen(fileName1, 'r');
                         if (fid1 == -1)
                            fprintf('ERROR: Unable to open file: %s\n', fileName1);
-                           return
+                           return;
                         end
                         file1Contents = textscan(fid1, '%s');
                         fclose(fid1);
-                        
+
                         fileName2 = [dirPathName '/' dFiles(id2).name];
                         fid2 = fopen(fileName2, 'r');
                         if (fid2 == -1)
                            fprintf('ERROR: Unable to open file: %s\n', fileName2);
-                           return
+                           return;
                         end
                         file2Contents = textscan(fid2, '%s');
                         fclose(fid2);
-                        
+
                         compRes = 1;
                         file1Contents = file1Contents{:};
                         file2Contents = file2Contents{:};
@@ -434,45 +426,45 @@ for idDir = 1:nbDirs
                            if ((length(file1Contents) >= idL) && (length(file2Contents) >= idL))
                               if (strcmp(file1Contents{idL}, file2Contents{idL}) == 0)
                                  compRes = 2;
-                                 break
+                                 break;
                               end
                            elseif (length(file1Contents) >= idL)
                               compRes = 3;
-                              break
+                              break;
                            elseif (length(file2Contents) >= idL)
                               compRes = 4;
-                              break
+                              break;
                            end
                         end
-                        
+
                         if (compRes == 1)
-                           
+
                            % files are identical
-                           fprintf('INFO: Files %s and %s are identical - %s deleted\n', dFiles(id1).name, dFiles(id2).name, dFiles(id2).name);
+                           fprintf('INFO: Files %s and %s are identical => %s deleted\n', dFiles(id1).name, dFiles(id2).name, dFiles(id2).name);
                            delete(fileName2);
                            deleted = 1;
-                           break
+                           break;
                         elseif (compRes == 3)
-                           
+
                            % new file contents is included in base file
-                           fprintf('INFO: File %s includes file %s contents - %s deleted\n', dFiles(id1).name, dFiles(id2).name, dFiles(id2).name);
+                           fprintf('INFO: File %s includes file %s contents => %s deleted\n', dFiles(id1).name, dFiles(id2).name, dFiles(id2).name);
                            delete(fileName2);
                            deleted = 1;
-                           break
+                           break;
                         elseif (compRes == 4)
-                           
+
                            % base file contents is included in new file
-                           fprintf('INFO: File %s includes file %s contents - %s deleted\n', dFiles(id2).name, dFiles(id1).name, dFiles(id1).name);
+                           fprintf('INFO: File %s includes file %s contents => %s deleted\n', dFiles(id2).name, dFiles(id1).name, dFiles(id1).name);
                            delete(fileName1);
                            deleted = 1;
-                           break
+                           break;
                         end
                      end
                      if (deleted == 1)
-                        break
+                        break;
                      end
                   end
-                  
+
                   if (deleted == 0)
                      stop = 1;
                   end
@@ -485,7 +477,7 @@ for idDir = 1:nbDirs
    end
 end
 
-return
+return;
 
 % ------------------------------------------------------------------------------
 % For a given list of floats, process the associated Argos split files (one
@@ -516,7 +508,7 @@ o_ok = 1;
 
 if (nargin ~= 3)
    o_ok = 0;
-   return
+   return;
 end
 
 % float to process
@@ -573,7 +565,7 @@ for idFloat = 1:nbFloats
    if (isempty(idF))
       fprintf('ERROR: No information on float #%d\n', floatNum);
       fprintf('(nothing done)\n');
-      continue
+      continue;
    end
    floatArgosId = str2num(listArgosId{idF});
    argosIdListAll(idFloat) = floatArgosId;
@@ -593,10 +585,6 @@ nbFloats = length(floatList);
 for idFloat = 1:nbFloats
    
    floatNum = floatList(idFloat);
-   if (ismember(floatNum, [6901260])) % 1 day cycle duration floats
-      MIN_NON_TRANS_DURATION_FOR_NEW_CYCLE = 10; % 10 hours
-   end
-   
    floatNumStr = num2str(floatNum);
    fprintf('%03d/%03d %s\n', idFloat, nbFloats, floatNumStr);
    
@@ -605,7 +593,7 @@ for idFloat = 1:nbFloats
    if (isempty(idF))
       fprintf('ERROR: No information on float #%d\n', floatNum);
       fprintf('(nothing done)\n');
-      continue
+      continue;
    end
    floatArgosId = str2num(listArgosId{idF});
    
@@ -617,9 +605,9 @@ for idFloat = 1:nbFloats
    dirInputFloat = [DIR_INPUT_ARGOS_FILES '/' sprintf('%06d', floatArgosId) '/'];
    if (~isdir(dirInputFloat))
       fprintf('WARNING: No Argos data for float #%d\n', floatNum);
-      continue
+      continue;
    end
-   
+      
    % collect dates in the Argos files of the float
    argosFileNames = [];
    argosFileFirstMsgDate = [];
@@ -632,27 +620,27 @@ for idFloat = 1:nbFloats
       argosFilePathName = [dirInputFloat '/' argosFileName];
       
       [val1, count1, errmsg1, nextindex1] = sscanf(argosFileName, '%d_%d-%d-%d-%d-%d-%d_%d.txt');
-      
+
       if ((isempty(errmsg1) && (count1 == 8)))
-         
+
          [argosLocDate, argosDataDate] = ...
             read_argos_file_fmt1_rough(argosFilePathName, floatArgosId);
          argosDate = [argosLocDate; argosDataDate];
-         
+
          if (~isempty(argosDate))
             argosFileNames{end+1} = argosFilePathName;
             argosFileFirstMsgDate(end+1) = min(argosDate);
             argosFileLastMsgDate(end+1) = max(argosDate);
-            
+
             floatArgosDate = [floatArgosDate; argosDate];
          else
-            fprintf('WARNING: Empty file (%s) - not considered\n', argosFileName);
+            fprintf('WARNING: Empty file (%s) => not considered\n', argosFileName);
          end
       else
-         fprintf('WARNING: Not expected file name %s - not considered\n', argosFileName);
+         fprintf('WARNING: Not expected file name %s => not considered\n', argosFileName);
       end
    end
-   
+
    % process the Argos files in chronological order
    if (~isempty(argosFileNames))
       
@@ -670,7 +658,7 @@ for idFloat = 1:nbFloats
       if ~(exist(dirOutputFloat, 'dir') == 7)
          mkdir(dirOutputFloat);
       end
-      
+   
       % create the output file names
       fileNameList = [];
       for id = 1:length(dateCut)
@@ -688,14 +676,14 @@ for idFloat = 1:nbFloats
       
       nbFiles = length(argosFileNames);
       for idFile = 1:nbFiles
-         
+
          % open and process input file
          fIdIn = fopen(argosFileNames{idFile}, 'r');
          if (fIdIn == -1)
             fprintf('Error while opening file : %s\n', argosFileNames{idFile});
-            return
+            return;
          end
-         
+
          text = [];
          dateList = [];
          lineNum = 0;
@@ -706,7 +694,7 @@ for idFloat = 1:nbFloats
                if (~isempty(text))
                   if (~isempty(dateList))
                      minDate = min(dateList);
-                     
+
                      % number of the file to store the data
                      idF = find(dateCut <= minDate);
                      if (~isempty(idF))
@@ -714,44 +702,44 @@ for idFloat = 1:nbFloats
                      else
                         fileNum = length(dateCut);
                      end
-                     
+
                      % store the data in the output file
                      fIdOut = fopen(fileNameList{fileNum}, 'a');
                      if (fIdOut == -1)
                         fprintf('ERROR: Unable to open file: %s\n', fileNameList{fileNum});
-                        return
+                        return;
                      end
-                     
+
                      for id = 1:length(text)
                         fprintf(fIdOut, '%s\n', text{id});
                      end
-                     
+
                      fclose(fIdOut);
-                     
+
                   else
-                     fprintf('INFO: Argos data without dates - not considered\n');
+                     fprintf('INFO: Argos data without dates => not considered\n');
                      for id = 1:length(text)
                         fprintf('%s\n', text{id});
                      end
                      fprintf('\n');
                   end
                end
-               
-               break
+
+               break;
             end
-            
+
             % empty line
             if (strcmp(deblank(line), ''))
-               continue
+               continue;
             end
-            
+
             % look for satellite pass header
             [val, count, errmsg, nextindex] = sscanf(line, '%d %d %d %d %c %c %d-%d-%d %d:%d:%d %f %f %f %d');
             if (isempty(errmsg) && (count >= 5) && (val(2) == floatArgosId))
                if (~isempty(text))
                   if (~isempty(dateList))
                      minDate = min(dateList);
-                     
+
                      % number of the file to store the data
                      idF = find(dateCut <= minDate);
                      if (~isempty(idF))
@@ -764,58 +752,58 @@ for idFloat = 1:nbFloats
                      fIdOut = fopen(fileNameList{fileNum}, 'a');
                      if (fIdOut == -1)
                         fprintf('ERROR: Unable to open file: %s\n', fileNameList{fileNum});
-                        return
+                        return;
                      end
-                     
+
                      for id = 1:length(text)
                         fprintf(fIdOut, '%s\n', text{id});
                      end
                      
                      fclose(fIdOut);
-                     
+
                   else
-                     fprintf('INFO: Argos data without dates - not considered\n');
+                     fprintf('INFO: Argos data without dates => not considered\n');
                      for id = 1:length(text)
                         fprintf('%s\n', text{id});
                      end
                      fprintf('\n');
                   end
-                  
+
                   text = [];
                   dateList = [];
                end
-               
+
                if (isempty(errmsg) && (count == 16))
                   date = gregorian_2_julian_dec_argo(sprintf('%04d/%02d/%02d %02d:%02d:%02d', ...
                      val(7), val(8), val(9), val(10), val(11), val(12)));
                   dateList = [dateList; date];
                end
-               
+
             else
-               
+
                % look for message header
                [val, count, errmsg, nextindex] = sscanf(line, '%d-%d-%d %d:%d:%f %d %2c %2c %2c %2c');
                if (isempty(errmsg) && (count == 11))
-                  
+
                   date = gregorian_2_julian_dec_argo(sprintf('%04d/%02d/%02d %02d:%02d:%02d', ...
                      val(1), val(2), val(3), val(4), val(5), val(6)));
                   dateList = [dateList; date];
-                  
+
                else
                   [val, count, errmsg, nextindex] = sscanf(line, '%d-%d-%d %d:%d:%f %d %8c %x %x %x');
                   if (isempty(errmsg) && (count == 11))
-                     
+
                      date = gregorian_2_julian_dec_argo(sprintf('%04d/%02d/%02d %02d:%02d:%02d', ...
                         val(1), val(2), val(3), val(4), val(5), val(6)));
                      dateList = [dateList; date];
-                     
+
                   end
                end
             end
-            
+
             text{end+1} = line;
          end
-         
+
          fclose(fIdIn);
          
          %          % move the file to the done files directory
@@ -827,11 +815,11 @@ for idFloat = 1:nbFloats
       fprintf('INFO: No available Argos file for float #%d\n', ...
          floatNum);
    end
-   
+      
    argosIdOccList(idFloatArgosIdOcc) = argosIdOccList(idFloatArgosIdOcc) - 1;
 end
 
-return
+return;
 
 % ------------------------------------------------------------------------------
 % Correction of the Argos HEX data.
@@ -846,7 +834,7 @@ return
 %
 % EXAMPLES :
 %
-% SEE ALSO :
+% SEE ALSO : 
 % AUTHORS  : Jean-Philippe Rannou (Altran)(jean-philippe.rannou@altran.com)
 % ------------------------------------------------------------------------------
 % RELEASES :
@@ -858,7 +846,7 @@ o_ok = 1;
 
 if (nargin ~= 2)
    o_ok = 0;
-   return
+   return;
 end
 
 % input directory(ies) to process
@@ -881,7 +869,7 @@ for idName = 1:length(tabInputDirName)
    inputDirName = char(tabInputDirName{idName});
    
    fprintf('Processing directory : %s\n', inputDirName);
-   
+
    if (SUB_DIR_FLAG == 0)
       co_cls_correct_argos_raw_file_one_dir(inputDirName, corDirName);
    else
@@ -909,7 +897,7 @@ for idName = 1:length(tabInputDirName)
    end
 end
 
-return
+return;
 
 % ------------------------------------------------------------------------------
 % Correction of the Argos HEX files of a given directory.
@@ -926,7 +914,7 @@ return
 %
 % EXAMPLES :
 %
-% SEE ALSO :
+% SEE ALSO : 
 % AUTHORS  : Jean-Philippe Rannou (Altran)(jean-philippe.rannou@altran.com)
 % ------------------------------------------------------------------------------
 % RELEASES :
@@ -948,7 +936,7 @@ for idFic = 1:nbFiles
       fIdIn = fopen(filePathName, 'r');
       if (fIdIn == -1)
          fprintf('Error while opening file : %s\n', filePathName);
-         return
+         return;
       end
       
       % first step: looking for satellite pass header and storing the number of
@@ -963,7 +951,7 @@ for idFic = 1:nbFiles
             if (startLine ~= -1)
                tabNbLinesToReadCor = [tabNbLinesToReadCor; lineNum-startLine+1];
             end
-            break
+            break;
          end
          lineNum = lineNum + 1;
          
@@ -993,15 +981,15 @@ for idFic = 1:nbFiles
             % no error dected => duplicate the file
             fileIn = filePathName;
             fileOut = [a_outputDir '/' fileName];
-            copy_file(fileIn, fileOut);
+            copyfile(fileIn, fileOut);
          else
             % error(s) detected => correct the file
-            
+
             % input file
             fIdIn = fopen(filePathName, 'r');
             if (fIdIn == -1)
                fprintf('Error while opening file : %s\n', filePathName);
-               return
+               return;
             end
             
             % output file
@@ -1009,7 +997,7 @@ for idFic = 1:nbFiles
             fIdOut = fopen(outputFileName, 'wt');
             if (fIdOut == -1)
                fprintf('Error while creating file : %s\n', outputFileName);
-               return
+               return;
             end
             
             lineNum = 0;
@@ -1019,7 +1007,7 @@ for idFic = 1:nbFiles
                while (nbLinesToCopy > 0)
                   line = fgetl(fIdIn);
                   if (line == -1)
-                     break
+                     break;
                   end
                   lineNum = lineNum + 1;
                   
@@ -1077,7 +1065,7 @@ for idFic = 1:nbFiles
    end
 end
 
-return
+return;
 
 % ------------------------------------------------------------------------------
 % For a given list of floats, process the associated Argos cycle files by:
@@ -1106,7 +1094,7 @@ o_ok = 1;
 
 if (nargin ~= 3)
    o_ok = 0;
-   return
+   return;
 end
 
 % float to process
@@ -1185,11 +1173,11 @@ for idFloat = 1:nbFloats
    if (isempty(idF))
       fprintf('ERROR: No information on float #%d\n', floatNum);
       fprintf('(nothing done)\n');
-      continue
+      continue;
    end
    floatArgosId = str2num(listArgosId{idF});
    floatEndDate = listEndDate(idF);
-   
+
    % select and sort the Argos files of the float
    argosFileNames = [];
    argosFileFirstMsgDate = [];
@@ -1211,24 +1199,24 @@ for idFloat = 1:nbFloats
                % check if the file should be considered
                fileDate = datenum(argosFileName(8:26), 'yyyy-mm-dd-HH-MM-SS') - g_decArgo_janFirst1950InMatlab;
                if (fileDate > floatEndDate)
-                  fprintf('INFO: Date of input file (%s) is after float end decoding date (%s) - file stored without cycle number (i.e. not decoded)\n', ...
+                  fprintf('INFO: Date of input file (%s) is after float end decoding date (%s) => file stored without cycle number (i.e. not decoded)\n', ...
                      julian_2_gregorian_dec_argo(fileDate), ...
                      julian_2_gregorian_dec_argo(floatEndDate));
                   g_decArgo_inputArgosFile = argosFilePathName;
                   move_argos_input_file(floatArgosId, fileDate, floatNum, [], 'UUU');
-                  continue
+                  continue;
                end
             end
-            
+
             argosFileNames{end+1} = argosFilePathName;
             argosFileFirstMsgDate(end+1) = datenum(argosFileName(8:26), 'yyyy-mm-dd-HH-MM-SS') - ...
                g_decArgo_janFirst1950InMatlab;
             
          else
-            fprintf('ERROR: Not expected file name: %s - file not considered\n', argosFileName);
+            fprintf('ERROR: Not expected file name: %s => file not considered\n', argosFileName);
          end
       else
-         fprintf('ERROR: Not expected file name: %s - file not considered\n', argosFileName);
+         fprintf('ERROR: Not expected file name: %s => file not considered\n', argosFileName);
       end
    end
    
@@ -1246,7 +1234,7 @@ for idFloat = 1:nbFloats
    end
 end
 
-return
+return;
 
 % ------------------------------------------------------------------------------
 % Process one Argos cycle file by:
@@ -1284,9 +1272,6 @@ global g_util_lastMsgDate;
 % miscellaneous decoder configuration parameters
 global g_decArgo_minNonTransDurForNewCycle;
 global g_decArgo_minNumMsgForNotGhost;
-
-% global input parameter information
-global g_decArgo_inputArgosFile;
 
 % minimum number of float messages for not only ghosts in contents
 NB_MSG_MIN = g_decArgo_minNumMsgForNotGhost;
@@ -1327,17 +1312,17 @@ if (isempty(argosDataDate))
    else
       move_argos_input_file(a_argosId, min(argosLocDate), a_floatNum, [], 'EEE');
    end
-   fprintf('INFO: File (%s) contains no Argos messages - file stored without cycle number (i.e. not decoded)\n', ...
+   fprintf('INFO: File (%s) contains no Argos messages => file stored without cycle number (i.e. not decoded)\n', ...
       a_argosFileName);
    
-   return
+   return;
 elseif (length(unique(argosDataDate)) < NB_MSG_MIN)
    
    move_argos_input_file(a_argosId, firstArgosMsgDate, a_floatNum, [], 'GGG');
-   fprintf('INFO: File (%s) contains only ghost messages - file stored without cycle number (i.e. not decoded)\n', ...
+   fprintf('INFO: File (%s) contains only ghost messages => file stored without cycle number (i.e. not decoded)\n', ...
       a_argosFileName);
    
-   return
+   return;
 end
 
 % find the cycle number
@@ -1346,10 +1331,10 @@ end
 [launchDate, delayBeforeMission, preludeDuration, firstProfileEndDate, cycleDuration, nbCyclesFirstMission] = ...
    get_meta_data_for_cycle_number_determination(a_floatNum, floatDecId, floatLaunchDate, floatCycleTime, floatRefDay);
 if (isempty(launchDate))
-   fprintf('ERROR: Unable to compute cycle number because of missing meta-data - file stored without cycle number (i.e. not decoded)\n');
+   fprintf('ERROR: Unable to compute cycle number because of missing meta-data => file stored without cycle number (i.e. not decoded)\n');
    
    move_argos_input_file(a_argosId, firstArgosMsgDate, a_floatNum, [], 'MMM');
-   return
+   return;
 end
 
 % estimate the cycle number
@@ -1434,273 +1419,16 @@ if (lastArgosMsgDate > launchDate)
    else
       
       % floats with two cycle durations
-      
+               
       % these float versions provide the cycle numbers
       decodedCycleNumber = decode_cycle_number(a_argosFileName, ...
          a_floatNum, a_argosId, frameLen, floatDecId);
       
       if (~isempty(decodedCycleNumber) && (decodedCycleNumber ~= -1))
-         
          % the cycle number has been decoded from the transmitted data
-         if (decodedCycleNumber ~= 0)
-            cycleNumber = decodedCycleNumber;
-         else
-            
-            % the cycle number reported by the float is #0
-            % it can be the prelude or a EOL, we must use additional dates and
-            % information to set the correct cycle number
-            
-            % multiple cycle durations only concern floats with a prelude phase
-            
-            % compute the duration of the cycle #1 (first deep cycle)
-            firstDeepCycleDuration = firstProfileEndDate - floatRefDay - ...
-               delayBeforeMission/1440 - preludeDuration/1440;
-            
-            % compute the duration of the transition cycle
-            surfTime = firstProfileEndDate - fix(firstProfileEndDate);
-            transitionCycleStartDate = surfTime + (nbCyclesFirstMission-1)*cycleDuration(1);
-            transitionCycleEndDate = fix(transitionCycleStartDate + cycleDuration(2)) + surfTime;
-            transitionCycleDuration = transitionCycleEndDate - transitionCycleStartDate;
-            
-            % try to use already computed cycles
-            idPrevCycle = find(g_util_lastMsgDate < firstArgosMsgDate);
-            if (~isempty(idPrevCycle))
-               idPrevCycle = idPrevCycle(end);
-               
-               if (g_util_cycleNumber(idPrevCycle) == 0)
-                  
-                  refDate = g_util_lastMsgDate(idPrevCycle);
-                  dates = [ ...
-                     refDate+firstDeepCycleDuration ...
-                     repmat(cycleDuration(1), 1, nbCyclesFirstMission-1) ...
-                     transitionCycleDuration ...
-                     repmat(cycleDuration(2), 1, 999)];
-                  for id = 2:length(dates)
-                     dates(id) = dates(id) + dates(id-1);
-                  end
-                  cycleNumbers = 1:length(dates);
-                  
-                  [~, idMin] = min(abs(dates-firstArgosMsgDate));
-                  cycleNumber = cycleNumbers(idMin);
-                  
-               elseif ((g_util_cycleNumber(idPrevCycle) > 0) && (g_util_cycleNumber(idPrevCycle) < nbCyclesFirstMission))
-                  
-                  refDate = g_util_firstMsgDate(idPrevCycle);
-                  dates = [ ...
-                     refDate ...
-                     repmat(cycleDuration(1), 1, nbCyclesFirstMission-g_util_cycleNumber(idPrevCycle)) ...
-                     transitionCycleDuration ...
-                     repmat(cycleDuration(2), 1, 999)];
-                  for id = 2:length(dates)
-                     dates(id) = dates(id) + dates(id-1);
-                  end
-                  cycleNumbers = g_util_cycleNumber(idPrevCycle):g_util_cycleNumber(idPrevCycle)+length(dates);
-                  
-                  [~, idMin] = min(abs(dates-firstArgosMsgDate));
-                  cycleNumber = cycleNumbers(idMin);
-                  
-               elseif (g_util_cycleNumber(idPrevCycle) == nbCyclesFirstMission)
-                  
-                  refDate = g_util_firstMsgDate(idPrevCycle);
-                  dates = [ ...
-                     refDate ...
-                     transitionCycleDuration ...
-                     repmat(cycleDuration(2), 1, 999)];
-                  for id = 2:length(dates)
-                     dates(id) = dates(id) + dates(id-1);
-                  end
-                  cycleNumbers = g_util_cycleNumber(idPrevCycle):g_util_cycleNumber(idPrevCycle)+length(dates);
-                  
-                  [~, idMin] = min(abs(dates-firstArgosMsgDate));
-                  cycleNumber = cycleNumbers(idMin);
-                  
-               else
-                  
-                  refDate = g_util_firstMsgDate(idPrevCycle);
-                  dates = [ ...
-                     refDate ...
-                     repmat(cycleDuration(2), 1, 999)];
-                  for id = 2:length(dates)
-                     dates(id) = dates(id) + dates(id-1);
-                  end
-                  cycleNumbers = g_util_cycleNumber(idPrevCycle):g_util_cycleNumber(idPrevCycle)+length(dates);
-                  
-                  [~, idMin] = min(abs(dates-firstArgosMsgDate));
-                  cycleNumber = cycleNumbers(idMin);
-                  
-               end
-               
-            else
-               
-               % use float meta-data
-               
-               dates = [ ...
-                  floatRefDay+delayBeforeMission/1440 ...
-                  preludeDuration/1440+firstDeepCycleDuration ...
-                  repmat(cycleDuration(1), 1, nbCyclesFirstMission-1) ...
-                  transitionCycleDuration ...
-                  repmat(cycleDuration(2), 1, 999)];
-               for id = 2:length(dates)
-                  dates(id) = dates(id) + dates(id-1);
-               end
-               cycleNumbers = 0:length(dates);
-               
-               [~, idMin] = min(abs(dates-firstArgosMsgDate));
-               cycleNumber = cycleNumbers(idMin);
-               
-            end
-         end
-         
-      elseif (decodedCycleNumber == -1)
-         
-         diffArgosDataDates = diff(argosDataDate)*24;
-         
-         % the file contains multiple cycles
-         [subFileNameList] = split_argos_file(a_argosFileName, a_floatNum, a_argosId);
-         if (~isempty(subFileNameList))
-            
-            fprintf('INFO: Argos cycle file split (%.1f hours without transmission): %s\n', ...
-               max(diffArgosDataDates), a_argosFileName);
-         else
-            fprintf('ERROR: Unable to split Argos cycle file: %s\n', ...
-               argosFileName);
-         end
-         
-         for idFile = 1:length(subFileNameList)
-            
-            cycleNumberFile = [];
-            
-            decodedCycleNumber = decode_cycle_number(subFileNameList{idFile}, ...
-               a_floatNum, a_argosId, frameLen, floatDecId);
-            
-            if (~isempty(decodedCycleNumber) && (decodedCycleNumber ~= -1))
-               
-               % the cycle number has been decoded from the transmitted data
-               if (decodedCycleNumber ~= 0)
-                  cycleNumberFile = decodedCycleNumber;
-               else
-                  
-                  % the cycle number reported by the float is #0
-                  % it can be the prelude or a EOL, we must use additional dates and
-                  % information to set the correct cycle number
-                  
-                  % multiple cycle durations only concern floats with a prelude phase
-                  
-                  % compute the duration of the cycle #1 (first deep cycle)
-                  firstDeepCycleDuration = firstProfileEndDate - floatRefDay - ...
-                     delayBeforeMission/1440 - preludeDuration/1440;
-                  
-                  % compute the duration of the transition cycle
-                  surfTime = firstProfileEndDate - fix(firstProfileEndDate);
-                  transitionCycleStartDate = surfTime + (nbCyclesFirstMission-1)*cycleDuration(1);
-                  transitionCycleEndDate = fix(transitionCycleStartDate + cycleDuration(2)) + surfTime;
-                  transitionCycleDuration = transitionCycleEndDate - transitionCycleStartDate;
-                  
-                  % try to use already computed cycles
-                  idPrevCycle = find(g_util_lastMsgDate < firstArgosMsgDate);
-                  if (~isempty(idPrevCycle))
-                     idPrevCycle = idPrevCycle(end);
-                     
-                     if (g_util_cycleNumber(idPrevCycle) == 0)
-                        
-                        refDate = g_util_lastMsgDate(idPrevCycle);
-                        dates = [ ...
-                           refDate+firstDeepCycleDuration ...
-                           repmat(cycleDuration(1), 1, nbCyclesFirstMission-1) ...
-                           transitionCycleDuration ...
-                           repmat(cycleDuration(2), 1, 999)];
-                        for id = 2:length(dates)
-                           dates(id) = dates(id) + dates(id-1);
-                        end
-                        cycleNumbers = 1:length(dates);
-                        
-                        [~, idMin] = min(abs(dates-firstArgosMsgDate));
-                        cycleNumberFile = cycleNumbers(idMin);
-                        
-                     elseif ((g_util_cycleNumber(idPrevCycle) > 0) && (g_util_cycleNumber(idPrevCycle) < nbCyclesFirstMission))
-                        
-                        refDate = g_util_firstMsgDate(idPrevCycle);
-                        dates = [ ...
-                           refDate ...
-                           repmat(cycleDuration(1), 1, nbCyclesFirstMission-g_util_cycleNumber(idPrevCycle)) ...
-                           transitionCycleDuration ...
-                           repmat(cycleDuration(2), 1, 999)];
-                        for id = 2:length(dates)
-                           dates(id) = dates(id) + dates(id-1);
-                        end
-                        cycleNumbers = g_util_cycleNumber(idPrevCycle):g_util_cycleNumber(idPrevCycle)+length(dates);
-                        
-                        [~, idMin] = min(abs(dates-firstArgosMsgDate));
-                        cycleNumberFile = cycleNumbers(idMin);
-                        
-                     elseif (g_util_cycleNumber(idPrevCycle) == nbCyclesFirstMission)
-                        
-                        refDate = g_util_firstMsgDate(idPrevCycle);
-                        dates = [ ...
-                           refDate ...
-                           transitionCycleDuration ...
-                           repmat(cycleDuration(2), 1, 999)];
-                        for id = 2:length(dates)
-                           dates(id) = dates(id) + dates(id-1);
-                        end
-                        cycleNumbers = g_util_cycleNumber(idPrevCycle):g_util_cycleNumber(idPrevCycle)+length(dates);
-                        
-                        [~, idMin] = min(abs(dates-firstArgosMsgDate));
-                        cycleNumberFile = cycleNumbers(idMin);
-                        
-                     else
-                        
-                        refDate = g_util_firstMsgDate(idPrevCycle);
-                        dates = [ ...
-                           refDate ...
-                           repmat(cycleDuration(2), 1, 999)];
-                        for id = 2:length(dates)
-                           dates(id) = dates(id) + dates(id-1);
-                        end
-                        cycleNumbers = g_util_cycleNumber(idPrevCycle):g_util_cycleNumber(idPrevCycle)+length(dates);
-                        
-                        [~, idMin] = min(abs(dates-firstArgosMsgDate));
-                        cycleNumberFile = cycleNumbers(idMin);
-                        
-                     end
-                     
-                  else
-                     
-                     % use float meta-data
-                     
-                     dates = [ ...
-                        floatRefDay+delayBeforeMission/1440 ...
-                        preludeDuration/1440+firstDeepCycleDuration ...
-                        repmat(cycleDuration(1), 1, nbCyclesFirstMission-1) ...
-                        transitionCycleDuration ...
-                        repmat(cycleDuration(2), 1, 999)];
-                     for id = 2:length(dates)
-                        dates(id) = dates(id) + dates(id-1);
-                     end
-                     cycleNumbers = 0:length(dates);
-                     
-                     [~, idMin] = min(abs(dates-firstArgosMsgDate));
-                     cycleNumberFile = cycleNumbers(idMin);
-                     
-                  end
-               end
-               
-               if (~isempty(cycleNumberFile))
-                  cycleNumber = [cycleNumber cycleNumberFile];
-               else
-                  fprintf('ERROR: Float #%d: Cannot determine cycle number for file: %s\n', ...
-                     a_floatNum, subFileNameList{idFile});
-                  cycleNumber = [];
-                  break
-               end
-            else
-               fprintf('ERROR: Float #%d: Cannot determine cycle number for file: %s\n', ...
-                  a_floatNum, subFileNameList{idFile});
-               cycleNumber = [];
-               break
-            end
-         end
+         cycleNumber = decodedCycleNumber;
       else
+         
          % the cycle number cannot be decoded from the transmitted data
          % we will use the transmission times to determine cycle number
          
@@ -1808,52 +1536,26 @@ if (lastArgosMsgDate > launchDate)
 else
    move_argos_input_file(a_argosId, firstArgosMsgDate, a_floatNum, [], 'TTT');
    
-   fprintf('INFO: Last date of input file (%s) is before float launch date (%s) - file stored without cycle number (i.e. not decoded)\n', ...
+   fprintf('INFO: Last date of input file (%s) is before float launch date (%s) => file stored without cycle number (i.e. not decoded)\n', ...
       julian_2_gregorian_dec_argo(lastArgosMsgDate), ...
       julian_2_gregorian_dec_argo(launchDate));
-   return
+   return;
 end
 
 % create the name of the input file and move it to the approriate directory
 if (~isempty(cycleNumber))
-   if (length(cycleNumber) == 1)
-      if (cycleNumber < 0)
-         move_argos_input_file(a_argosId, firstArgosMsgDate, a_floatNum, [], 'MMM');
-         
-         fprintf('ERROR: Computed cycle number is negative (%d): check the consistency of the meta-data - file stored without cycle number (i.e. not decoded)\n', ...
-            cycleNumber);
-      else
-         move_argos_input_file(a_argosId, firstArgosMsgDate, a_floatNum, cycleNumber);
-         
-         g_util_cycleNumber = [g_util_cycleNumber; cycleNumber];
-         g_util_firstMsgDate = [g_util_firstMsgDate; firstArgosMsgDate];
-         g_util_lastMsgDate = [g_util_lastMsgDate; lastArgosMsgDate];
-      end
+   if (cycleNumber < 0)
+      move_argos_input_file(a_argosId, firstArgosMsgDate, a_floatNum, [], 'MMM');
+      
+      fprintf('ERROR: Computed cycle number is negative (%d): check the consistency of the meta-data => file stored without cycle number (i.e. not decoded)\n', ...
+         cycleNumber);
    else
-      for idFile = 1:length(subFileNameList)
-         
-         % read Argos file
-         [argosLocDate, argosLocLon, argosLocLat, argosLocAcc, argosLocSat, ...
-            argosDataDate, argosDataData] = read_argos_file_fmt1({subFileNameList{idFile}}, a_argosId, frameLen);
-         firstArgosMsgDate = min(argosDataDate);
-         lastArgosMsgDate = max(argosDataDate);
-         
-         g_decArgo_inputArgosFile = subFileNameList{idFile};
-         
-         if (cycleNumber(idFile) < 0)
-            move_argos_input_file(a_argosId, firstArgosMsgDate, a_floatNum, [], 'MMM');
-            
-            fprintf('ERROR: Computed cycle number is negative (%d): check the consistency of the meta-data - file stored without cycle number (i.e. not decoded)\n', ...
-               cycleNumber(idFile));
-         else
-            move_argos_input_file(a_argosId, firstArgosMsgDate, a_floatNum, cycleNumber(idFile));
-            
-            g_util_cycleNumber = [g_util_cycleNumber; cycleNumber(idFile)];
-            g_util_firstMsgDate = [g_util_firstMsgDate; firstArgosMsgDate];
-            g_util_lastMsgDate = [g_util_lastMsgDate; lastArgosMsgDate];
-         end
-      end
+      move_argos_input_file(a_argosId, firstArgosMsgDate, a_floatNum, cycleNumber);
+      
+      g_util_cycleNumber = [g_util_cycleNumber; cycleNumber];
+      g_util_firstMsgDate = [g_util_firstMsgDate; firstArgosMsgDate];
+      g_util_lastMsgDate = [g_util_lastMsgDate; lastArgosMsgDate];
    end
 end
 
-return
+return;

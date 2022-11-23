@@ -35,7 +35,7 @@ global g_decArgo_outputNcParamValue;
 
 % retrieve technical message data
 if (size(a_tabTech, 1) > 1)
-   fprintf('WARNING: Float #%d cycle #%d: %d tech message in the buffer - using the last one\n', ...
+   fprintf('WARNING: Float #%d cycle #%d: %d tech message in the buffer => using the last one\n', ...
       g_decArgo_floatNum, g_decArgo_cycleNum, ...
       size(a_tabTech, 1));
 end
@@ -163,14 +163,18 @@ if (a_deepCycle == 1)
       g_decArgo_cycleNum 129];
    g_decArgo_outputNcParamValue{end+1} = tabTech(40);
    
-   pres = sensor_2_value_for_pressure_204_to_209_219_220(tabTech(41));
-   temp = sensor_2_value_for_temp_204_to_214_217_219_220_222_to_225(tabTech(42));
-   psal = tabTech(43)/1000;
-   if (any([pres temp psal] ~= 0))
-      g_decArgo_outputNcParamIndex = [g_decArgo_outputNcParamIndex;
-         g_decArgo_cycleNum 145];
-      g_decArgo_outputNcParamValue{end+1} = pres;
-   end
+   g_decArgo_outputNcParamIndex = [g_decArgo_outputNcParamIndex;
+      g_decArgo_cycleNum 145];
+   g_decArgo_outputNcParamValue{end+1} = sensor_2_value_for_pressure_204_to_209(tabTech(41));
+   
+   % the two following items have moved to TRAJ file
+   %    g_decArgo_outputNcParamIndex = [g_decArgo_outputNcParamIndex;
+   %       g_decArgo_cycleNum 146];
+   %    g_decArgo_outputNcParamValue{end+1} = sensor_2_value_for_temperature_204_to_211(tabTech(42));
+   %
+   %    g_decArgo_outputNcParamIndex = [g_decArgo_outputNcParamIndex;
+   %       g_decArgo_cycleNum 147];
+   %    g_decArgo_outputNcParamValue{end+1} = tabTech(43)/1000;
    
    g_decArgo_outputNcParamIndex = [g_decArgo_outputNcParamIndex;
       g_decArgo_cycleNum 130];
@@ -246,10 +250,6 @@ if (a_deepCycle == 1)
       g_decArgo_cycleNum 144];
    g_decArgo_outputNcParamValue{end+1} = tabTech(65);
 
-   g_decArgo_outputNcParamIndex = [g_decArgo_outputNcParamIndex;
-      g_decArgo_cycleNum 1000];
-   g_decArgo_outputNcParamValue{end+1} = tabTech(74);
-
    sbeOptodeStatus = a_tabTech(76);
    if (sbeOptodeStatus == 0)
       sbeOptodeStatus = 1;
@@ -270,40 +270,6 @@ if (a_deepCycle == 1)
       g_decArgo_cycleNum 149];
    g_decArgo_outputNcParamValue{end+1} = aaOptodeStatus;
 
-else
-   
-   offset = 10000;
-
-   g_decArgo_outputNcParamIndex = [g_decArgo_outputNcParamIndex;
-      g_decArgo_cycleNum 130+offset];
-   g_decArgo_outputNcParamValue{end+1} = tabTech(50);
-   
-   g_decArgo_outputNcParamIndex = [g_decArgo_outputNcParamIndex;
-      g_decArgo_cycleNum 131+offset];
-   g_decArgo_outputNcParamValue{end+1} = tabTech(51)*5;
-   
-   rtcStatus = tabTech(53);
-   if (rtcStatus == 0)
-      rtcStatusOut = 1;
-   else
-      rtcStatusOut = 0;
-   end
-   g_decArgo_outputNcParamIndex = [g_decArgo_outputNcParamIndex;
-      g_decArgo_cycleNum 133+offset];
-   g_decArgo_outputNcParamValue{end+1} = rtcStatusOut;
-   
-   g_decArgo_outputNcParamIndex = [g_decArgo_outputNcParamIndex;
-      g_decArgo_cycleNum 143+offset];
-   g_decArgo_outputNcParamValue{end+1} = tabTech(64);
-   
-   g_decArgo_outputNcParamIndex = [g_decArgo_outputNcParamIndex;
-      g_decArgo_cycleNum 144+offset];
-   g_decArgo_outputNcParamValue{end+1} = tabTech(65);
-
-   g_decArgo_outputNcParamIndex = [g_decArgo_outputNcParamIndex;
-      g_decArgo_cycleNum 1000+offset];
-   g_decArgo_outputNcParamValue{end+1} = tabTech(74);
-   
 end
 
-return
+return;

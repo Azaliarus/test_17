@@ -49,13 +49,13 @@ global g_decArgo_salDef;
 
 
 if (isempty(a_dataCTD))
-   return
+   return;
 end
 
-for type = [1 3]
-   idForType = find(a_dataCTD(:, 1) == type);
-   for idP = 1:length(idForType)
-      data = a_dataCTD(idForType(idP), :);
+for idT = [1 3]
+   idDesc = find(a_dataCTD(:, 1) == idT);
+   for idP = 1:length(idDesc)
+      data = a_dataCTD(idDesc(idP), :);
       for idMeas = 1:15
          if (idMeas == 1)
             data(idMeas+1) = data(idMeas+1) + a_refDay;
@@ -63,11 +63,11 @@ for type = [1 3]
             if ((data(idMeas+1+15*2) == g_decArgo_presDef) && ...
                   (data(idMeas+1+15*3) == g_decArgo_tempDef) && ...
                   (data(idMeas+1+15*4) == g_decArgo_salDef))
-               break
+               break;
             end
          end
          
-         if (type == 1)
+         if (idT == 1)
             o_descProfDate = [o_descProfDate; data(idMeas+1)];
             o_descProfPres = [o_descProfPres; data(idMeas+1+15*2)];
             o_descProfTemp = [o_descProfTemp; data(idMeas+1+15*3)];
@@ -93,4 +93,4 @@ o_ascProfDate = o_ascProfDate(idSorted);
 o_ascProfTemp = o_ascProfTemp(idSorted);
 o_ascProfSal = o_ascProfSal(idSorted);
 
-return
+return;

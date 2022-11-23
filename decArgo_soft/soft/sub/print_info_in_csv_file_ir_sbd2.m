@@ -102,12 +102,12 @@ if (~isempty(a_cyProfPhaseList))
                      end
                   end
                   if (~isempty(idDel))
-                     break
+                     break;
                   end
                end
             end
             if (~isempty(idDel))
-               break
+               break;
             end
          end
       end
@@ -129,7 +129,7 @@ if (~isempty(a_cyProfPhaseList))
                tabStop(idDel(1, 1)) = newId(end);
             else
                % the remaining ids are not contiguous (not processed yet)
-               fprintf('ERROR: Float #%d Cycle #%d: Not contiguous indexes - nothing done (TO BE DONE)\n', ...
+               fprintf('ERROR: Float #%d Cycle #%d: Not contiguous indexes => nothing done (TO BE DONE)\n', ...
                   g_decArgo_floatNum, ...
                   g_decArgo_cycleNum);
                stop = 1;
@@ -200,4 +200,4 @@ if (~isempty(a_cyProfPhaseList))
    end
 end
 
-return
+return;

@@ -23,7 +23,7 @@ function check_argos_raw_files(varargin)
 DIR_INPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\IN\split_apex_061609\in_split_cycle - copie\';
 
 % directory to store the log and CSV files
-DIR_LOG_FILE = 'C:\Users\jprannou\_RNU\DecArgo_soft\work\log\';
+DIR_LOG_FILE = 'C:\Users\jprannou\_RNU\DecArgo_soft\work\';
 
 % min non-trans duration (in hour) to use the ghost detection
 MIN_NON_TRANS_DURATION_FOR_GHOST = 7;
@@ -52,7 +52,7 @@ if (nargin == 0)
    % floats to process come from floatListFileName
    if ~(exist(floatListFileName, 'file') == 2)
       fprintf('File not found: %s\n', floatListFileName);
-      return
+      return;
    end
    
    fprintf('Floats from list: %s\n', floatListFileName);
@@ -78,7 +78,7 @@ tic;
 outputFileName = [DIR_LOG_FILE '/' 'check_argos_raw_files' name '_' datestr(now, 'yyyymmddTHHMMSS') '.csv'];
 fidOut = fopen(outputFileName, 'wt');
 if (fidOut == -1)
-   return
+   return;
 end
 header = ['Line; WMO; File; ' ...
    'JulD first; JulD last; Trans dur; Nb ghost del; ' ...
@@ -105,7 +105,7 @@ for idFloat = 1:nbFloats
    if (isempty(idF))
       fprintf('ERROR: No information on float #%d\n', floatNum);
       fprintf('(nothing done)\n');
-      continue
+      continue;
    end
    floatArgosId = str2num(listArgosId{idF});
    floatFrameLen = listFrameLen(idF);
@@ -187,4 +187,4 @@ fprintf('done (Elapsed time is %.1f seconds)\n', ellapsedTime);
 
 diary off;
 
-return
+return;

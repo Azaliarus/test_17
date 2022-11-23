@@ -7,7 +7,8 @@
 %    o_floatFrameLen, ...
 %    o_floatCycleTime, o_floatDriftSamplingPeriod, o_floatDelay, ...
 %    o_floatLaunchDate, o_floatLaunchLon, o_floatLaunchLat, ...
-%    o_floatRefDay, o_floatDmFlag] = get_one_float_info(a_floatNum, a_floatArgosId)
+%    o_floatRefDay, o_floatEndDate, ...
+%    o_floatDmFlag] = get_one_float_info(a_floatNum, a_floatArgosId)
 %
 % INPUT PARAMETERS :
 %   a_floatNum      : float WMO number (empty if a_floatArgosId is not empty)
@@ -27,6 +28,7 @@
 %   o_floatLaunchLon           : float launch longitude
 %   o_floatLaunchLat           : float launch latitude
 %   o_floatRefDay              : float reference day (day of the first descent)
+%   o_floatEndDate             : float end decoding date
 %   o_floatDmFlag              : float DM flag
 %
 % EXAMPLES :
@@ -42,7 +44,8 @@ function [o_floatNum, o_floatArgosId, ...
    o_floatFrameLen, ...
    o_floatCycleTime, o_floatDriftSamplingPeriod, o_floatDelay, ...
    o_floatLaunchDate, o_floatLaunchLon, o_floatLaunchLat, ...
-   o_floatRefDay, o_floatDmFlag] = get_one_float_info(a_floatNum, a_floatArgosId)
+   o_floatRefDay, o_floatEndDate, ...
+   o_floatDmFlag] = get_one_float_info(a_floatNum, a_floatArgosId)
 
 % output parameters initialization
 o_floatNum = [];
@@ -57,6 +60,7 @@ o_floatLaunchDate = [];
 o_floatLaunchLon = [];
 o_floatLaunchLat = [];
 o_floatRefDay = [];
+o_floatEndDate = [];
 o_floatDmFlag = [];
 
 % global configuration values
@@ -75,11 +79,11 @@ if (~isempty(a_floatNum))
    if (length(floatInfoFileNames) == 1)
       floatInfoFileName = [g_decArgo_dirInputJsonFloatDecodingParametersFile '/' floatInfoFileNames(1).name];
    elseif (isempty(floatInfoFileNames))
-      fprintf('WARNING: Float information file not found for float #%d\n', a_floatNum);
-      return
+      fprintf('ERROR: Float information file not found for float #%d\n', a_floatNum);
+      return;
    else
       fprintf('ERROR: Multiple float information files for float #%d\n', a_floatNum);
-      return
+      return;
    end
    
 elseif (~isempty(a_floatArgosId))
@@ -87,13 +91,13 @@ elseif (~isempty(a_floatArgosId))
    if (length(floatInfoFileNames) == 1)
       floatInfoFileName = [g_decArgo_dirInputJsonFloatDecodingParametersFile '/' floatInfoFileNames(1).name];
    elseif (isempty(floatInfoFileNames))
-      fprintf('WARNING: Float information file not found for Argos Id #%d\n', a_floatArgosId);
-      return
+      fprintf('ERROR: Float information file not found for Argos Id #%d\n', a_floatArgosId);
+      return;
    else
       for idF = 1: length(floatInfoFileNames)
          if (~isempty(strfind(floatInfoFileNames(idF).name, 'WWWWWWW_')))
-            fprintf('ERROR: Conflict between one JSON info file (%s) and the other ones - clean the set of JSON info files for this float\n', floatInfoFileNames(idF).name);
-            return
+            fprintf('ERROR: Conflict between one JSON info file (%s) and the other ones => clean the set of JSON info files for this float\n', floatInfoFileNames(idF).name);
+            return;
          end
       end
       % read Argos file
@@ -102,8 +106,8 @@ elseif (~isempty(a_floatArgosId))
       lastArgosMsgDate = max(argosDataDate);
       
       if (isempty(lastArgosMsgDate))
-         fprintf('WARNING: Input Argos file (%s) is empty - cannot choose between possible WMO numbers\n', g_decArgo_inputArgosFile);
-         return
+         fprintf('WARNING: Input Argos file (%s) is empty => cannot choose between possible WMO numbers\n', g_decArgo_inputArgosFile);
+         return;
       end
       
       % collect launch dates of possible json files
@@ -121,7 +125,7 @@ elseif (~isempty(a_floatArgosId))
          
          if (sum(isfield(fileContents, expectedFields)) ~= length(expectedFields))
             fprintf('ERROR: Missing data in float information file: %s\n', filePathName);
-            return
+            return;
          end
          
          floatLaunchDateStr = getfield(fileContents, 'LAUNCH_DATE');
@@ -141,7 +145,7 @@ elseif (~isempty(a_floatArgosId))
       if (~isempty(idF))
          idFloat = idF(end);
       else
-         [~, idMin] = min(launchDate);
+         [unused, idMin] = min(launchDate);
          idFloat = idMin;
       end
       
@@ -185,12 +189,13 @@ else
    expectedFields{end+1} = 'LAUNCH_DATE';
    expectedFields{end+1} = 'LAUNCH_LON';
    expectedFields{end+1} = 'LAUNCH_LAT';
+   expectedFields{end+1} = 'END_DECODING_DATE';
    expectedFields{end+1} = 'REFERENCE_DAY';
    expectedFields{end+1} = 'DM_FLAG';
    
    if (sum(isfield(fileContents, expectedFields)) ~= length(expectedFields))
       fprintf('ERROR: Missing data in float information file: %s\n', floatInfoFileName);
-      return
+      return;
    end
    
    o_floatNum = str2num(getfield(fileContents, 'WMO'));
@@ -207,10 +212,18 @@ else
       floatLaunchDate(9:10), floatLaunchDate(11:12), floatLaunchDate(13:14)));
    o_floatLaunchLon = str2num(getfield(fileContents, 'LAUNCH_LON'));
    o_floatLaunchLat = str2num(getfield(fileContents, 'LAUNCH_LAT'));
+   floatEndDate = getfield(fileContents, 'END_DECODING_DATE');
+   if (strcmp(floatEndDate, '99999999999999'))
+      o_floatEndDate = g_decArgo_dateDef;
+   else
+      o_floatEndDate = gregorian_2_julian_dec_argo(sprintf('%s/%s/%s %s:%s:%s', ...
+         floatEndDate(1:4), floatEndDate(5:6), floatEndDate(7:8), ...
+         floatEndDate(9:10), floatEndDate(11:12), floatEndDate(13:14)));
+   end
    floatRefDay = getfield(fileContents, 'REFERENCE_DAY');
    o_floatRefDay = gregorian_2_julian_dec_argo(sprintf('%s/%s/%s 00:00:00', ...
       floatRefDay(1:4), floatRefDay(5:6), floatRefDay(7:8)));
    o_floatDmFlag = str2num(getfield(fileContents, 'DM_FLAG'));
 end
 
-return
+return;

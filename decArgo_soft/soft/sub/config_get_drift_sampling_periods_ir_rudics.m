@@ -32,6 +32,7 @@ o_zoneThreshold = ones(4, 1)*-1;
 % float configuration
 global g_decArgo_floatConfig;
 
+
 % current configuration
 configNum = g_decArgo_floatConfig.DYNAMIC.NUMBER;
 configName = g_decArgo_floatConfig.DYNAMIC.NAMES;
@@ -42,15 +43,9 @@ usedConfNum = g_decArgo_floatConfig.USE.CONFIG;
 
 % find the id of the concerned configuration
 idUsedConf = find((usedCy == a_cycleNum) & (usedProf == a_profNum));
-% if (isempty(idUsedConf))
-%    idUsedConf = find((usedCy == a_cycleNum-1) & (usedProf == a_profNum));
-%    if (isempty(idUsedConf))
-%       idUsedConf = find((usedCy == a_cycleNum-2) & (usedProf == a_profNum));
-%    end
-% end
 idConf = find(configNum == usedConfNum(idUsedConf));
 
-% find the sampling periods and the depth zone thresholds
+% find the sapmling periods and the depth zone thresholds
 for id = 1:5
    % sampling period
    confParamName = sprintf('CONFIG_PC_%d_0_%d', ...
@@ -70,4 +65,4 @@ for id = 1:4
    end
 end
 
-return
+return;

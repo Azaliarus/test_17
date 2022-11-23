@@ -25,7 +25,7 @@ function set_cycle_number_of_argos_cycle_file(varargin)
 
 % directory of the Argos cycle files
 DIR_INPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\ArgosApex_processing_20160208\fichiers_cycle_apex_233_floats_bascule_20160217\';
-DIR_INPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\IN\APEX_ARGOS_APF11\OUT\FINAL\';
+% DIR_INPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\rerun\ori_split_cycle_CORRECT_final\';
 
 % mode processing flags
 global g_decArgo_realtimeFlag;
@@ -51,7 +51,7 @@ if (nargin ~= 3)
    fprintf('   set_cycle_number_of_argos_cycle_file(WMO, file_date, cycle_number) => set cycle cycle number of Argos cycle file (dated file_date) to cycle_number\n');
    fprintf('where file_date is provided as a string present in the Argos cycle file name (format: ''yyyy-mm-dd-HH-MM-SS''\n');
    fprintf('aborted ...\n');
-   return
+   return;
 else
 
    floatNum = varargin{1};
@@ -66,8 +66,8 @@ end
 
 % check the input directory
 if ~(exist(DIR_INPUT_ARGOS_FILES, 'dir') == 7)
-   fprintf('ERROR: The Argos cycle files directory %s does not exist - exit\n', DIR_INPUT_ARGOS_FILES);
-   return
+   fprintf('ERROR: The Argos cycle files directory %s does not exist => exit\n', DIR_INPUT_ARGOS_FILES);
+   return;
 end
 
 % get floats information
@@ -79,8 +79,8 @@ end
 % find current float Argos Id
 idF = find(listWmoNum == floatNum, 1);
 if (isempty(idF))
-   fprintf('ERROR: No information on float #%d - exit\n', floatNum);
-   return
+   fprintf('ERROR: No information on float #%d => exit\n', floatNum);
+   return;
 end
 floatArgosId = str2num(listArgosId{idF});
 
@@ -101,9 +101,9 @@ for idFile = 1:length(argosFiles)
       if (isempty(argosFileNameFound))
          argosFileNameFound = argosFileName;
       else
-         fprintf('ERROR: More than one Argos cycle file are dated %s - exit\n', ...
+         fprintf('ERROR: More than one Argos cycle file are dated %s => exit\n', ...
             datestr(file_date, 'yyyy-mm-dd-HH-MM-SS'));
-         return
+         return;
       end
    end
    
@@ -116,14 +116,14 @@ for idFile = 1:length(argosFiles)
 end
 
 if (isempty(argosFileNameFound))
-   fprintf('ERROR: File not found, check that provided date is part of the Argos cycle file name - exit\n');
-   return
+   fprintf('ERROR: File not found, check that provided date is part of the Argos cycle file name => exit\n');
+   return;
 end
 
 if (~isempty(find(tabCycleNum == cycleNumber, 1)))
-   fprintf('ERROR: An Argos cycle file already has cycle number #%d - exit\n', ...
+   fprintf('ERROR: An Argos cycle file already has cycle number #%d => exit\n', ...
       cycleNumber);
-   return
+   return;
 end
 
 % create a common save directory
@@ -154,4 +154,4 @@ end
 
 fprintf('done\n');
 
-return
+return;

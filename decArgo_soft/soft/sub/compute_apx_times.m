@@ -78,6 +78,7 @@ if (a_cycleNum == 0)
    %    [~, o_timeData.configParam.deepProfileDescentPeriod] = find_struct(a_timeInfo, 'label', 'deepProfileDescentPeriod', 'value');
    
    % elseif (a_cycleNum < 7) || (a_cycleNum == 12)
+   %    a=1
 
 else
    [~, downTimeEnd] = find_struct(a_timeInfo, 'label', 'downTimeEnd', 'value');
@@ -106,12 +107,8 @@ if (a_cycleNum > 0)
    % compute TST from float transmission strategy
    [tabTst1, tabTst2] = compute_apx_TST( ...
       a_argosDataData, a_argosDataUsed, a_argosDataDate, o_timeData.configParam, a_decoderId);
-   if (~isempty(tabTst1))
-      [cycleTimeStruct.transStartTime1, ~] = select_a_value(tabTst1);
-   end
-   if (~isempty(tabTst2))
-      [cycleTimeStruct.transStartTime2, ~] = select_a_value(tabTst2);
-   end
+   [cycleTimeStruct.transStartTime1, ~] = select_a_value(tabTst1);
+   [cycleTimeStruct.transStartTime2, ~] = select_a_value(tabTst2);
    
    if (VERBOSE)
       uTst1 = unique(tabTst1(find(tabTst1 ~= g_decArgo_dateDef)));
@@ -137,24 +134,21 @@ if (a_cycleNum > 0)
    end
    
    % store TST from float transmission strategy
-   if (cycleTimeStruct.transStartTime2 ~= g_decArgo_dateDef)
-      % we prefer the improved method because the TWR one needs additional
-      % configuration information (trans rep rate) that can be erroneously
-      % reported
-      cycleTimeStruct.transStartTimeAdj = cycleTimeStruct.transStartTime2;
+   if (cycleTimeStruct.transStartTime1 ~= g_decArgo_dateDef)
+      cycleTimeStruct.transStartTime = cycleTimeStruct.transStartTime1;
    else
-      cycleTimeStruct.transStartTimeAdj = cycleTimeStruct.transStartTime1;
+      cycleTimeStruct.transStartTime = cycleTimeStruct.transStartTime2;
    end
-   if (cycleTimeStruct.transStartTimeAdj ~= g_decArgo_dateDef)
+   cycleTimeStruct.transStartTimeAdj = cycleTimeStruct.transStartTime;
+   if (cycleTimeStruct.transStartTime ~= g_decArgo_dateDef)
       cycleTimeStruct.transStartTimeStatus = g_JULD_STATUS_1;
    end
    
    % compute AET = TST - 10 minutes
-   if (~ismember(a_decoderId, [1021 1022]))
-      if (cycleTimeStruct.transStartTimeAdj ~= g_decArgo_dateDef)
-         cycleTimeStruct.ascentEndTimeAdj = cycleTimeStruct.transStartTimeAdj - 10/1440;
-         cycleTimeStruct.ascentEndTimeStatus = cycleTimeStruct.transStartTimeStatus;
-      end
+   if (cycleTimeStruct.transStartTime ~= g_decArgo_dateDef)
+      cycleTimeStruct.ascentEndTime = cycleTimeStruct.transStartTime - 10/1440;
+      cycleTimeStruct.ascentEndTimeAdj = cycleTimeStruct.ascentEndTime;
+      cycleTimeStruct.ascentEndTimeStatus = cycleTimeStruct.transStartTimeStatus;
    end
 end
 
@@ -164,11 +158,11 @@ o_timeData.cycleTime(idCycleStruct) = cycleTimeStruct;
 if (a_finalStep)
    
    % compute (or estimate) TET and clock drift
-   o_timeData = compute_apx_TET(o_timeData, a_decoderId);
+   o_timeData = compute_apx_TET(o_timeData);
    
    % finalize cycle times
-   o_timeData = finalize_apx_times(o_timeData, a_decoderId);
+   o_timeData = finalize_apx_times(o_timeData);
    
 end
 
-return
+return;

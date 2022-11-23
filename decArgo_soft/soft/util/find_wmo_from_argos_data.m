@@ -23,7 +23,7 @@ DIR_INPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\IN\tmp\OUT\STEP2\';
 DIR_OUTPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\IN\tmp\OUT\STEP2\out\';
 
 % directory to store the log file
-DIR_LOG_FILE = 'C:\Users\jprannou\_RNU\DecArgo_soft\work\log\';
+DIR_LOG_FILE = 'C:\Users\jprannou\_RNU\DecArgo_soft\work\';
 
 % default values initialization
 init_default_values;
@@ -214,7 +214,7 @@ for idDir = 1:nbDirs
                   end
                end
             else
-               fprintf('INFO: empty file (no message with good CRC) - %d messages ignored\n', size(argosDataData, 1));
+               fprintf('INFO: empty file (no message with good CRC) => %d messages ignored\n', size(argosDataData, 1));
             end
          end
       end
@@ -226,4 +226,4 @@ fprintf('done (Elapsed time is %.1f seconds)\n', ellapsedTime);
 
 diary off;
 
-return
+return;

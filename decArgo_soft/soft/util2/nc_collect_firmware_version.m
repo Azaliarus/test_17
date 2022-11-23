@@ -19,7 +19,7 @@
 function nc_collect_firmware_version(varargin)
 
 % top directory of input NetCDF mono-profile files
-DIR_INPUT_NC_FILES = 'C:\Users\jprannou\_DATA\201809-ArgoData\';
+DIR_INPUT_NC_FILES = 'E:\archive_201510\201510-ArgoData\DATA\';
 
 % directory to store the log and the csv files
 DIR_LOG_CSV_FILE = 'C:\Users\jprannou\_RNU\DecArgo_soft\work\';
@@ -44,7 +44,7 @@ for idDir = 1:length(dacDir)
       outputFileName = [DIR_LOG_CSV_FILE '/' 'nc_collect_firmware_version_' dacDirName '_' datestr(now, 'yyyymmddTHHMMSS') '.csv'];
       fidOut = fopen(outputFileName, 'wt');
       if (fidOut == -1)
-         return
+         return;
       end
       fprintf(fidOut, '%s\n', header);
       
@@ -106,7 +106,7 @@ fprintf('done (Elapsed time is %.1f seconds)\n', ellapsedTime);
 
 diary off;
 
-return
+return;
 
 % ------------------------------------------------------------------------------
 % Retrieve data from NetCDF file.
@@ -141,7 +141,7 @@ if (exist(a_ncPathFileName, 'file') == 2)
    fCdf = netcdf.open(a_ncPathFileName, 'NC_NOWRITE');
    if (isempty(fCdf))
       fprintf('ERROR: Unable to open NetCDF input file: %s\n', a_ncPathFileName);
-      return
+      return;
    end
    
    % retrieve variables from NetCDF file

@@ -37,11 +37,8 @@ tabInputDirName = [];
 % tabInputDirName{end+1} = 'C:\Users\jprannou\_DATA\Apex_set2\121512_ori\';
 % tabInputDirName{end+1} = 'C:\Users\jprannou\_DATA\ArgosApex_processing_ALL\recup_mail_VB_20160830\final_processing\ori\';
 % tabInputDirName{end+1} = 'C:\Users\jprannou\_DATA\ArgosApex_processing_20160823\Complement_argos_V110813\ori\';
-% tabInputDirName{end+1} = 'C:\Users\jprannou\_DATA\ArgosApex_processing_20160914\fichiers_cycle_apex_233_floats_bascule_20160823\';
-% tabInputDirName{end+1} = 'C:\Users\jprannou\_DATA\Apex_set3\071807_ori_cycle\';
-% tabInputDirName{end+1} = 'C:\Users\jprannou\_DATA\Apex_set3\090810_ori_cycle\';
-% tabInputDirName{end+1} = 'C:\Users\jprannou\_DATA\Apex_set3\102015_ori_cycle\';
-tabInputDirName{end+1} = 'C:\Users\jprannou\_DATA\IN\APEX_ARGOS_APF11\IN\ori_cycle\';
+tabInputDirName{end+1} = 'C:\Users\jprannou\_DATA\ArgosApex_processing_20160914\fichiers_cycle_apex_233_floats_bascule_20160823\';
+
 
 % directory to store the log file
 DIR_LOG_FILE = 'C:\Users\jprannou\_RNU\DecArgo_soft\work\log\';
@@ -100,7 +97,7 @@ fprintf('done (Elapsed time is %.1f seconds)\n', ellapsedTime);
 
 diary off;
 
-return
+return;
 
 % ------------------------------------------------------------------------------
 % Correction of the Argos HEX files of a given directory.
@@ -139,7 +136,7 @@ for idFic = 1:nbFiles
       fIdIn = fopen(filePathName, 'r');
       if (fIdIn == -1)
          fprintf('Error while opening file : %s\n', filePathName);
-         return
+         return;
       end
       
       % first step: looking for satellite pass header and storing the number of
@@ -154,7 +151,7 @@ for idFic = 1:nbFiles
             if (startLine ~= -1)
                tabNbLinesToReadCor = [tabNbLinesToReadCor; lineNum-startLine+1];
             end
-            break
+            break;
          end
          lineNum = lineNum + 1;
          
@@ -184,7 +181,7 @@ for idFic = 1:nbFiles
             % no error dected => duplicate the file
             fileIn = filePathName;
             fileOut = [a_outputDir '/' fileName];
-            copy_file(fileIn, fileOut);
+            copyfile(fileIn, fileOut);
          else
             % error(s) detected => correct the file
 
@@ -192,7 +189,7 @@ for idFic = 1:nbFiles
             fIdIn = fopen(filePathName, 'r');
             if (fIdIn == -1)
                fprintf('Error while opening file : %s\n', filePathName);
-               return
+               return;
             end
             
             % output file
@@ -200,7 +197,7 @@ for idFic = 1:nbFiles
             fIdOut = fopen(outputFileName, 'wt');
             if (fIdOut == -1)
                fprintf('Error while creating file : %s\n', outputFileName);
-               return
+               return;
             end
             
             lineNum = 0;
@@ -210,7 +207,7 @@ for idFic = 1:nbFiles
                while (nbLinesToCopy > 0)
                   line = fgetl(fIdIn);
                   if (line == -1)
-                     break
+                     break;
                   end
                   lineNum = lineNum + 1;
                   
@@ -268,4 +265,4 @@ for idFic = 1:nbFiles
    end
 end
 
-return
+return;

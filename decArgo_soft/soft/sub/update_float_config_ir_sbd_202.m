@@ -34,7 +34,7 @@ global g_decArgo_firstDeepCycleNumber;
 
 
 if (size(a_floatParam, 1) > 1)
-   fprintf('ERROR: Float #%d cycle #%d: BUFFER anomaly (%d param messages in the buffer) - using the last one\n', ...
+   fprintf('ERROR: Float #%d cycle #%d: BUFFER anomaly (%d param messages in the buffer) => using the last one\n', ...
       g_decArgo_floatNum, g_decArgo_cycleNum, ...
       size(a_floatParam, 1));
 end
@@ -158,6 +158,6 @@ end
 g_decArgo_floatConfig.DYNAMIC_TMP.DATES = [g_decArgo_floatConfig.DYNAMIC_TMP.DATES floatParam(end-1)];
 g_decArgo_floatConfig.DYNAMIC_TMP.VALUES = [g_decArgo_floatConfig.DYNAMIC_TMP.VALUES newConfig];
 
-% create_csv_to_print_config_ir_sbd('updateConfig_', 0, g_decArgo_floatConfig);
+% print_config_in_csv_file_ir_sbd('updateConfig_', 0, g_decArgo_floatConfig);
 
-return
+return;

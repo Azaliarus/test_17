@@ -111,18 +111,18 @@ o_deepestPressureDescending = [];
 
 if ~(exist(a_fileName, 'file') == 2)
    fprintf('Fichier introuvable : %s\n', a_fileName);
-   return
+   return;
 end
 
 fCdf = netcdf.open(a_fileName, 'NC_NOWRITE');
 if (isempty(fCdf))
    fprintf('Unable to open NetCDF file: %s\n', a_fileName);
-   return
+   return;
 end
 
 % dimensions
-[~, o_nCycles] = netcdf.inqDim(fCdf, netcdf.inqDimID(fCdf, 'N_CYCLES'));
-[~, o_nParam] = netcdf.inqDim(fCdf, netcdf.inqDimID(fCdf, 'N_PARAM'));
+[unused, o_nCycles] = netcdf.inqDim(fCdf, netcdf.inqDimID(fCdf, 'N_CYCLES'));
+[unused, o_nParam] = netcdf.inqDim(fCdf, netcdf.inqDimID(fCdf, 'N_PARAM'));
 
 % caractéristiques du flotteur
 o_platformNumber = netcdf.getVar(fCdf, netcdf.inqVarID(fCdf, 'PLATFORM_NUMBER'))';
@@ -174,7 +174,7 @@ o_launchQc = netcdf.getVar(fCdf, netcdf.inqVarID(fCdf, 'LAUNCH_QC'));
 o_startDate = netcdf.getVar(fCdf, netcdf.inqVarID(fCdf, 'START_DATE'))';
 o_startDateQc = netcdf.getVar(fCdf, netcdf.inqVarID(fCdf, 'START_DATE_QC'))';
 o_deployPlatform = netcdf.getVar(fCdf, netcdf.inqVarID(fCdf, 'DEPLOY_PLATFORM'))';
-o_deployMission = netcdf.getVar(fCdf, netcdf.inqVarID(fCdf, 'CRUISE_NAME'))';
+o_deployMission = netcdf.getVar(fCdf, netcdf.inqVarID(fCdf, 'DEPLOY_MISSION'))';
 o_deployAvailableProfileId = netcdf.getVar(fCdf, netcdf.inqVarID(fCdf, 'DEPLOY_AVAILABLE_PROFILE_ID'))';
 o_endMissionDate = netcdf.getVar(fCdf, netcdf.inqVarID(fCdf, 'END_MISSION_DATE'))';
 o_endMissionStatus = netcdf.getVar(fCdf, netcdf.inqVarID(fCdf, 'END_MISSION_STATUS'));
@@ -225,4 +225,4 @@ end
 
 netcdf.close(fCdf);
 
-return
+return;

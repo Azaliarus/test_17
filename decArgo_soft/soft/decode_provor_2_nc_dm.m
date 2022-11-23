@@ -45,12 +45,16 @@ global g_decArgo_xmlReportDOMNode;
 global g_decArgo_reportData;
 g_decArgo_reportData = [];
 
+% Argos Id temporary sub-directory
+global g_decArgo_tmpArgosIdDirectory;
 
 % global input parameter information
 global g_decArgo_xmlReportFileName;
 
-global g_decArgo_processRemainingBuffers;
-g_decArgo_processRemainingBuffers = 1;
+% global input parameter information
+global g_decArgo_processModeRedecode;
+global g_decArgo_inputFloatWmo;
+global g_decArgo_inputFloatWmoList;
 
 
 logFileName = [];
@@ -154,17 +158,6 @@ catch
    
 end
 
-% when no configuration file has been selected, set the path of the XML report
-if (isempty(g_decArgo_dirOutputXmlFile))
-   if (ispc)
-      g_decArgo_dirOutputXmlFile = '.'; % local dir for windows
-   elseif (isunix)
-      g_decArgo_dirOutputXmlFile = '/tmp'; % local dir for windows
-   end
-   fprintf('WARNING: XML report is stored in ''%s'' directory\n', ...
-      g_decArgo_dirOutputXmlFile);
-end
-
 % create the XML report path file name
 if (~isempty(g_decArgo_xmlReportFileName))
    xmlFileName = [g_decArgo_dirOutputXmlFile '/' g_decArgo_xmlReportFileName];
@@ -178,4 +171,4 @@ xmlwrite(xmlFileName, g_decArgo_xmlReportDOMNode);
 %    edit(xmlFileName);
 % end
 
-return
+return;

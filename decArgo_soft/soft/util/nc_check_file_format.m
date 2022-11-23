@@ -20,58 +20,64 @@
 function nc_check_file_format(varargin)
 
 % directory of the JAVA checker
-% DIR_JAVA_CHECKER = 'C:\Users\jprannou\_RNU\Argo\checker_US\javaChecker\file_checker_exec_v2.6_2022-04-16_spec_v2.6_2022-04-16\';
-% DIR_JAVA_CHECKER = 'C:\Users\jprannou\_RNU\Argo\checker_US\javaChecker\file_checker_exec_v2.6_2022-04-19_spec_v2.6_2022-04-19\';
-% DIR_JAVA_CHECKER = 'C:\Users\jprannou\_RNU\Argo\checker_US\javaChecker\file_checker_exec_v2.6_2022-04-19_spec_v2.6_2022-04-21\';
-% DIR_JAVA_CHECKER = 'C:\Users\jprannou\_RNU\Argo\checker_US\javaChecker\file_checker_exec_v2.7_2022-05-17_spec_v2.6_2022-04-21\';
-DIR_JAVA_CHECKER = 'C:\Users\jprannou\_RNU\Argo\checker_US\javaChecker\file_checker_exec_v2.7.03_2022-06-01_spec_v2.6_2022-04-21\';
+DIR_JAVA_CHECKER = 'C:\Users\jprannou\_RNU\Argo\checker_US\javaChecker\file_checker_2015-12-07_spec_2016-03-07\'; 
+DIR_JAVA_CHECKER = 'C:\Users\jprannou\_RNU\Argo\checker_US\javaChecker\file_checker_2016-04-10_spec_2016-04-10\'; 
+DIR_JAVA_CHECKER = 'C:\Users\jprannou\_RNU\Argo\checker_US\javaChecker\file_checker_2016-04-10_spec_2016-04-19\'; 
+DIR_JAVA_CHECKER = 'C:\Users\jprannou\_RNU\Argo\checker_US\javaChecker\file_checker_2016-04-10_spec_2016-05-16\'; 
+DIR_JAVA_CHECKER = 'C:\Users\jprannou\_RNU\Argo\checker_US\javaChecker\file_checker_2016-05-23_spec_2016-05-23\';
+DIR_JAVA_CHECKER = 'C:\Users\jprannou\_RNU\Argo\checker_US\javaChecker\file_checker_2016-06-27_spec_2016-06-27\';
+DIR_JAVA_CHECKER = 'C:\Users\jprannou\_RNU\Argo\checker_US\javaChecker\file_checker_2016-08-01_spec_2016-07-28\';
+DIR_JAVA_CHECKER = 'C:\Users\jprannou\_RNU\Argo\checker_US\javaChecker\file_checker_2016-08-01_spec_2016-08-30\';
+
 
 % top directory of the NetCDF files to check
 DIR_INPUT_NC_FILES = 'C:\Users\jprannou\_DATA\OUT\nc_output_decArgo\';
-% DIR_INPUT_NC_FILES = 'C:\Users\jprannou\_DATA\Conversion_en_3.1_20220829\OUT\';
-% DIR_INPUT_NC_FILES = 'C:\Users\jprannou\_DATA\Conversion_en_3.1_20220822\OUT\';
-% DIR_INPUT_NC_FILES = 'C:\Users\jprannou\_DATA\TEST_DM_REPORT\DIR_INPUT_OLD_NC_FILES\';
-% DIR_INPUT_NC_FILES = 'C:\Users\jprannou\_DATA\TEST_DM_REPORT\DIR_INPUT_NEW_NC_FILES\';
-% DIR_INPUT_NC_FILES = 'C:\Users\jprannou\_DATA\TEST_DM_REPORT\OUT\';
-
-% json meta-data file directory
-DIR_JSON_FLOAT_META = 'C:\Users\jprannou\_DATA\IN\decArgo_config_floats\json_float_meta\';
+% DIR_INPUT_NC_FILES = 'C:\Users\jprannou\_DATA\OUT\test_update_format_tech\coriolis\';
+% DIR_INPUT_NC_FILES = 'C:\Users\jprannou\_DATA\OUT\nc_output_decPrv_deep\';
+% DIR_INPUT_NC_FILES = 'C:\Users\jprannou\_DATA\convert_DM_apex_in_3.1\updated_data\';
+% DIR_INPUT_NC_FILES = 'C:\Users\jprannou\_DATA\OUT\nc_output_decArgo_ref_apx_bascule\';
+% DIR_INPUT_NC_FILES = 'C:\Users\jprannou\_DATA\OUT\test_update_param_adj_error\coriolis\';
+% DIR_INPUT_NC_FILES = 'C:\Users\jprannou\_DATA\OUT\nc_output_decArgo_nova\';
 
 % directory to store checker reports
 DIR_OUTPUT_REPORT_FILES = 'C:\Users\jprannou\_DATA\OUT\checker_reports\';
 
 % default list of floats to check
-FLOAT_LIST_FILE_NAME = 'C:\Users\jprannou\_RNU\DecArgo_soft\lists\cts5_usea.txt';
-FLOAT_LIST_FILE_NAME = 'C:\Users\jprannou\_RNU\DecArgo_soft\lists\_cts4_3.xx_all.txt';
-FLOAT_LIST_FILE_NAME = 'C:\Users\jprannou\_RNU\DecArgo_soft\lists\_cts5_all.txt';
-FLOAT_LIST_FILE_NAME = 'C:\Users\jprannou\_RNU\DecArgo_soft\lists\_cts4_21.xx_2.xx_not_DM_all.txt';
-FLOAT_LIST_FILE_NAME = 'C:\Users\jprannou\_RNU\DecArgo_soft\lists\_cts4_21.xx_2.xx_DM_all.txt';
-FLOAT_LIST_FILE_NAME = 'C:\Users\jprannou\_RNU\Argo\ActionsCoriolis\ConvertApexOldVersionsTo3.1\list\nemo_list_20220829.txt';
-FLOAT_LIST_FILE_NAME = 'C:\Users\jprannou\_RNU\DecArgo_soft\lists\_nke_rem_flbb_20160512.txt';
-% FLOAT_LIST_FILE_NAME = 'C:\Users\jprannou\_RNU\DecArgo_soft\lists\arvor_c_5.3_5.301_all.txt';
-% FLOAT_LIST_FILE_NAME = 'C:\Users\jprannou\_RNU\DecArgo_soft\lists\arvor_cm.txt';
+% FLOAT_LIST_FILE_NAME = 'C:\Users\jprannou\_RNU\DecArgo_soft\lists\_nke_rem_all.txt'; 
+% FLOAT_LIST_FILE_NAME = 'C:\Users\jprannou\_RNU\DecArgo_soft\lists\_nke_prv_ir_all.txt'; 
+% FLOAT_LIST_FILE_NAME = 'C:\Users\jprannou\_RNU\DecArgo_soft\lists\_apex_argos_071412.txt'; 
+% FLOAT_LIST_FILE_NAME = 'C:\Users\jprannou\_RNU\DecArgo_soft\lists\_apex_argos_061609.txt'; 
+% FLOAT_LIST_FILE_NAME = 'C:\Users\jprannou\_RNU\DecArgo_soft\lists\_apex_argos_061810.txt'; 
+FLOAT_LIST_FILE_NAME = 'C:\Users\jprannou\_RNU\DecArgo_soft\lists\_apex_argos_matlab_all.txt'; 
+% FLOAT_LIST_FILE_NAME = 'C:\Users\jprannou\_RNU\DecArgo_soft\lists\_apex_with_DM_profile_071412.txt';
+% FLOAT_LIST_FILE_NAME = 'C:\Users\jprannou\_RNU\DecArgo_soft\lists\_apex_with_DM_profile_062608.txt';
+% FLOAT_LIST_FILE_NAME = 'C:\Users\jprannou\_RNU\DecArgo_soft\lists\_apex_with_DM_profile_all.txt';
+% FLOAT_LIST_FILE_NAME = 'C:\Users\jprannou\_RNU\DecArgo_soft\lists\_apex_with_DM_profile_061609.txt';
+FLOAT_LIST_FILE_NAME = 'C:\Users\jprannou\_RNU\DecArgo_soft\lists\_nova_dova.txt';
+FLOAT_LIST_FILE_NAME = 'C:\Users\jprannou\_RNU\DecArgo_soft\lists\tmp.txt';
+FLOAT_LIST_FILE_NAME = 'C:\Users\jprannou\_RNU\DecArgo_soft\lists\arvor_arn_ir.txt';
+% FLOAT_LIST_FILE_NAME = 'C:\Users\jprannou\_RNU\DecArgo_soft\lists\arvor_4.54.txt';
+
 
 % meta-data file exported from Coriolis data base
-% dataBaseFileName = 'C:\Users\jprannou\_RNU\DecPrv_info\_configParamNames\meta_PRV_from_VB_REFERENCE_20150217.txt';
+dataBaseFileName = 'C:\Users\jprannou\_RNU\DecPrv_info\_configParamNames\meta_PRV_from_VB_REFERENCE_20150217.txt';
 % dataBaseFileName = 'C:\Users\jprannou\_RNU\DecApx_info\_configParamNames\export_meta_APEX_from_VB_20150703.txt';
 
-% directory to store the log file
-DIR_LOG_FILE = 'C:\Users\jprannou\_RNU\DecArgo_soft\work\log\';
-
-% directory to store the csv file
-DIR_CSV_FILE = 'C:\Users\jprannou\_RNU\DecArgo_soft\work\csv\';
+% directory to store the log and csv files
+DIR_LOG_FILE = 'C:\Users\jprannou\_RNU\DecArgo_soft\work\'; 
 
 % nc file types to check
 CHECK_NC_TRAJ = 1;
-CHECK_NC_MULTI_PROF = 0;
+CHECK_NC_MULTI_PROF = 1;
 CHECK_NC_MONO_PROF = 1;
 CHECK_NC_TECH = 1;
 CHECK_NC_META = 1;
-% CHECK_NC_TRAJ = 1;
+
+% CHECK_NC_TRAJ = 0;
 % CHECK_NC_MULTI_PROF = 0;
 % CHECK_NC_MONO_PROF = 0;
 % CHECK_NC_TECH = 0;
-% CHECK_NC_META = 0;
+% CHECK_NC_META = 1;
 
 
 if (nargin == 0)
@@ -80,7 +86,7 @@ if (nargin == 0)
    % floats to process come from floatListFileName
    if ~(exist(floatListFileName, 'file') == 2)
       fprintf('ERROR: File not found: %s\n', floatListFileName);
-      return
+      return;
    end
    
    fprintf('Floats from list: %s\n', floatListFileName);
@@ -103,66 +109,49 @@ diary(logFile);
 tic;
 
 % create the CSV output file
-outputFileName = [DIR_CSV_FILE '/' 'nc_check_file_format' name '_' datestr(now, 'yyyymmddTHHMMSS') '.csv'];
+outputFileName = [DIR_LOG_FILE '/' 'nc_check_file_format' name '_' datestr(now, 'yyyymmddTHHMMSS') '.csv'];
 fidOut = fopen(outputFileName, 'wt');
 if (fidOut == -1)
-   return
+   return;
 end
 header = ['Line #; WMO; File type; File name; Status; Error numbers; Warning numbers'];
 fprintf(fidOut, '%s\n', header);
 
 % read meta file
-% fprintf('Processing file: %s\n', dataBaseFileName);
-% fId = fopen(dataBaseFileName, 'r');
-% if (fId == -1)
-%    fprintf('ERROR: Unable to open file: %s\n', dataBaseFileName);
-%    return
-% end
-% metaFileContents = textscan(fId, '%s', 'delimiter', '\t');
-% metaFileContents = metaFileContents{:};
-% fclose(fId);
-%
-% metaFileContents = regexprep(metaFileContents, '"', '');
-%
-% metaData = reshape(metaFileContents, 5, size(metaFileContents, 1)/5)';
+fprintf('Processing file: %s\n', dataBaseFileName);
+fId = fopen(dataBaseFileName, 'r');
+if (fId == -1)
+   fprintf('ERROR: Unable to open file: %s\n', dataBaseFileName);
+   return;
+end
+metaFileContents = textscan(fId, '%s', 'delimiter', '\t');
+metaFileContents = metaFileContents{:};
+fclose(fId);
 
-% metaWmoList = metaData(:, 1);
-% S = sprintf('%s*', metaWmoList{:});
-% metaWmoList = sscanf(S, '%f*');
+metaFileContents = regexprep(metaFileContents, '"', '');
+
+metaData = reshape(metaFileContents, 5, size(metaFileContents, 1)/5)';
+
+metaWmoList = metaData(:, 1);
+S = sprintf('%s*', metaWmoList{:});
+metaWmoList = sscanf(S, '%f*');
 
 % process the floats
 lineNum = 1;
 nbFloats = length(floatList);
 for idFloat = 1:nbFloats
-   
+     
    floatNum = floatList(idFloat);
    floatNumStr = num2str(floatNum);
    fprintf('%03d/%03d %s\n', idFloat, nbFloats, floatNumStr);
    
-   % json meta-data file for this float
-   jsonInputFileName = [DIR_JSON_FLOAT_META '/' sprintf('%d_meta.json', floatNum)];
-   
-   floatDac = 'INCOIS';
-%    floatDac = 'CORIOLIS';
-   if (exist(jsonInputFileName, 'file') == 2)
-      % read meta-data file
-      metaData = loadjson(jsonInputFileName);
-      
-      inst = get_institution_from_data_centre(metaData.DATA_CENTRE);
-      if (~isempty(inst))
-         floatDac = inst;
-      end
-   end
-   
-   %    [floatDac] = get_float_dac(floatNum, metaWmoList, metaData);
-   %    floatDac = 'incois';
-   %    floatDac = 'aoml';
-   %    floatDac = 'csio';
-   %    floatDac = 'bodc';
-   %    floatDac = 'coriolis';
+   [floatDac] = get_float_dac(floatNum, metaWmoList, metaData);
+   floatDac = 'incois';
+%    floatDac = 'aoml';
+   floatDac = 'coriolis';
    
    for idType = 1:5
-      
+
       if ((idType == 1) && (CHECK_NC_TRAJ == 1))
          % check trajectory files
          ncFileDir = [DIR_INPUT_NC_FILES '/' num2str(floatNum) '/'];
@@ -189,18 +178,14 @@ for idFloat = 1:nbFloats
          ncFiles = dir([ncFileDir sprintf('%d_meta.nc', floatNum)]);
          pattern = 'META';
       else
-         continue
+         continue;
       end
-      
+
       if (exist(ncFileDir, 'dir') == 7)
          
          for idFile = 1:length(ncFiles)
             
             ncFileName = ncFiles(idFile).name;
-            [~, name, ~] = fileparts(ncFileName);
-            if (strcmp(name(end-3:end), '_aux'))
-               continue
-            end
             ncFilePathName = [ncFileDir '/' ncFileName];
             
             cmd = '';
@@ -208,7 +193,6 @@ for idFloat = 1:nbFloats
                cmd = ['cd ' DIR_JAVA_CHECKER ' & ' ...
                   'java -classpath ' DIR_JAVA_CHECKER ' ' ...
                   '-jar ' DIR_JAVA_CHECKER '/ValidateSubmit.jar ' ...
-                  '-full-traj-checks ' ...
                   lower(floatDac) ' ' ...
                   DIR_JAVA_CHECKER '/spec ' ...
                   DIR_OUTPUT_REPORT_FILES ' ' ...
@@ -217,14 +201,13 @@ for idFloat = 1:nbFloats
             elseif (isunix)
                cmd = ['cd ' DIR_JAVA_CHECKER ' & ' ...
                   DIR_JAVA_CHECKER '/ArgoFileChecker.csh ' ...
-                  '-full-traj-checks ' ...
                   lower(floatDac) ' ' ...
                   DIR_OUTPUT_REPORT_FILES ' ' ...
                   ncFileDir ' ' ...
                   ncFileName];
             else
                fprintf('Cannot determine operating system\n');
-               return
+               return;
             end
             
             [status, cmdOut] = system(cmd);
@@ -233,22 +216,22 @@ for idFloat = 1:nbFloats
                reportFilePathName = [DIR_OUTPUT_REPORT_FILES '/' ncFileName '.filecheck'];
                if ~(exist(reportFilePathName, 'file') == 2)
                   fprintf('ERROR: Report file not found: %s\n', reportFilePathName);
-                  continue
+                  continue;
                end
                
                fId = fopen(reportFilePathName, 'r');
                if (fId == -1)
                   fprintf('ERROR: Unable to open file: %s\n', reportFilePathName);
-                  continue
+                  continue;
                end
-               
+
                status = '';
                errorNum = -1;
                warningNum = -1;
                while 1
                   line = fgetl(fId);
                   if (line == -1)
-                     break
+                     break;
                   end
                   
                   % collect information
@@ -288,9 +271,9 @@ for idFloat = 1:nbFloats
                fclose(fId);
                
                % edit report
-               %                if ((errorNum > 0) || (warningNum > 0))
-               %                   edit(reportFilePathName);
-               %                end
+%                if ((errorNum > 0) || (warningNum > 0))
+%                   edit(reportFilePathName);
+%                end
                
                % print collected information in the output CSV file
                fprintf(fidOut, '%d; %d; %s; %s; %s; %d; %d\n', ...
@@ -306,7 +289,7 @@ for idFloat = 1:nbFloats
       end
    end
 end
-
+   
 ellapsedTime = toc;
 fprintf('done (Elapsed time is %.1f seconds)\n', ellapsedTime);
 
@@ -314,7 +297,7 @@ fclose(fidOut);
 
 diary off;
 
-return
+return;
 
 % ------------------------------------------------------------------------------
 function [o_floatDac] = get_float_dac(a_floatNum, a_metaWmoList, a_metaData)
@@ -326,10 +309,10 @@ idForWmo = find(a_metaWmoList == a_floatNum);
 idF = find(strcmp(a_metaData(idForWmo, 5), 'DATA_CENTRE'));
 if (~isempty(idF))
    floatDac = a_metaData{idForWmo(idF), 4};
-   [o_floatDac] = get_institution_from_data_centre(floatDac, 1);
+   [o_floatDac] = get_institution_from_data_centre(floatDac);
 else
    o_floatDac = 'CORIOLIS';
 end
 
-return
+return;
 

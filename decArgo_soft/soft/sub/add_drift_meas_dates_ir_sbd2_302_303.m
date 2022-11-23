@@ -2,7 +2,7 @@
 % Add the dates of the drift measurements.
 %
 % SYNTAX :
-%  [o_dataCTD, o_dataOXY, o_dataFLNTU, o_dataCYCLOPS, o_dataSEAPOINT, o_measDates] = ...
+%  [o_dataCTD, o_dataOXY, o_dataFLNTU, o_dataCYCLOPS, o_dataSEAPOINT] = ...
 %    add_drift_meas_dates_ir_sbd2_302_303(a_dataCTD, a_dataOXY, a_dataFLNTU, a_dataCYCLOPS, a_dataSEAPOINT)
 %
 % INPUT PARAMETERS :
@@ -18,7 +18,6 @@
 %   o_dataFLNTU    : output FLNTU data
 %   o_dataCYCLOPS  : output CYCLOPS data
 %   o_dataSEAPOINT : output SEAPOINT data
-%   o_measDates    : measurement dates transmitted by the float
 %
 % EXAMPLES :
 %
@@ -28,7 +27,7 @@
 % RELEASES :
 %   11/26/2015 - RNU - creation
 % ------------------------------------------------------------------------------
-function [o_dataCTD, o_dataOXY, o_dataFLNTU, o_dataCYCLOPS, o_dataSEAPOINT, o_measDates] = ...
+function [o_dataCTD, o_dataOXY, o_dataFLNTU, o_dataCYCLOPS, o_dataSEAPOINT] = ...
    add_drift_meas_dates_ir_sbd2_302_303(a_dataCTD, a_dataOXY, a_dataFLNTU, a_dataCYCLOPS, a_dataSEAPOINT)
 
 % cycle phases
@@ -41,7 +40,6 @@ o_dataOXY = [];
 o_dataFLNTU = [];
 o_dataCYCLOPS = [];
 o_dataSEAPOINT = [];
-o_measDates = [];
 
 % unpack the input data
 a_dataCTDMean = a_dataCTD{1};
@@ -137,7 +135,6 @@ if (~isempty(a_dataCTDMeanDate))
          a_dataCTDMeanDate(idDrift(idL), 2), ...
          a_dataCTDMeanDate(idDrift(idL), 4:end));
    end
-   o_measDates = [o_measDates; a_dataCTDMeanDate(:, 1:4)];
 end
 if (~isempty(a_dataCTDStdMedDate))
    idDrift = find(a_dataCTDStdMedDate(:, 3) == g_decArgo_phaseParkDrift);
@@ -147,7 +144,6 @@ if (~isempty(a_dataCTDStdMedDate))
          a_dataCTDStdMedDate(idDrift(idL), 2), ...
          a_dataCTDStdMedDate(idDrift(idL), 4:end));
    end
-   o_measDates = [o_measDates; a_dataCTDStdMedDate(:, 1:4)];
 end
 
 if (~isempty(a_dataOXYMeanDate))
@@ -158,7 +154,6 @@ if (~isempty(a_dataOXYMeanDate))
          a_dataOXYMeanDate(idDrift(idL), 2), ...
          a_dataOXYMeanDate(idDrift(idL), 4:end));
    end
-   o_measDates = [o_measDates; a_dataOXYMeanDate(:, 1:4)];
 end
 if (~isempty(a_dataOXYStdMedDate))
    idDrift = find(a_dataOXYStdMedDate(:, 3) == g_decArgo_phaseParkDrift);
@@ -168,7 +163,6 @@ if (~isempty(a_dataOXYStdMedDate))
          a_dataOXYStdMedDate(idDrift(idL), 2), ...
          a_dataOXYStdMedDate(idDrift(idL), 4:end));
    end
-   o_measDates = [o_measDates; a_dataOXYStdMedDate(:, 1:4)];
 end
 
 if (~isempty(a_dataFLNTUMeanDate))
@@ -179,7 +173,6 @@ if (~isempty(a_dataFLNTUMeanDate))
          a_dataFLNTUMeanDate(idDrift(idL), 2), ...
          a_dataFLNTUMeanDate(idDrift(idL), 4:end));
    end
-   o_measDates = [o_measDates; a_dataFLNTUMeanDate(:, 1:4)];
 end
 if (~isempty(a_dataFLNTUStdMedDate))
    idDrift = find(a_dataFLNTUStdMedDate(:, 3) == g_decArgo_phaseParkDrift);
@@ -189,7 +182,6 @@ if (~isempty(a_dataFLNTUStdMedDate))
          a_dataFLNTUStdMedDate(idDrift(idL), 2), ...
          a_dataFLNTUStdMedDate(idDrift(idL), 4:end));
    end
-   o_measDates = [o_measDates; a_dataFLNTUStdMedDate(:, 1:4)];
 end
 
 if (~isempty(a_dataCYCLOPS))
@@ -201,7 +193,6 @@ if (~isempty(a_dataCYCLOPS))
             a_dataCYCLOPSMeanDate(idDrift(idL), 2), ...
             a_dataCYCLOPSMeanDate(idDrift(idL), 4:end));
       end
-      o_measDates = [o_measDates; a_dataCYCLOPSMeanDate(:, 1:4)];
    end
    if (~isempty(a_dataCYCLOPSStdMedDate))
       idDrift = find(a_dataCYCLOPSStdMedDate(:, 3) == g_decArgo_phaseParkDrift);
@@ -211,7 +202,6 @@ if (~isempty(a_dataCYCLOPS))
             a_dataCYCLOPSStdMedDate(idDrift(idL), 2), ...
             a_dataCYCLOPSStdMedDate(idDrift(idL), 4:end));
       end
-      o_measDates = [o_measDates; a_dataCYCLOPSStdMedDate(:, 1:4)];
    end
 end
 
@@ -224,7 +214,6 @@ if (~isempty(a_dataSEAPOINT))
             a_dataSEAPOINTMeanDate(idDrift(idL), 2), ...
             a_dataSEAPOINTMeanDate(idDrift(idL), 4:end));
       end
-      o_measDates = [o_measDates; a_dataSEAPOINTMeanDate(:, 1:4)];
    end
    if (~isempty(a_dataSEAPOINTStdMedDate))
       idDrift = find(a_dataSEAPOINTStdMedDate(:, 3) == g_decArgo_phaseParkDrift);
@@ -234,7 +223,6 @@ if (~isempty(a_dataSEAPOINT))
             a_dataSEAPOINTStdMedDate(idDrift(idL), 2), ...
             a_dataSEAPOINTStdMedDate(idDrift(idL), 4:end));
       end
-      o_measDates = [o_measDates; a_dataSEAPOINTStdMedDate(:, 1:4)];
    end
 end
 
@@ -323,4 +311,4 @@ if (~isempty(a_dataSEAPOINT))
    o_dataSEAPOINT{2} = o_dataSEAPOINTStdMed;
 end
 
-return
+return;

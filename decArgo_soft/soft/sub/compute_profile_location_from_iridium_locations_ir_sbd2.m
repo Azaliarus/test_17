@@ -6,13 +6,12 @@
 % SYNTAX :
 %  [o_locDate, o_locLon, o_locLat, o_locQc, o_firstMsgTime, o_lastCycleFlag] = ...
 %    compute_profile_location_from_iridium_locations_ir_sbd2( ...
-%    a_iridiumMailData, a_cycleNumber, a_profileNumber, a_prevCycleFlag)
+%    a_iridiumMailData, a_cycleNumber, a_profileNumber)
 %
 % INPUT PARAMETERS :
 %   a_iridiumMailData : Iridium mail contents
 %   a_cycleNumber     : concerned cycle number
 %   a_profileNumber   : concerned profile number
-%   a_prevCycleFlag   : previous cycle flag
 %
 % OUTPUT PARAMETERS :
 %   o_locDate       : profile location date
@@ -33,11 +32,10 @@
 % ------------------------------------------------------------------------------
 function [o_locDate, o_locLon, o_locLat, o_locQc, o_firstMsgTime, o_lastCycleFlag] = ...
    compute_profile_location_from_iridium_locations_ir_sbd2( ...
-   a_iridiumMailData, a_cycleNumber, a_profileNumber, a_prevCycleFlag)
+   a_iridiumMailData, a_cycleNumber, a_profileNumber)
 
 % QC flag values (char)
 global g_decArgo_qcStrGood;
-global g_decArgo_qcStrProbablyGood;
 
 % output parameters initialization
 o_locDate = [];
@@ -48,73 +46,33 @@ o_firstMsgTime = [];
 o_lastCycleFlag = [];
 
 
-if (a_prevCycleFlag == 0)
-   cycleNumber = a_cycleNumber;
-   profileNumber = a_profileNumber;
-else
-   % try to determine cycleNumber and profileNumber of previous cycle
-   if (any(([a_iridiumMailData.floatCycleNumber] == a_cycleNumber) & ...
-         ([a_iridiumMailData.floatProfileNumber] == a_profileNumber-1)))
-      cycleNumber = a_cycleNumber;
-      profileNumber = a_profileNumber - 1;
-   else
-      cycleNumber = a_cycleNumber - 1;
-      idForCy = find([a_iridiumMailData.floatCycleNumber] == cycleNumber);
-      if (~isempty(idForCy))
-         profileNumber = max([a_iridiumMailData(idForCy).floatProfileNumber]);
-      else
-         profileNumber = 1; % to prevent float 2902089 from crashing the decoder
-      end
-   end
-end
-
 % process the contents of the Iridium mail associated to the current cycle
-idFCyProfNum = find(([a_iridiumMailData.floatCycleNumber] == cycleNumber) & ...
-   ([a_iridiumMailData.floatProfileNumber] == profileNumber) & ...
-   ([a_iridiumMailData.cepRadius] ~= 0) & ([a_iridiumMailData.cepRadius] < 5));
+idFCyProfNum = find(([a_iridiumMailData.floatCycleNumber] == a_cycleNumber) & ...
+   ([a_iridiumMailData.floatProfileNumber] == a_profileNumber));
 if (~isempty(idFCyProfNum))
    timeList = [a_iridiumMailData(idFCyProfNum).timeOfSessionJuld];
    latList = [a_iridiumMailData(idFCyProfNum).unitLocationLat];
    lonList = [a_iridiumMailData(idFCyProfNum).unitLocationLon];
    radiusList = [a_iridiumMailData(idFCyProfNum).cepRadius];
    
-   % CEP Radius is initialized to 0 (so that the Iridium location is not
-   % considered if not present in the mail; Ex: co_20190527T062249Z_300234065420780_000939_000000_10565.txt)
-   % note also that NOVA/DOVA Iridium data (recieved from Paul Lane in CSV
-   % files) have CEP Radius set to 0
-   idDel = find(radiusList == 0);
-   if (~isempty(idDel))
-      timeList(idDel) = [];
-      latList(idDel) = [];
-      lonList(idDel) = [];
-      radiusList(idDel) = [];
+   weight = 1./(radiusList.*radiusList);
+   o_locDate = mean(timeList);
+   o_locLon = sum(lonList.*weight)/sum(weight);
+   o_locLat = sum(latList.*weight)/sum(weight);
+   if (mean(radiusList) < 5)
+      o_locQc = g_decArgo_qcStrGood;
+   else
+      o_locQc = '2';
    end
+   o_firstMsgTime = min(timeList);
    
-   % longitudes must be in the [-180, 180[ interval
-   % (see cycle #18 of float #6903190)
-   idToShift = find(lonList >= 180);
-   lonList(idToShift) = lonList(idToShift) - 360;
-   
-   if (~isempty(timeList))
-      weight = 1./(radiusList.*radiusList);
-      o_locDate = mean(timeList);
-      o_locLon = sum(lonList.*weight)/sum(weight);
-      o_locLat = sum(latList.*weight)/sum(weight);
-      if (mean(radiusList) < 5)
-         o_locQc = g_decArgo_qcStrGood;
-      else
-         o_locQc = g_decArgo_qcStrProbablyGood;
-      end
-      o_firstMsgTime = min(timeList);
-      
-      o_lastCycleFlag = 0;
-      if (cycleNumber == max([a_iridiumMailData.floatCycleNumber]))
-         idFCyNum = find([a_iridiumMailData.floatCycleNumber] == cycleNumber);
-         if (profileNumber == max([a_iridiumMailData(idFCyNum).floatProfileNumber]))
-            o_lastCycleFlag = 1;
-         end
+   o_lastCycleFlag = 0;
+   if (a_cycleNumber == max([a_iridiumMailData.floatCycleNumber]))
+      idFCyNum = find([a_iridiumMailData.floatCycleNumber] == a_cycleNumber);
+      if (a_profileNumber == max([a_iridiumMailData(idFCyNum).floatProfileNumber]))
+         o_lastCycleFlag = 1;
       end
    end
 end
 
-return
+return;

@@ -75,7 +75,7 @@ global g_decArgo_generateNcTech;
 
 % no drift message received
 if (isempty(a_tabDrifCTD))
-   return
+   return;
 end
 
 % add and offset of 3 minutes to technical dates (given in tenths of an
@@ -88,7 +88,7 @@ end
 % retrieve the drift sampling period from the configuration
 [configNames, configValues] = get_float_config_argos_1(0);
 driftSamplingPeriod = get_config_value('CONFIG_MC8_', configNames, configValues);
-if (isempty(driftSamplingPeriod))
+if (isnan(driftSamplingPeriod))
    driftSamplingPeriod = a_driftSamplingPeriod;
 end
 
@@ -161,7 +161,7 @@ o_parkSal = ones(nbMeasTot, 1)*g_decArgo_salCountsDef;
 
 % fill drift measurement arrays
 idCurMes = 1;
-[~, idSort] = sort(msgDates);
+[unused, idSort] = sort(msgDates);
 for id = 1:size(a_tabDrifCTD, 1)
    idMsg = idSort(id);
    msgOcc = a_tabDrifCTD(idMsg, 1);
@@ -241,4 +241,4 @@ if (g_decArgo_generateNcTech ~= 0)
    g_decArgo_outputNcParamValue{end+1} = sum(msgNbMeas);
 end
 
-return
+return;

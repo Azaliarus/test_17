@@ -57,23 +57,19 @@ if (~isempty(profInfo))
          if (~isempty(idF))
             sensorNumbers = profInfo(idF, 3);
             anomaly = 0;
-            for sensorNum = 0:max(sensorNumbers)
+            for sensorNum = 0:max(sensorNumbers);
                idFS = find(sensorNumbers == sensorNum);
                if ((((sensorNum == 0) || (sensorNum == 0) )&& (length(idFS) > 2)) || ...
                      ((sensorNum > 1) && (length(idFS) > 1)))
                   anomaly = 1;
-                  break
+                  break;
                end
             end
             if (anomaly == 1)
-               if (~isempty([a_tabProfiles(idF).dateQc]))
-                  [a_tabProfiles(idF).dateQc] = deal(g_decArgo_qcStrCorrectable);
-               end
-               if (~isempty([a_tabProfiles(idF).locationQc]))
-                  [a_tabProfiles(idF).locationQc] = deal(g_decArgo_qcStrCorrectable);
-               end
+               [a_tabProfiles(idF).dateQc] = deal(g_decArgo_qcStrCorrectable);
+               [a_tabProfiles(idF).locationQc] = deal(g_decArgo_qcStrCorrectable);
                
-               fprintf('WARNING: Float #%d Cycle #%d Profile #%d Output Cycle #%d Direction ''%c'': multiple profiles mixed - JULD_QC and POSITION_QC set to ''3''\n', ...
+               fprintf('WARNING: Float #%d Cycle #%d Profile #%d Output Cycle #%d Direction ''%c'': multiple profiles mixed => JULD_QC and POSITION_QC set to ''3''\n', ...
                   g_decArgo_floatNum, ...
                   a_tabProfiles(idF(1)).cycleNumber, ...
                   a_tabProfiles(idF(1)).profileNumber, ...
@@ -88,4 +84,4 @@ end
 % update output parameters
 o_tabProfiles = a_tabProfiles;
 
-return
+return;

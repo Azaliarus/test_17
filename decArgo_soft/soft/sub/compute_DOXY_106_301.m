@@ -76,36 +76,36 @@ global g_decArgo_doxy_202_205_302_pCoef3;
 
 
 if (isempty(a_C1PHASE_DOXY) || isempty(a_C2PHASE_DOXY) || isempty(a_TEMP_DOXY))
-   return
+   return;
 end
 
 % get calibration information
 if (isempty(g_decArgo_calibInfo))
-   fprintf('WARNING: Float #%d Cycle #%d Profile #%d: DOXY calibration coefficients are missing - DOXY data set to fill value in ''%c'' profile of OPTODE sensor\n', ...
+   fprintf('WARNING: Float #%d Cycle #%d Profile #%d: DOXY calibration coefficients are missing => DOXY data set to fill value in ''%c'' profile of OPTODE sensor\n', ...
       g_decArgo_floatNum, ...
       a_profOptode.cycleNumber, ...
       a_profOptode.profileNumber, ...
       a_profOptode.direction);
-   return
+   return;
 elseif ((isfield(g_decArgo_calibInfo, 'OPTODE')) && (isfield(g_decArgo_calibInfo.OPTODE, 'TabDoxyCoef')))
    tabDoxyCoef = g_decArgo_calibInfo.OPTODE.TabDoxyCoef;
    % the size of the tabDoxyCoef should be: size(tabDoxyCoef) = 5 28 for the
    % Aanderaa standard calibration
    if (~isempty(find((size(tabDoxyCoef) == [5 28]) ~= 1, 1)))
-      fprintf('ERROR: Float #%d Cycle #%d Profile #%d: DOXY calibration coefficients are inconsistent - DOXY data set to fill value in ''%c'' profile of OPTODE sensor\n', ...
+      fprintf('ERROR: Float #%d Cycle #%d Profile #%d: DOXY calibration coefficients are inconsistent => DOXY data set to fill value in ''%c'' profile of OPTODE sensor\n', ...
          g_decArgo_floatNum, ...
          a_profOptode.cycleNumber, ...
          a_profOptode.profileNumber, ...
          a_profOptode.direction);
-      return
+      return;
    end
 else
-   fprintf('ERROR: Float #%d Cycle #%d Profile #%d: inconsistent DOXY calibration coefficients - DOXY data set to fill value in ''%c'' profile of OPTODE sensor\n', ...
+   fprintf('WARNING: Float #%d Cycle #%d Profile #%d: inconsistent DOXY calibration coefficients => DOXY data set to fill value in ''%c'' profile of OPTODE sensor\n', ...
       g_decArgo_floatNum, ...
       a_profOptode.cycleNumber, ...
       a_profOptode.profileNumber, ...
       a_profOptode.direction);
-   return
+   return;
 end
 
 idDef = find( ...
@@ -162,14 +162,10 @@ if (~isempty(idNoDef))
       );
    
    % units convertion (micromol/L to micromol/kg)
-   [measLon, measLat] = get_meas_location(a_profOptode.cycleNumber, a_profOptode.profileNumber, a_profOptode);
-   rho = potential_density_gsw(presValues, tempValues, psalValues, 0, measLon, measLat);
-   rho = rho/1000;
-
+   rho = potential_density(presValues, tempValues, psalValues);
    oxyValues = oxygenPresComp ./ rho;
-   idNoNan = find(~isnan(oxyValues));
    
-   o_DOXY(idNoDef(idNoNan)) = oxyValues(idNoNan);
+   o_DOXY(idNoDef) = oxyValues;
 end
 
-return
+return;

@@ -36,7 +36,7 @@ global g_decArgo_outputNcParamValue;
 % retrieve technical message #2 data
 idF2 = find(a_tabTech(:, 1) == 4);
 if (length(idF2) > 1)
-   fprintf('WARNING: Float #%d cycle #%d: %d tech message #2 in the buffer - using the last one\n', ...
+   fprintf('WARNING: Float #%d cycle #%d: %d tech message #2 in the buffer => using the last one\n', ...
       g_decArgo_floatNum, g_decArgo_cycleNum, ...
       length(idF2));
 end
@@ -76,15 +76,19 @@ if (a_deepCycle == 1)
       g_decArgo_cycleNum 207];
    g_decArgo_outputNcParamValue{end+1} = tabTech2(9);
    
-   pres = sensor_2_value_for_pressure_202_210_to_214_217_222_to_225(tabTech2(10));
-   temp = sensor_2_value_for_temperature_201_to_203_215_216_218_221(tabTech2(11));
-   psal = tabTech2(12)/1000;
-   if (any([pres temp psal] ~= 0))
-      g_decArgo_outputNcParamIndex = [g_decArgo_outputNcParamIndex;
-         g_decArgo_cycleNum 221];
-      g_decArgo_outputNcParamValue{end+1} = pres;
-   end
+   g_decArgo_outputNcParamIndex = [g_decArgo_outputNcParamIndex;
+      g_decArgo_cycleNum 221];
+   g_decArgo_outputNcParamValue{end+1} = sensor_2_value_for_pressure_202_210_211(tabTech2(10));
    
+   % the two following items have moved to TRAJ file
+   %    g_decArgo_outputNcParamIndex = [g_decArgo_outputNcParamIndex;
+   %       g_decArgo_cycleNum 222];
+   %    g_decArgo_outputNcParamValue{end+1} = sensor_2_value_for_temperature_201_202_203(tabTech2(11));
+   %
+   %    g_decArgo_outputNcParamIndex = [g_decArgo_outputNcParamIndex;
+   %       g_decArgo_cycleNum 223];
+   %    g_decArgo_outputNcParamValue{end+1} = sensor_2_value_for_salinity_201_202_203(tabTech2(12));
+
    g_decArgo_outputNcParamIndex = [g_decArgo_outputNcParamIndex;
       g_decArgo_cycleNum 208];
    g_decArgo_outputNcParamValue{end+1} = tabTech2(16);
@@ -172,13 +176,11 @@ if (a_deepCycle == 1)
 
 else
 
-   offset = 10000;
-
    g_decArgo_outputNcParamIndex = [g_decArgo_outputNcParamIndex;
-      g_decArgo_cycleNum 220+offset];
+      g_decArgo_cycleNum 220];
    g_decArgo_outputNcParamValue{end+1} = sprintf('%04d%02d%02d%02d%02d%02d', ...
          tabTech2(40)+2000, tabTech2(39), tabTech2(38), tabTech2(35), tabTech2(36), tabTech2(37));
    
 end
 
-return
+return;

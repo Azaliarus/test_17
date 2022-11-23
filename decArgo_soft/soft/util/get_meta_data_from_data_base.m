@@ -18,57 +18,28 @@
 % ------------------------------------------------------------------------------
 function get_meta_data_from_data_base()
 
-% to switch between Coriolis and JPR configurations
-CORIOLIS_CONFIGURATION_FLAG = 1;
+% meta-data file exported from Coriolis data base
+dataBaseFileName = 'C:\Users\jprannou\_RNU\DecPrv_info\ASFAR\DBexport_ASFAR_fromVB20151029.txt';
+dataBaseFileName = 'C:\Users\jprannou\_RNU\DecPrv_info\Arvor-Cm-Bio\DBexport_arvorCM_fromVB20151030.txt';
+dataBaseFileName = 'C:\Users\jprannou\_RNU\DecApx_info\_configParamNames\export_meta_APEX_from_VB_20150703.txt';
+dataBaseFileName = 'C:\Users\jprannou\_RNU\DecNova_info\_configParamNames\NOVA_DBExport_20160226.txt';
+dataBaseFileName = 'C:\Users\jprannou\_RNU\DecPrv_info\_configParamNames\export_ARVOR_I_5-43_21060628.txt';
+dataBaseFileName = 'C:\Users\jprannou\_RNU\DecPrv_info\_configParamNames\export_4-55_20160701.txt';
+dataBaseFileName = 'C:\Users\jprannou\_RNU\DecPrv_info\_configParamNames\export_4-54_20160701.txt';
+dataBaseFileName = 'C:\Users\jprannou\_RNU\DecNemo_info\_configParamNames\nemo_DB_export_from_VB_20160818.txt';
 
-if (CORIOLIS_CONFIGURATION_FLAG)
+% list of concerned floats
+floatListFileName = 'C:\Users\jprannou\_RNU\DecArgo_soft\lists\arvor_asfar.txt';
+floatListFileName = 'C:\Users\jprannou\_RNU\DecArgo_soft\lists\_apex_argos_062608.txt';
+floatListFileName = 'C:\Users\jprannou\_RNU\DecArgo_soft\lists\_apex_argos_061609.txt';
+floatListFileName = 'C:\Users\jprannou\_RNU\DecArgo_soft\lists\_apex_argos_021009.txt';
+floatListFileName = 'C:\Users\jprannou\_RNU\DecArgo_soft\lists\_apex_argos_061810.txt';
+floatListFileName = 'C:\Users\jprannou\_RNU\DecArgo_soft\lists\_apex_argos_093008.txt';
+floatListFileName = '';
 
-   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-   % CORIOLIS CONFIGURATION - START
+% directory to store the log and csv file
+DIR_LOG_CSV_FILE = 'C:\Users\jprannou\_RNU\DecArgo_soft\work\';
 
-   % meta-data file exported from Coriolis data base
-   % dataBaseFileName = '/home/idmtmp7/vincent/matlab/DB_export/new_nova_meta.txt';
-   dataBaseFileName = '/home/idmtmp7/vincent/matlab/DB_export/new_iridium_meta.txt';
-   % dataBaseFileName = '/home/idmtmp7/vincent/matlab/DB_export/new_argos_meta.txt';
-   % dataBaseFileName = '/home/idmtmp7/vincent/matlab/DB_export/new_arvorcm_meta.txt';
-   % dataBaseFileName = '/home/idmtmp7/vincent/matlab/DB_export/new_rem_meta.txt';
-   % dataBaseFileName = '/home/idmtmp7/vincent/matlab/DB_export/new_apex_meta.txt';
-   % dataBaseFileName = '/home/idmtmp7/vincent/matlab/DB_export/new_nemo_meta.txt';
-
-   % list of concerned floats
-   % floatListFileName = '/home/idmtmp7/vincent/matlab/list/new_arvorcm.txt';
-   % floatListFileName = '/home/idmtmp7/vincent/matlab/list/new_argos.txt';
-   % floatListFileName = '/home/idmtmp7/vincent/matlab/list/new_rem.txt';
-   floatListFileName = '/home/idmtmp7/vincent/matlab/list/new_iridium.txt';
-   % floatListFileName = '/home/idmtmp7/vincent/matlab/list/new_nova.txt';
-   % floatListFileName = '/home/idmtmp7/vincent/matlab/list/new_apex.txt';
-   % floatListFileName = '/home/idmtmp7/vincent/matlab/list/new_nemo.txt';
-
-   % directory to store the log and csv file
-   DIR_LOG_CSV_FILE = '/home/coriolis_exp/binlx/co04/co0414/co041402/data/csv';
-
-   % CORIOLIS CONFIGURATION - END
-   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-else
-
-   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-   % JPR CONFIGURATION - START
-
-   % meta-data file exported from Coriolis data base
-   dataBaseFileName = 'C:\Users\jprannou\_RNU\DecPrv_info\_configParamNames\DB_Export\DBexport_CTS5_USEA_HB_6904117.txt';
-
-   % list of concerned floats
-   floatListFileName = 'C:\Users\jprannou\_RNU\DecArgo_soft\lists\_apex_argos_093008.txt';
-   floatListFileName = '';
-
-   % directory to store the log and csv file
-   DIR_LOG_CSV_FILE = 'C:\Users\jprannou\_RNU\DecArgo_soft\work\';
-
-   % JPR CONFIGURATION - END
-   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-end
 
 % create and start log file recording
 logFile = [DIR_LOG_CSV_FILE '/' 'get_meta_data_from_data_base_' datestr(now, 'yyyymmddTHHMMSS') '.log'];
@@ -81,10 +52,10 @@ outputFileName = [DIR_LOG_CSV_FILE '/get_meta_data_from_data_base_' datestr(now,
 fidOut = fopen(outputFileName, 'wt');
 if (fidOut == -1)
    fprintf('Erreur ouverture fichier: %s\n', outputFileName);
-   return
+   return;
 end
 
-header = ['Data center; Decoder version; Serial No; Cycle length (days); Parking PRES; Profile PRES; WMO #; Decoder Id; PTT #; IMEI #; Frame length (bytes); Cycle length (hours); Drift sampling period (hours); DELAI parameter (hours); Launch date (yyyymmddHHMMSS); Launch longitude; Launch latitude; Day of the first descent (yyyymmdd); End decoding date; DM flag; Decoder version'];
+header = ['Data center; Decoder version; Serial No; Cycle length (days); Parking PRES; Profile PRES; WMO #; Decoder Id; PTT #;  Frame length (bytes); Cycle length (hours); Drift sampling period (hours); DELAI parameter (hours); Launch date (yyyymmddHHMMSS); Launch longitude; Launch latitude; Day of the first descent (yyyymmdd); End decoding date; DM flag; Decoder version'];
 fprintf(fidOut, '%s\n', header);
 
 % read meta file
@@ -92,7 +63,7 @@ fprintf('Processing file: %s\n', dataBaseFileName);
 fId = fopen(dataBaseFileName, 'r');
 if (fId == -1)
    fprintf('ERROR: Unable to open file: %s\n', dataBaseFileName);
-   return
+   return;
 end
 metaFileContents = textscan(fId, '%s', 'delimiter', '\t');
 metaFileContents = metaFileContents{:};
@@ -106,7 +77,7 @@ metaWmoList = metaData(:, 1);
 for id = 1:length(metaWmoList)
    if (isempty(str2num(metaWmoList{id})))
       fprintf('%s is not a valid WMO number\n', metaWmoList{id});
-      return
+      return;
    end
 end
 S = sprintf('%s*', metaWmoList{:});
@@ -142,12 +113,11 @@ for idFloat = 1:length(floatList)
    ptt = '';
    if (~isempty(idPtt))
       ptt = paramValueList{idForWmo(idPtt)};
-   end
-   
-   idImei = find(strcmp(paramCodeList(idForWmo), 'IMEI') == 1, 1);
-   imei = '';
-   if (~isempty(idImei))
-      imei = paramValueList{idForWmo(idImei)};
+   else
+      idPtt = find(strcmp(paramCodeList(idForWmo), 'IMEI') == 1, 1);
+      if (~isempty(idPtt))
+         ptt = paramValueList{idForWmo(idPtt)};
+      end
    end
    
    idSerialNum = find(strcmp(paramCodeList(idForWmo), 'INST_REFERENCE') == 1, 1);
@@ -231,9 +201,9 @@ for idFloat = 1:length(floatList)
       coVersion = paramValueList{idForWmo(idCoVersion)};
    end
    
-   fprintf(fidOut, '%s; %s; %s; %g; %s; %s; %d; ; %s; %s; 31; %s; %s; -1; %s; %s; %s; %s; 99999999999999; 0; %s\n', ...
+   fprintf(fidOut, '%s; %s; %s; %g; %s; %s; %d; ; %s; 31; %s; %s; -1; %s; %s; %s; %s; 99999999999999; 0; %s\n', ...
       dataCenter, coVersion, serialNum, str2num(cycleTime)/24, parkPres, profPres, ...
-      floatNum, ptt, imei, cycleTime, driftPeriod, launchDate, launchLon, launchLat, dayFirstDesc, coVersion);
+      floatNum, ptt, cycleTime, driftPeriod, launchDate, launchLon, launchLat, dayFirstDesc, coVersion);
 end
 
 ellapsedTime = toc;
@@ -243,4 +213,4 @@ fclose(fidOut);
 
 diary off;
 
-return
+return;

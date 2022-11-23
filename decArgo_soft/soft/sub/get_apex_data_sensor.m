@@ -5,7 +5,7 @@
 %  [o_argosLocDate, o_argosLocLon, o_argosLocLat, o_argosLocAcc, o_argosLocSat, ...
 %    o_argosDataData, o_argosDataDate, o_sensorData, o_sensorDate] = ...
 %    get_apex_data_sensor(a_argosPathFileName, a_argosId, a_frameLength, ...
-%    a_dataMsgBytesToFreeze, a_firstArgosMsgNum, a_lastArgosMsgNum)
+%    a_dataMsgBytesToFreeze, a_nbArgosMsgMax)
 %
 % INPUT PARAMETERS :
 %   a_argosPathFileName    : input Argos file path name
@@ -13,8 +13,7 @@
 %   a_frameLength          : test message length (in bytes)
 %   a_dataMsgBytesToFreeze : bytes to freeze during the redundancy step of the
 %                            data selection
-%   a_firstArgosMsgNum     : number of the first Argos data message
-%   a_lastArgosMsgNum      : number of the last Argos data message
+%   a_nbArgosMsgMax        : maximum number of Argos data messages
 %
 % OUTPUT PARAMETERS :
 %   o_argosLocDate  : Argos location dates
@@ -38,7 +37,7 @@
 function [o_argosLocDate, o_argosLocLon, o_argosLocLat, o_argosLocAcc, o_argosLocSat, ...
    o_argosDataData, o_argosDataUsed, o_argosDataDate, o_sensorData, o_sensorDate] = ...
    get_apex_data_sensor(a_argosPathFileName, a_argosId, a_frameLength, ...
-   a_dataMsgBytesToFreeze, a_firstArgosMsgNum, a_lastArgosMsgNum)
+   a_dataMsgBytesToFreeze, a_nbArgosMsgMax)
 
 % output parameters initialization
 o_argosLocDate = [];
@@ -73,7 +72,7 @@ global g_decArgo_generateNcTech;
 
 if ~(exist(a_argosPathFileName, 'file') == 2)
    fprintf('ERROR: Argos file not found: %s\n', a_argosPathFileName);
-   return
+   return;
 end
 
 % read Argos file
@@ -90,8 +89,8 @@ end
 
 nbMesCrcOk = 0;
 msgNums = sort(unique(o_argosDataData(:, 2)));
-if (any(msgNums > a_lastArgosMsgNum))
-   idDel = find(msgNums > a_lastArgosMsgNum);
+if (any(msgNums > a_nbArgosMsgMax))
+   idDel = find(msgNums > a_nbArgosMsgMax);
 %    ignoredStr = sprintf('#%d, ', msgNums(idDel));
 %    fprintf('WARNING: Float #%d Cycle #%d: ignored Argos data message %s\n', ...
 %       g_decArgo_floatNum, g_decArgo_cycleNum, ignoredStr(1:end-2));
@@ -144,7 +143,7 @@ for idNum = 1:length(msgNums)
             
             % don't take NULL data message into account
             if (unique(currentData) == 0)
-               continue
+               continue;
             end
             
             % compute the redundancy of the messages
@@ -156,7 +155,7 @@ for idNum = 1:length(msgNums)
                   tabOcc(idData) = tabOcc(idData) + 1;
                   tabId{idData} = [tabId{idData} idForNumCrcOk(id)];
                   ok = 1;
-                  break
+                  break;
                end
             end
             
@@ -228,7 +227,7 @@ for idNum = 1:length(msgNums)
                   o_sensorDate = [o_sensorDate; o_argosDataDate(idForNum(id))];
                   o_argosDataUsed{end+1} = [];
                   nbMesCrcOk = nbMesCrcOk + 1;
-                  break
+                  break;
                end
             end
          end
@@ -269,7 +268,7 @@ if (~isempty(g_decArgo_outputCsvFileId))
       g_decArgo_floatNum, g_decArgo_cycleNum, nbMesCrcOk, nbMesCrcOk*100/nbMesTot);
    
    if (~isempty(o_sensorData))
-      expected = a_firstArgosMsgNum:max(o_sensorData(:, 2));
+      expected = 1:max(o_sensorData(:, 2));
       received = o_sensorData(:, 2)';
       numMissing = setdiff(expected, received);
       if (~isempty(numMissing))
@@ -320,4 +319,4 @@ if (g_decArgo_generateNcTech ~= 0)
    
 end
 
-return
+return;

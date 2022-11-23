@@ -50,9 +50,9 @@ xmlReportInputParam = 0;
 idDel = [];
 if (~isempty(a_varargin))
    if (rem(length(a_varargin), 2) ~= 0)
-      fprintf('ERROR: expecting an even number of input arguments (e.g. (''argument_name'', ''argument_value'') - exit\n');
+      fprintf('ERROR: expecting an even number of input arguments (e.g. (''argument_name'', ''argument_value'') => exit\n');
       o_inputError = 1;
-      return
+      return;
    else
       for id = 1:2:length(a_varargin)
          if (strcmpi(a_varargin{id}, 'configfile'))
@@ -67,9 +67,9 @@ if (~isempty(a_varargin))
                % store input parameter in the XML report
                g_decArgo_xmlReportDOMNode = add_element_in_xml_report(g_decArgo_xmlReportDOMNode, 'param_xmlreport', a_varargin{id+1});
             else
-               fprintf('ERROR: inconsistent input arguments - exit\n');
+               fprintf('ERROR: inconsistent input arguments => exit\n');
                o_inputError = 1;
-               return
+               return;
             end
          end
       end
@@ -96,16 +96,16 @@ end
 % check the config input file
 if (configFileInputParam == 1)
    if ~(exist(g_decArgo_configFilePathName, 'file') == 2)
-      fprintf('ERROR: input configuration file (%s) does not exist - exit\n', g_decArgo_configFilePathName);
+      fprintf('ERROR: input configuration file (%s) does not exist => exit\n', g_decArgo_configFilePathName);
       o_inputError = 1;
-      return
+      return;
    end
 end
 
 % check the xml report file name consistency
 if (xmlReportInputParam == 1)
    if (length(g_decArgo_xmlReportFileName) < 29)
-      fprintf('WARNING: inconsistent xml report file name (%s) expecting co041404_yyyymmddTHHMMSSZ[_PID].xml - ignored\n', g_decArgo_xmlReportFileName);
+      fprintf('WARNING: inconsistent xml report file name (%s) expecting co041404_yyyymmddTHHMMSSZ[_PID].xml => ignored\n', g_decArgo_xmlReportFileName);
       g_decArgo_xmlReportFileName = [];
    end
 end
@@ -113,4 +113,4 @@ end
 o_unusedVarargin = a_varargin;
 o_unusedVarargin(idDel) = [];
 
-return
+return;

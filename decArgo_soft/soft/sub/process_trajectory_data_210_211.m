@@ -2,7 +2,7 @@
 % Process trajectory data.
 %
 % SYNTAX :
-%  [o_tabTrajNMeas, o_tabTrajNCycle, o_tabTechNMeas] = process_trajectory_data_210_211( ...
+%  [o_tabTrajNMeas, o_tabTrajNCycle] = process_trajectory_data_210_211( ...
 %    a_cycleNum, a_deepCycle, a_irSessionNum, ...
 %    a_gpsData, a_iridiumMailData, ...
 %    a_cycleStartDate, ...
@@ -48,12 +48,12 @@
 %   a_parkTemp                : drift meas TEMP
 %   a_parkSal                 : drift meas PSAL
 %   a_nearSurfDate            : "near surface" profile dates
-%   a_nearSurfTransDate       : "near surface" profile transmitted date flags
+%   a_nearSurfTransDate       : "near surface" profile transmitted date falgs
 %   a_nearSurfPres            : "near surface" profile PRES
 %   a_nearSurfTemp            : "near surface" profile TEMP
 %   a_nearSurfSal             : "near surface" profile PSAL
 %   a_inAirDate               : "in air" profile dates
-%   a_inAirTransDate          : "in air" profile transmitted date flags
+%   a_inAirTransDate          : "in air" profile transmitted date falgs
 %   a_inAirPres               : "in air" profile PRES
 %   a_inAirTemp               : "in air" profile TEMP
 %   a_inAirSal                : "in air" profile PSAL
@@ -64,7 +64,6 @@
 % OUTPUT PARAMETERS :
 %   o_tabTrajNMeas  : N_MEASUREMENT trajectory data
 %   o_tabTrajNCycle : N_CYCLE trajectory data
-%   o_tabTechNMeas  : N_MEASUREMENT technical data
 %
 % EXAMPLES :
 %
@@ -74,7 +73,7 @@
 % RELEASES :
 %   07/04/2016 - RNU - creation
 % ------------------------------------------------------------------------------
-function [o_tabTrajNMeas, o_tabTrajNCycle, o_tabTechNMeas] = process_trajectory_data_210_211( ...
+function [o_tabTrajNMeas, o_tabTrajNCycle] = process_trajectory_data_210_211( ...
    a_cycleNum, a_deepCycle, a_irSessionNum, ...
    a_gpsData, a_iridiumMailData, ...
    a_cycleStartDate, ...
@@ -94,13 +93,6 @@ function [o_tabTrajNMeas, o_tabTrajNCycle, o_tabTechNMeas] = process_trajectory_
 % output parameters initialization
 o_tabTrajNMeas = [];
 o_tabTrajNCycle = [];
-o_tabTechNMeas = [];
-
-% current float WMO number
-global g_decArgo_floatNum;
-
-% current cycle number
-global g_decArgo_cycleNum;
 
 % global measurement codes
 global g_MC_CycleStart;
@@ -135,8 +127,7 @@ global g_MC_Surface;
 global g_MC_LMT;
 global g_MC_TET;
 global g_MC_Grounded;
-global g_MC_InWaterSeriesOfMeasPartOfSurfaceSequenceRelativeToTST;
-global g_MC_InAirSeriesOfMeasPartOfSurfaceSequenceRelativeToTST;
+global g_MC_InAirSingleMeas;
 
 % global time status
 global g_JULD_STATUS_1;
@@ -158,17 +149,22 @@ global g_decArgo_salDef;
 % offset between float days and julian days
 global g_decArgo_julD2FloatDayOffset;
 
-% float configuration
-global g_decArgo_floatConfig;
-
-% array to store GPS data
-global g_decArgo_gpsData;
-
-% array to store Iridium mail contents
-global g_decArgo_iridiumMailData;
-
 
 ID_OFFSET = 1;
+
+% unpack GPS data
+gpsLocCycleNum = a_gpsData{1};
+gpsLocDate = a_gpsData{4};
+gpsLocLon = a_gpsData{5};
+gpsLocLat = a_gpsData{6};
+gpsLocQc = a_gpsData{7};
+
+% GPS data for the current cycle
+idF = find(gpsLocCycleNum == a_cycleNum);
+gpsCyLocDate = gpsLocDate(idF);
+gpsCyLocLon = gpsLocLon(idF);
+gpsCyLocLat = gpsLocLat(idF);
+gpsCyLocQc = gpsLocQc(idF);
 
 % structure to store N_MEASUREMENT data
 trajNMeasStruct = get_traj_n_meas_init_struct(a_cycleNum, -1);
@@ -180,71 +176,25 @@ trajNCycleStruct = get_traj_n_cycle_init_struct(a_cycleNum, -1);
 floatClockDrift = 0;
 
 % retrieve technical message #1 data
-tabTech1 = [];
-if (~isempty(a_tabTech1))
-   idF1 = find(a_tabTech1(:, 1) == 0);
-   if (length(idF1) > 1)
-      fprintf('WARNING: Float #%d cycle #%d: %d tech message #1 in the buffer - using the last one\n', ...
-         g_decArgo_floatNum, g_decArgo_cycleNum, ...
-         length(idF1));
-   end
-   tabTech1 = a_tabTech1(idF1(end), :);
+idF1 = find(a_tabTech1(:, 1) == 0);
+if (length(idF1) > 1)
+   fprintf('WARNING: Float #%d cycle #%d: %d tech message #1 in the buffer => using the last one\n', ...
+      g_decArgo_floatNum, g_decArgo_cycleNum, ...
+      length(idF1));
 end
+tabTech1 = a_tabTech1(idF1(end), :);
 
 % retrieve technical message #2 data
-tabTech2 = [];
-if (~isempty(a_tabTech2))
-   idF2 = find(a_tabTech2(:, 1) == 4);
-   if (length(idF2) > 1)
-      fprintf('WARNING: Float #%d cycle #%d: %d tech message #2 in the buffer - using the last one\n', ...
-         g_decArgo_floatNum, g_decArgo_cycleNum, ...
-         length(idF2));
-   end
-   tabTech2 = a_tabTech2(idF2(end), :);
+idF2 = find(a_tabTech2(:, 1) == 4);
+if (length(idF2) > 1)
+   fprintf('WARNING: Float #%d cycle #%d: %d tech message #2 in the buffer => using the last one\n', ...
+      g_decArgo_floatNum, g_decArgo_cycleNum, ...
+      length(idF2));
 end
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% IN AIR MEASUREMENTS
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-tabMeasStructInAir = [];
-if (~isempty(a_inAirDate))
-   
-   % create the parameters
-   paramPres = get_netcdf_param_attributes('PRES');
-   paramTemp = get_netcdf_param_attributes('TEMP');
-   paramSal = get_netcdf_param_attributes('PSAL');
-   
-   % convert decoder default values to netCDF fill values
-   a_inAirPres(find(a_inAirPres == g_decArgo_presDef)) = paramPres.fillValue;
-   a_inAirTemp(find(a_inAirTemp == g_decArgo_tempDef)) = paramTemp.fillValue;
-   a_inAirSal(find(a_inAirSal == g_decArgo_salDef)) = paramSal.fillValue;
-   
-   for idMeas = 1:length(a_inAirPres)
-      
-      if (a_inAirDate(idMeas) ~= g_decArgo_dateDef)
-         if (a_inAirTransDate(idMeas) == 0)
-            measTimeStatus = g_JULD_STATUS_1;
-         else
-            measTimeStatus = g_JULD_STATUS_2;
-         end
-         measStruct = create_one_meas_float_time(g_MC_InAirSeriesOfMeasPartOfSurfaceSequenceRelativeToTST, a_inAirDate(idMeas), measTimeStatus, floatClockDrift);
-      else
-         measStruct = get_traj_one_meas_init_struct();
-         measStruct.measCode = g_MC_InAirSeriesOfMeasPartOfSurfaceSequenceRelativeToTST;
-      end
-      
-      % add parameter variables to the structure
-      measStruct.paramList = [paramPres paramTemp paramSal];
-      
-      % add parameter data to the structure
-      measStruct.paramData = [a_inAirPres(idMeas) a_inAirTemp(idMeas) a_inAirSal(idMeas)];
-      
-      tabMeasStructInAir = [tabMeasStructInAir; measStruct];
-   end
-end
+tabTech2 = a_tabTech2(idF2(end), :);
 
 if (a_deepCycle == 1)
-   
+      
    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
    % POSITIONING SYSTEM AND TRANSMISSION SYSTEM TIMES AND LOCATIONS
    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -256,90 +206,30 @@ if (a_deepCycle == 1)
    if (firstMsgTime ~= g_decArgo_dateDef)
       measStruct = create_one_meas_surface(g_MC_FMT, ...
          firstMsgTime, ...
-         g_decArgo_argosLonDef, [], [], [], [], 1);
+         g_decArgo_argosLonDef, [], [], [], []);
       trajNMeasStruct.tabMeas = [trajNMeasStruct.tabMeas; measStruct];
       
       trajNCycleStruct.juldFirstMessage = firstMsgTime;
       trajNCycleStruct.juldFirstMessageStatus = g_JULD_STATUS_4;
    end
    
-   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-   % GPS LOCATIONS
-   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-   
-   % unpack GPS data
-   gpsLocCycleNum = a_gpsData{1};
-   gpsLocDate = a_gpsData{4};
-   gpsLocLon = a_gpsData{5};
-   gpsLocLat = a_gpsData{6};
-   gpsLocQc = a_gpsData{7};
-
-   idF = find(gpsLocCycleNum == a_cycleNum);
-   gpsCyLocDate = gpsLocDate(idF);
-   gpsCyLocLon = gpsLocLon(idF);
-   gpsCyLocLat = gpsLocLat(idF);
-   gpsCyLocQc = gpsLocQc(idF);
-
-   surfaceLocData = repmat(get_traj_one_meas_init_struct, length(gpsCyLocDate), 1);
+   % GPS locations
    for idpos = 1:length(gpsCyLocDate)
-      surfaceLocData(idpos) = create_one_meas_surface(g_MC_Surface, ...
+      measStruct = create_one_meas_surface(g_MC_Surface, ...
          gpsCyLocDate(idpos), ...
          gpsCyLocLon(idpos), ...
          gpsCyLocLat(idpos), ...
          'G', ...
          ' ', ...
-         num2str(gpsCyLocQc(idpos)), 1);
+         num2str(gpsCyLocQc(idpos)));
+      trajNMeasStruct.tabMeas = [trajNMeasStruct.tabMeas; measStruct];
    end
    
-   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-   % IRIDIUM LOCATIONS
-   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-   
-   iridiumCyLocDate = [];
-   if (~isempty(a_iridiumMailData))
-      idFixForCycle = find([a_iridiumMailData.cycleNumber] == a_cycleNum);
-      cpt = length(surfaceLocData) + 1;
-      surfaceLocData = cat(1, ...
-         surfaceLocData, ...
-         repmat(get_traj_one_meas_init_struct, length(idFixForCycle), 1));
-      for idFix = idFixForCycle
-         if (a_iridiumMailData(idFix).cepRadius ~= 0)
-            surfaceLocData(cpt) = create_one_meas_surface_with_error_ellipse(g_MC_Surface, ...
-               a_iridiumMailData(idFix).timeOfSessionJuld, ...
-               a_iridiumMailData(idFix).unitLocationLon, ...
-               a_iridiumMailData(idFix).unitLocationLat, ...
-               'I', ...
-               0, ... % no need to set a Qc, it will be set during RTQC
-               a_iridiumMailData(idFix).cepRadius*1000, ...
-               a_iridiumMailData(idFix).cepRadius*1000, ...
-               '', ...
-               ' ', ...
-               1);
-            cpt = cpt + 1;
-         end
-      end
-      surfaceLocData(cpt:end) = [];
-      iridiumCyLocDate = [a_iridiumMailData(idFixForCycle).timeOfSessionJuld];
-   end
-   
-   % sort the surface locations by date
-   if (~isempty(surfaceLocData))
-      surfaceLocDates = [surfaceLocData.juld];
-      [~, idSort] = sort(surfaceLocDates);
-      surfaceLocData = surfaceLocData(idSort);
-      
-      % store the data
-      trajNMeasStruct.tabMeas = [trajNMeasStruct.tabMeas; surfaceLocData];
-      surfaceLocData = [];
-   end
-   
-   if (~isempty(gpsCyLocDate) || ~isempty(iridiumCyLocDate))
-      locDates = [gpsCyLocDate' iridiumCyLocDate];
-      
-      trajNCycleStruct.juldFirstLocation = min(locDates);
+   if (~isempty(gpsCyLocDate))
+      trajNCycleStruct.juldFirstLocation = gpsCyLocDate(1);
       trajNCycleStruct.juldFirstLocationStatus = g_JULD_STATUS_4;
       
-      trajNCycleStruct.juldLastLocation = max(locDates);
+      trajNCycleStruct.juldLastLocation = gpsCyLocDate(end);
       trajNCycleStruct.juldLastLocationStatus = g_JULD_STATUS_4;
    end
    
@@ -347,7 +237,7 @@ if (a_deepCycle == 1)
    if (lastMsgTime ~= g_decArgo_dateDef)
       measStruct = create_one_meas_surface(g_MC_LMT, ...
          lastMsgTime, ...
-         g_decArgo_argosLonDef, [], [], [], [], 1);
+         g_decArgo_argosLonDef, [], [], [], []);
       trajNMeasStruct.tabMeas = [trajNMeasStruct.tabMeas; measStruct];
       
       trajNCycleStruct.juldLastMessage = lastMsgTime;
@@ -599,10 +489,10 @@ if (a_deepCycle == 1)
             else
                measTimeStatus = g_JULD_STATUS_2;
             end
-            measStruct = create_one_meas_float_time(g_MC_InWaterSeriesOfMeasPartOfSurfaceSequenceRelativeToTST, a_nearSurfDate(idMeas), measTimeStatus, floatClockDrift);
+            measStruct = create_one_meas_float_time(g_MC_InAirSingleMeas, a_nearSurfDate(idMeas), measTimeStatus, floatClockDrift);
          else
             measStruct = get_traj_one_meas_init_struct();
-            measStruct.measCode = g_MC_InWaterSeriesOfMeasPartOfSurfaceSequenceRelativeToTST;
+            measStruct.measCode = g_MC_InAirSingleMeas;
          end
          
          % add parameter variables to the structure
@@ -615,8 +505,40 @@ if (a_deepCycle == 1)
       end
    end
    
-   if (~isempty(tabMeasStructInAir))
-      trajNMeasStruct.tabMeas = [trajNMeasStruct.tabMeas; tabMeasStructInAir];
+   if (~isempty(a_inAirDate))
+      
+      % create the parameters
+      paramPres = get_netcdf_param_attributes('PRES');
+      paramTemp = get_netcdf_param_attributes('TEMP');
+      paramSal = get_netcdf_param_attributes('PSAL');
+      
+      % convert decoder default values to netCDF fill values
+      a_inAirPres(find(a_inAirPres == g_decArgo_presDef)) = paramPres.fillValue;
+      a_inAirTemp(find(a_inAirTemp == g_decArgo_tempDef)) = paramTemp.fillValue;
+      a_inAirSal(find(a_inAirSal == g_decArgo_salDef)) = paramSal.fillValue;
+      
+      for idMeas = 1:length(a_inAirPres)
+         
+         if (a_inAirDate(idMeas) ~= g_decArgo_dateDef)
+            if (a_inAirTransDate(idMeas) == 0)
+               measTimeStatus = g_JULD_STATUS_1;
+            else
+               measTimeStatus = g_JULD_STATUS_2;
+            end
+            measStruct = create_one_meas_float_time(g_MC_InAirSingleMeas, a_inAirDate(idMeas), measTimeStatus, floatClockDrift);
+         else
+            measStruct = get_traj_one_meas_init_struct();
+            measStruct.measCode = g_MC_InAirSingleMeas;
+         end
+         
+         % add parameter variables to the structure
+         measStruct.paramList = [paramPres paramTemp paramSal];
+         
+         % add parameter data to the structure
+         measStruct.paramData = [a_inAirPres(idMeas) a_inAirTemp(idMeas) a_inAirSal(idMeas)];
+         
+         trajNMeasStruct.tabMeas = [trajNMeasStruct.tabMeas; measStruct];
+      end
    end
    
    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -625,30 +547,22 @@ if (a_deepCycle == 1)
    
    tabDate = [];
    tabPres = [];
-   tabDur = [];
-   tabType = [];
    if (~isempty(a_cycleStartDate))
       
       for idP = 1:size(a_evAct, 1)
          tabDate = [tabDate; a_evAct(idP, 2) + g_decArgo_julD2FloatDayOffset];
          tabPres = [tabPres; a_evAct(idP, 3)];
-         tabDur = [tabDur; a_evAct(idP, 4)];
-         tabType = [tabType; 6];
       end
-      
+         
       for idP = 1:size(a_pumpAct, 1)
          tabDate = [tabDate; a_pumpAct(idP, 2) + g_decArgo_julD2FloatDayOffset];
          tabPres = [tabPres; a_pumpAct(idP, 3)];
-         tabDur = [tabDur; a_pumpAct(idP, 4)];
-         tabType = [tabType; 7];
       end
       
       if (~isempty(tabDate))
          % sort the actions in chronological order
          [tabDate, idSorted] = sort(tabDate);
          tabPres = tabPres(idSorted);
-         tabDur = tabDur(idSorted);
-         tabType = tabType(idSorted);
          
          descentToParkEndDate = g_decArgo_dateDef;
          if (~isempty(a_descentToParkEndDate))
@@ -658,7 +572,7 @@ if (a_deepCycle == 1)
          if (~isempty(a_descentToProfStartDate))
             descentToProfStartDate = a_descentToProfStartDate;
          end
-         
+
          tabRefDates = [ ...
             a_cycleStartDate descentToParkEndDate; ...
             descentToParkEndDate descentToProfStartDate; ...
@@ -672,9 +586,6 @@ if (a_deepCycle == 1)
             g_MC_SpyAtProf;...
             g_MC_SpyInAscProf];
          
-         % structure to store N_MEASUREMENT technical data
-         o_tabTechNMeas = get_traj_n_meas_init_struct(a_cycleNum, -1);
-         
          for idS = 1:length(tabMc)
             if ((tabRefDates(idS, 1) ~= g_decArgo_dateDef) && (tabRefDates(idS, 2) ~= g_decArgo_dateDef))
                idF = find((tabDate >= tabRefDates(idS, 1)) & (tabDate < tabRefDates(idS, 2)));
@@ -687,22 +598,8 @@ if (a_deepCycle == 1)
                   measStruct.paramData = tabPres(idF(idP));
                   
                   trajNMeasStruct.tabMeas = [trajNMeasStruct.tabMeas; measStruct];
-                  
-                  measStruct = create_one_meas_float_time(tabMc(idS), tabDate(idF(idP)), g_JULD_STATUS_2, floatClockDrift);
-                  if (tabType(idF(idP)) == 6)
-                     param = get_netcdf_param_attributes('VALVE_ACTION_DURATION');
-                  else
-                     param = get_netcdf_param_attributes('PUMP_ACTION_DURATION');
-                  end
-                  measStruct.paramList = param;
-                  measStruct.paramData = tabDur(idF(idP));
-                  
-                  o_tabTechNMeas.tabMeas = [o_tabTechNMeas.tabMeas; measStruct];
                end
             end
-         end
-         if (isempty(o_tabTechNMeas.tabMeas))
-            o_tabTechNMeas = [];
          end
       end
    end
@@ -714,8 +611,8 @@ if (a_deepCycle == 1)
    % deepest bin of the descending and ascending profiles
    tabDescDeepestBin = [];
    tabDescDeepestBinPres = [];
-   tabAscDeepestBin = [];
-   tabAscDeepestBinPres = [];
+   tabAscDeepestBin = []; 
+   tabAscDeepestBinPres = []; 
    for idProf = 1:length(a_tabProfiles)
       profile = a_tabProfiles(idProf);
       if (profile.direction == 'A')
@@ -838,35 +735,30 @@ if (a_deepCycle == 1)
       trajNMeasStruct.tabMeas = [trajNMeasStruct.tabMeas; measStruct];
       
    end
-   
+      
    if (~isempty(tabTech2))
       
       % last pumped CTD measurement
-      pres = sensor_2_value_for_pressure_202_210_to_214_217_222_to_225(tabTech2(15+ID_OFFSET));
-      temp = sensor_2_value_for_temp_204_to_214_217_219_220_222_to_225(tabTech2(16+ID_OFFSET));
-      psal = tabTech2(17+ID_OFFSET)/1000;
-      if (any([pres temp psal] ~= 0))
-         measStruct = get_traj_one_meas_init_struct();
-         measStruct.measCode = g_MC_LastAscPumpedCtd;
-         paramPres = get_netcdf_param_attributes('PRES');
-         paramTemp = get_netcdf_param_attributes('TEMP');
-         paramSal = get_netcdf_param_attributes('PSAL');
-         measStruct.paramList = [paramPres paramTemp paramSal];
-         
-         measStruct.paramData = [pres temp psal];
-         
-         trajNMeasStruct.tabMeas = [trajNMeasStruct.tabMeas; measStruct];
-      end
+      measStruct = get_traj_one_meas_init_struct();
+      measStruct.measCode = g_MC_LastAscPumpedCtd;
+      paramPres = get_netcdf_param_attributes('PRES');
+      paramTemp = get_netcdf_param_attributes('TEMP');
+      paramSal = get_netcdf_param_attributes('PSAL');
+      measStruct.paramList = [paramPres paramTemp paramSal];
+      
+      pres = sensor_2_value_for_pressure_202_210_211(tabTech2(15+ID_OFFSET));
+      temp = sensor_2_value_for_temperature_204_to_211(tabTech2(16+ID_OFFSET));
+      psal = sensor_2_value_for_salinity_210_211(tabTech2(17+ID_OFFSET));
+      measStruct.paramData = [pres temp psal];
+      
+      trajNMeasStruct.tabMeas = [trajNMeasStruct.tabMeas; measStruct];
+      
    end
    
    % grounding information
    grounded = 'N';
-   if (~isempty(a_firstGroundingPres))
-      if (~isempty(a_firstGroundingDate))
-         measStruct = create_one_meas_float_time(g_MC_Grounded, a_firstGroundingDate, g_JULD_STATUS_2, floatClockDrift);
-      else
-         measStruct = get_traj_one_meas_init_struct();
-      end
+   if (~isempty(a_firstGroundingDate))
+      measStruct = create_one_meas_float_time(g_MC_Grounded, a_firstGroundingDate, g_JULD_STATUS_2, floatClockDrift);
       paramPres = get_netcdf_param_attributes('PRES');
       paramPres.resolution = single(1);
       measStruct.paramList = paramPres;
@@ -874,12 +766,8 @@ if (a_deepCycle == 1)
       trajNMeasStruct.tabMeas = [trajNMeasStruct.tabMeas; measStruct];
       grounded = 'Y';
    end
-   if (~isempty(a_secondGroundingPres))
-      if (~isempty(a_secondGroundingDate))
-         measStruct = create_one_meas_float_time(g_MC_Grounded, a_secondGroundingDate, g_JULD_STATUS_2, floatClockDrift);
-      else
-         measStruct = get_traj_one_meas_init_struct();
-      end
+   if (~isempty(a_secondGroundingDate))
+      measStruct = create_one_meas_float_time(g_MC_Grounded, a_secondGroundingDate, g_JULD_STATUS_2, floatClockDrift);
       paramPres = get_netcdf_param_attributes('PRES');
       paramPres.resolution = single(1);
       measStruct.paramList = paramPres;
@@ -891,7 +779,7 @@ if (a_deepCycle == 1)
    if (~isempty(tabTech1) && (tabTech1(12+ID_OFFSET) == 1))
       grounded = 'Y';
    end
-   
+      
    trajNCycleStruct.grounded = grounded;
    
 else
@@ -907,106 +795,30 @@ else
    if (firstMsgTime ~= g_decArgo_dateDef)
       measStruct = create_one_meas_surface(g_MC_FMT, ...
          firstMsgTime, ...
-         g_decArgo_argosLonDef, [], [], [], [], 1);
+         g_decArgo_argosLonDef, [], [], [], []);
       trajNMeasStruct.tabMeas = [trajNMeasStruct.tabMeas; measStruct];
       
       trajNCycleStruct.juldFirstMessage = firstMsgTime;
       trajNCycleStruct.juldFirstMessageStatus = g_JULD_STATUS_4;
    end
    
-   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-   % IN AIR MEASUREMENTS
-   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-   
-   if (~isempty(tabMeasStructInAir))
-      trajNMeasStruct.tabMeas = [trajNMeasStruct.tabMeas; tabMeasStructInAir];
-   end
-   
-   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-   % GPS LOCATIONS
-   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-   
-   % unpack GPS data
-   gpsLocCycleNum = g_decArgo_gpsData{1};
-   gpsLocDate = g_decArgo_gpsData{4};
-   gpsLocLon = g_decArgo_gpsData{5};
-   gpsLocLat = g_decArgo_gpsData{6};
-   gpsLocQc = g_decArgo_gpsData{7};
-   gpsLocInTrajFlag = g_decArgo_gpsData{13};
-
-   idF = find((gpsLocCycleNum == a_cycleNum) & (gpsLocInTrajFlag == 0));
-   gpsCyLocDate = gpsLocDate(idF);
-   gpsCyLocLon = gpsLocLon(idF);
-   gpsCyLocLat = gpsLocLat(idF);
-   gpsCyLocQc = gpsLocQc(idF);
-
-   surfaceLocData = repmat(get_traj_one_meas_init_struct, length(gpsCyLocDate), 1);
+   % GPS locations
    for idpos = 1:length(gpsCyLocDate)
-      surfaceLocData(idpos) = create_one_meas_surface(g_MC_Surface, ...
+      measStruct = create_one_meas_surface(g_MC_Surface, ...
          gpsCyLocDate(idpos), ...
          gpsCyLocLon(idpos), ...
          gpsCyLocLat(idpos), ...
          'G', ...
          ' ', ...
-         num2str(gpsCyLocQc(idpos)), 1);
-   end
-
-   gpsLocInTrajFlag(idF) = 1; % to be sure each new location is computed only once
-   g_decArgo_gpsData{13} = gpsLocInTrajFlag;
-   
-   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-   % IRIDIUM LOCATIONS
-   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-   
-   iridiumCyLocDate = [];
-   if (~isempty(g_decArgo_iridiumMailData))
-      idFixForCycle = find(([g_decArgo_iridiumMailData.cycleNumber] == a_cycleNum) & ...
-         ([g_decArgo_iridiumMailData.locInTrajFlag] == 0));
-      if (~isempty(idFixForCycle))
-         cpt = length(surfaceLocData) + 1;
-         surfaceLocData = cat(1, ...
-            surfaceLocData, ...
-            repmat(get_traj_one_meas_init_struct, length(idFixForCycle), 1));
-         for idFix = idFixForCycle
-            if (g_decArgo_iridiumMailData(idFix).cepRadius ~= 0)
-               surfaceLocData(cpt) = create_one_meas_surface_with_error_ellipse(g_MC_Surface, ...
-                  g_decArgo_iridiumMailData(idFix).timeOfSessionJuld, ...
-                  g_decArgo_iridiumMailData(idFix).unitLocationLon, ...
-                  g_decArgo_iridiumMailData(idFix).unitLocationLat, ...
-                  'I', ...
-                  0, ... % no need to set a Qc, it will be set during RTQC
-                  g_decArgo_iridiumMailData(idFix).cepRadius*1000, ...
-                  g_decArgo_iridiumMailData(idFix).cepRadius*1000, ...
-                  '', ...
-                  ' ', ...
-                  1);
-               cpt = cpt + 1;
-            end
-         end
-         surfaceLocData(cpt:end) = [];
-         iridiumCyLocDate = [g_decArgo_iridiumMailData(idFixForCycle).timeOfSessionJuld];
-         [g_decArgo_iridiumMailData(idFixForCycle).locInTrajFlag] = deal(1); % to be sure each new location is computed only once
-      end
+         num2str(gpsCyLocQc(idpos)));
+      trajNMeasStruct.tabMeas = [trajNMeasStruct.tabMeas; measStruct];
    end
    
-   % sort the surface locations by date
-   if (~isempty(surfaceLocData))
-      surfaceLocDates = [surfaceLocData.juld];
-      [~, idSort] = sort(surfaceLocDates);
-      surfaceLocData = surfaceLocData(idSort);
-      
-      % store the data
-      trajNMeasStruct.tabMeas = [trajNMeasStruct.tabMeas; surfaceLocData];
-      surfaceLocData = [];
-   end
-   
-   if (~isempty(gpsCyLocDate) || ~isempty(iridiumCyLocDate))
-      locDates = [gpsCyLocDate' iridiumCyLocDate];
-      
-      trajNCycleStruct.juldFirstLocation = min(locDates);
+   if (~isempty(gpsCyLocDate))
+      trajNCycleStruct.juldFirstLocation = gpsCyLocDate(1);
       trajNCycleStruct.juldFirstLocationStatus = g_JULD_STATUS_4;
       
-      trajNCycleStruct.juldLastLocation = max(locDates);
+      trajNCycleStruct.juldLastLocation = gpsCyLocDate(end);
       trajNCycleStruct.juldLastLocationStatus = g_JULD_STATUS_4;
    end
    
@@ -1014,7 +826,7 @@ else
    if (lastMsgTime ~= g_decArgo_dateDef)
       measStruct = create_one_meas_surface(g_MC_LMT, ...
          lastMsgTime, ...
-         g_decArgo_argosLonDef, [], [], [], [], 1);
+         g_decArgo_argosLonDef, [], [], [], []);
       trajNMeasStruct.tabMeas = [trajNMeasStruct.tabMeas; measStruct];
       
       trajNCycleStruct.juldLastMessage = lastMsgTime;
@@ -1022,11 +834,11 @@ else
    end
    
    trajNMeasStruct.surfOnly = 1;
-   
+
    % clock offset
    trajNCycleStruct.clockOffset = floatClockDrift;
    trajNCycleStruct.dataMode = 'A';
-   
+
    trajNCycleStruct.surfOnly = 1;
    
    if (a_irSessionNum == 1)
@@ -1054,31 +866,13 @@ else
 end
 
 % add configuration mission number
-if (any(g_decArgo_floatConfig.USE.CYCLE == a_cycleNum))
-   configMissionNumber = get_config_mission_number_ir_sbd(a_cycleNum);
-   if (~isempty(configMissionNumber))
-      if (a_cycleNum > 0) % we don't assign any configuration to cycle #0 data
-         trajNCycleStruct.configMissionNumber = configMissionNumber;
-      end
-   end
-elseif (trajNCycleStruct.surfOnly == 1)
-   % we don't know what should be the configuration number during a surface
-   % cycle after a reset of the float => we keep the previous one
-   cyNum = a_cycleNum - 1;
-   while (cyNum >= 0)
-      if (any(g_decArgo_floatConfig.USE.CYCLE == cyNum))
-         configMissionNumber = get_config_mission_number_ir_sbd(cyNum);
-         if (~isempty(configMissionNumber))
-            trajNCycleStruct.configMissionNumber = configMissionNumber;
-            break
-         end
-      end
-      cyNum = cyNum - 1;
-   end
+configMissionNumber = get_config_mission_number_ir_sbd(a_cycleNum);
+if (~isempty(configMissionNumber))
+   trajNCycleStruct.configMissionNumber = configMissionNumber;
 end
 
 % output data
 o_tabTrajNMeas = [o_tabTrajNMeas; trajNMeasStruct];
 o_tabTrajNCycle = trajNCycleStruct;
 
-return
+return;

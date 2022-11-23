@@ -40,9 +40,9 @@ idUsedConf = find((g_decArgo_floatConfig.USE.CYCLE == a_cycleNum) & ...
    (g_decArgo_floatConfig.USE.PROFILE == a_profileNum));
 if (isempty(idUsedConf))
    
-   fprintf('WARNING: Float #%d: config missing for cycle #%d and profile #%d - unable to set the vertical sampling scheme\n', ...
+   fprintf('WARNING: Float #%d: config missing for cycle #%d and profile #%d => unable to set the vertical sampling scheme\n', ...
       g_decArgo_floatNum, a_cycleNum, a_profileNum);
-   return
+   return;
 end
 
 % retrieve the data of the concerned configuration
@@ -50,4 +50,4 @@ idConf = find(g_decArgo_floatConfig.DYNAMIC.NUMBER == g_decArgo_floatConfig.USE.
 o_configNames = g_decArgo_floatConfig.DYNAMIC.NAMES;
 o_configValues = g_decArgo_floatConfig.DYNAMIC.VALUES(:, idConf);
 
-return
+return;

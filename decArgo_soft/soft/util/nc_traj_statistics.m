@@ -21,13 +21,12 @@ function nc_traj_statistics(varargin)
 
 % top directory of the NetCDF files to convert
 DIR_INPUT_NC_FILES = 'C:\users\RNU\Argo\work\nc_output_decPrv_\';
-DIR_INPUT_NC_FILES = 'C:\Users\jprannou\_DATA\OUT\nc_output_decArgo\';
 
 % default list of floats to convert
 FLOAT_LIST_FILE_NAME = 'C:/users/RNU/Argo/Aco/12833_update_decPrv_pour_RT_TRAJ3/lists/rem_all.txt';
 
 % directory to store the log and csv files
-DIR_LOG_CSV_FILE = 'C:\Users\jprannou\_RNU\DecArgo_soft\work\log';
+DIR_LOG_CSV_FILE = 'C:\users\RNU\Argo\work\';
 
 % default values initialization
 init_default_values;
@@ -39,7 +38,7 @@ if (nargin == 0)
    % floats to process come from floatListFileName
    if ~(exist(floatListFileName, 'file') == 2)
       fprintf('ERROR: File not found: %s\n', floatListFileName);
-      return
+      return;
    end
    
    fprintf('Floats from list: %s\n', floatListFileName);
@@ -64,7 +63,7 @@ diary(logFile);
 outputFileName = [DIR_LOG_CSV_FILE '/' 'nc_traj_statistics' name '_' datestr(now, 'yyyymmddTHHMMSS') '.csv'];
 fidOut = fopen(outputFileName, 'wt');
 if (fidOut == -1)
-   return
+   return;
 end
 
 tic;
@@ -214,7 +213,7 @@ diary off;
 
 fclose(fidOut);
 
-return
+return;
 
 
 % ------------------------------------------------------------------------------
@@ -258,4 +257,4 @@ days = fix(h/24);
 h = h -24*days;
 o_durationStr = sprintf('%d day %02d:%02d:%02d', days, h, m, s);
 
-return
+return;

@@ -101,7 +101,7 @@ if (~isempty(a_dataSEAPOINT))
 end
 
 if (isempty(a_cyProfPhaseList))
-   return
+   return;
 end
 
 % consider only sensor data
@@ -115,7 +115,7 @@ for idDataType = 1:length(dataTypeList)
    
    % the stDev & median data are associated with mean data
    if (ismember(dataType, [1 4 7 16 38 41]))
-      continue
+      continue;
    end
    
    prof = [];
@@ -125,7 +125,7 @@ for idDataType = 1:length(dataTypeList)
          [prof, drift] = process_profile_ir_sbd2_CTD_mean_stdMed( ...
             a_dataCTDMean, a_dataCTDStdMed, ...
             a_descentToParkStartDate, a_ascentEndDate, ...
-            a_gpsData, a_iridiumMailData, a_sensorTechCTD, a_decoderId);
+            a_gpsData, a_iridiumMailData, a_sensorTechCTD);
                   
       case 3
          % OXYGEN (mean & stDev & median)
@@ -134,12 +134,12 @@ for idDataType = 1:length(dataTypeList)
                [prof, drift] = process_profile_ir_sbd2_OXY_mean_stdMed_301( ...
                   a_dataOXYMean, a_dataOXYStdMed, ...
                   a_descentToParkStartDate, a_ascentEndDate, ...
-                  a_gpsData, a_iridiumMailData, a_sensorTechOPTODE, a_sensorTechCTD, a_decoderId);
+                  a_gpsData, a_iridiumMailData, a_sensorTechOPTODE, a_sensorTechCTD);
             case {302, 303}
                [prof, drift] = process_profile_ir_sbd2_OXY_mean_stdMed_302_303( ...
                   a_dataOXYMean, a_dataOXYStdMed, ...
                   a_descentToParkStartDate, a_ascentEndDate, ...
-                  a_gpsData, a_iridiumMailData, a_sensorTechOPTODE, a_sensorTechCTD, a_decoderId);
+                  a_gpsData, a_iridiumMailData, a_sensorTechOPTODE, a_sensorTechCTD);
             otherwise
                fprintf('WARNING: Float #%d Cycle #%d: Nothing done yet to process data type #%d for decoderId #%d\n', ...
                   g_decArgo_floatNum, ...
@@ -152,28 +152,28 @@ for idDataType = 1:length(dataTypeList)
          [prof, drift] = process_profile_ir_sbd2_FLBB_mean_stdMed( ...
             a_dataFLBBMean, a_dataFLBBStdMed, ...
             a_descentToParkStartDate, a_ascentEndDate, ...
-            a_gpsData, a_iridiumMailData, a_sensorTechFLBB, a_decoderId);
+            a_gpsData, a_iridiumMailData, a_sensorTechFLBB);
          
       case 15
          % FLNTU (mean & stDev & median)
          [prof, drift] = process_profile_ir_sbd2_FLNTU_mean_stdMed( ...
             a_dataFLNTUMean, a_dataFLNTUStdMed, ...
             a_descentToParkStartDate, a_ascentEndDate, ...
-            a_gpsData, a_iridiumMailData, a_sensorTechFLNTU, a_decoderId);
+            a_gpsData, a_iridiumMailData, a_sensorTechFLNTU);
          
       case 37
          % CYCLOPS (mean & stDev & median)
          [prof, drift] = process_profile_ir_sbd2_CYCLOPS_mean_stdMed( ...
             a_dataCYCLOPSMean, a_dataCYCLOPSStdMed, ...
             a_descentToParkStartDate, a_ascentEndDate, ...
-            a_gpsData, a_iridiumMailData, a_sensorTechCYCLOPS, a_decoderId);
+            a_gpsData, a_iridiumMailData, a_sensorTechCYCLOPS);
          
       case 40
          % SEAPOINT (mean & stDev & median)
          [prof, drift] = process_profile_ir_sbd2_SEAPOINT_mean_stdMed( ...
             a_dataSEAPOINTMean, a_dataSEAPOINTStdMed, ...
             a_descentToParkStartDate, a_ascentEndDate, ...
-            a_gpsData, a_iridiumMailData, a_sensorTechSEAPOINT, a_decoderId);
+            a_gpsData, a_iridiumMailData, a_sensorTechSEAPOINT);
 
       otherwise
          fprintf('WARNING: Float #%d Cycle #%d: Nothing done yet for processing profiles with data type #%d\n', ...
@@ -192,4 +192,4 @@ for idDataType = 1:length(dataTypeList)
    end
 end
 
-return
+return;

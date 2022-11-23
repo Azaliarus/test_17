@@ -3,12 +3,13 @@
 %
 % SYNTAX :
 %  [o_ctdIntData] = compute_interpolated_CTD_measurements( ...
-%    a_ctdMeasData, a_presData, a_presData, a_profDir)
+%    a_ctdMeasData, a_presData, a_extrapFlag)
 %
 % INPUT PARAMETERS :
 %   a_ctdMeasData : CTD profile measurements
 %   a_presData    : P levels of T and S measurement interpolation
-%   a_profDir     : profile direction
+%   a_extrapFlag  : extrapolated flag (if 1 do the extrapolation for P levels
+%                   that are outside the CTD P interval)
 %
 % OUTPUT PARAMETERS :
 %   o_ctdIntData : CTD interpolated data
@@ -22,14 +23,14 @@
 %   06/02/2014 - RNU - creation
 % ------------------------------------------------------------------------------
 function [o_ctdIntData] = compute_interpolated_CTD_measurements( ...
-   a_ctdMeasData, a_presData, a_profDir)
+   a_ctdMeasData, a_presData, a_extrapFlag)
 
 % output parameters initialization
 o_ctdIntData = [];
 
 
 if (isempty(a_ctdMeasData))
-   return
+   return;
 end
 
 paramPres = get_netcdf_param_attributes('PRES');
@@ -44,7 +45,7 @@ idNoDefInput = find(~((a_ctdMeasData(:, 1) == paramPres.fillValue) | ...
    (a_ctdMeasData(:, 2) == paramTemp.fillValue) | ...
    (a_ctdMeasData(:, 3) == paramSal.fillValue)));
 
-if (~isempty(idNoDefInput))
+if (length(idNoDefInput) > 1)
    
    % get PTS measurements
    ctdPresData = a_ctdMeasData(idNoDefInput, 1);
@@ -52,42 +53,38 @@ if (~isempty(idNoDefInput))
    ctdPsalData = a_ctdMeasData(idNoDefInput, 3);
    
    % if it is a ascending profile, flip measurements up to down
-   %    if (length(find(diff(ctdPresData)<0)) > length(ctdPresData)/2)
-   if (a_profDir == 'A')
+   if (length(find(diff(ctdPresData)<0)) > length(ctdPresData)/2)
       ctdPresData = flipud(ctdPresData);
       ctdTempData = flipud(ctdTempData);
       ctdPsalData = flipud(ctdPsalData);
    end
    
-   if (length(ctdPresData) > 1)
-      
-      % consider increasing pressures only (we start the algorithm from the middle
-      % of the profile)
-      idToDelete = [];
-      idStart = fix(length(ctdPresData)/2);
-      pMin = ctdPresData(idStart);
-      for id = idStart-1:-1:1
-         if (ctdPresData(id) >= pMin)
-            idToDelete = [idToDelete id];
-         else
-            pMin = ctdPresData(id);
-         end
+   % consider increasing pressures only (we start the algorithm from the middle
+   % of the profile)
+   idToDelete = [];
+   idStart = fix(length(ctdPresData)/2);
+   pMin = ctdPresData(idStart);
+   for id = idStart-1:-1:1
+      if (ctdPresData(id) >= pMin)
+         idToDelete = [idToDelete id];
+      else
+         pMin = ctdPresData(id);
       end
-      pMax = ctdPresData(idStart);
-      for id = idStart+1:length(ctdPresData)
-         if (ctdPresData(id) <= pMax)
-            idToDelete = [idToDelete id];
-         else
-            pMax = ctdPresData(id);
-         end
-      end
-      
-      ctdPresData(idToDelete) = [];
-      ctdTempData(idToDelete) = [];
-      ctdPsalData(idToDelete) = [];
    end
+   pMax = ctdPresData(idStart);
+   for id = idStart+1:length(ctdPresData)
+      if (ctdPresData(id) <= pMax)
+         idToDelete = [idToDelete id];
+      else
+         pMax = ctdPresData(id);
+      end
+   end
+
+   ctdPresData(idToDelete) = [];
+   ctdTempData(idToDelete) = [];
+   ctdPsalData(idToDelete) = [];
    
-   if (~isempty(ctdPresData))
+   if (a_extrapFlag == 0)
       
       % duplicate T&S values 10 dbar above the shallowest level
       ctdPresData = [ctdPresData(1)-10; ctdPresData];
@@ -105,18 +102,28 @@ if (~isempty(idNoDefInput))
       psalIntData = interp1(ctdPresData, ...
          ctdPsalData, ...
          a_presData(idNoDefOutput), 'linear');
-      
-      tempIntData(isnan(tempIntData)) = paramTemp.fillValue;
-      psalIntData(isnan(psalIntData)) = paramSal.fillValue;
-      
-      % output parameters
-      o_ctdIntData = [ ...
-         a_presData ...
-         ones(length(a_presData), 1)*paramTemp.fillValue ...
-         ones(length(a_presData), 1)*paramSal.fillValue];
-      o_ctdIntData(idNoDefOutput, 2) = tempIntData;
-      o_ctdIntData(idNoDefOutput, 3) = psalIntData;
+   else
+      tempIntData = interp1(ctdPresData, ...
+         ctdTempData, ...
+         a_presData(idNoDefOutput), 'linear', 'extrap');
+      psalIntData = interp1(ctdPresData, ...
+         ctdPsalData, ...
+         a_presData(idNoDefOutput), 'linear', 'extrap');
    end
+   
+   % output parameters
+   o_ctdIntData = [ ...
+      a_presData ...
+      ones(length(a_presData), 1)*paramTemp.fillValue ...
+      ones(length(a_presData), 1)*paramSal.fillValue];
+   o_ctdIntData(idNoDefOutput, 2) = tempIntData;
+   o_ctdIntData(idNoDefOutput, 3) = psalIntData;
+   
+elseif ((length(idNoDefInput) == 1) && (length(a_presData) == 1) && ...
+      (a_ctdMeasData(idNoDefInput, 1) == a_presData))
+   
+   o_ctdIntData = a_ctdMeasData;
+
 end
 
-return
+return;

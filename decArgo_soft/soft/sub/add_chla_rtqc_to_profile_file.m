@@ -7,12 +7,10 @@
 %    a_profPresFluoChla, a_profPresFluoChlaQc, a_presFluoChlaDataFillValue, ...
 %    a_profFluoChla, a_profFluoChlaQc, a_fluoChlaDataFillValue, ...
 %    a_profChla, a_profChlaQc, a_chlaDataFillValue, ...
-%    a_profChlaAdj, a_profChlaAdjQc, a_chlaDataAdjFillValue, ...
 %    a_darkChla, a_scaleChla, a_lastDarkChla, ...
 %    a_profPres, a_profPresQc, a_presDataFillValue, ...
 %    a_profTemp, a_profTempQc, a_tempDataFillValue, ...
-%    a_profPsal, a_profPsalQc, a_psalDataFillValue, ...
-%    a_lon, a_lat)
+%    a_profPsal, a_profPsalQc, a_psalDataFillValue)
 %
 % INPUT PARAMETERS :
 %   a_floatNum                  : float WMO number
@@ -28,9 +26,6 @@
 %   a_profChla                  : CHLA parameter profile
 %   a_profChlaQc                : Qcs of the CHLA parameter profile
 %   a_chlaDataFillValue         : fill value of the CHLA parameter
-%   a_profChlaAdj               : CHLA_ADJUSTED parameter profile
-%   a_profChlaAdjQc             : Qcs of the CHLA_ADJUSTED parameter profile
-%   a_chlaDataAdjFillValue      : fill value of the CHLA_ADJUSTED parameter
 %   a_darkChla                  : launch DARK_CHLA calibration coefficient
 %   a_scaleChla                 : launch SCALE_CHLA calibration coefficient
 %   a_lastDarkChla              : last adjusted value of the DARK_CHLA
@@ -44,8 +39,6 @@
 %   a_profPsal                  : salinities of the CTD profile
 %   a_profPsalQc                : salinity Qcs of the CTD profile
 %   a_psalDataFillValue         : fill value of the PSAL parameter
-%   a_lon                       : longitude of the profile
-%   a_lat                       : latitude of the profile
 %
 % OUTPUT PARAMETERS :
 %   o_profChlaQc    : Qcs of the CHLA parameter profile
@@ -66,12 +59,10 @@ function [o_profChlaQc, o_profChlaAdj, o_profChlaAdjQc, o_chlaAdjInfo] = ...
    a_profPresFluoChla, a_profPresFluoChlaQc, a_presFluoChlaDataFillValue, ...
    a_profFluoChla, a_profFluoChlaQc, a_fluoChlaDataFillValue, ...
    a_profChla, a_profChlaQc, a_chlaDataFillValue, ...
-   a_profChlaAdj, a_profChlaAdjQc, a_chlaDataAdjFillValue, ...
    a_darkChla, a_scaleChla, a_lastDarkChla, ...
    a_profPres, a_profPresQc, a_presDataFillValue, ...
    a_profTemp, a_profTempQc, a_tempDataFillValue, ...
-   a_profPsal, a_profPsalQc, a_psalDataFillValue, ...
-   a_lon, a_lat)
+   a_profPsal, a_profPsalQc, a_psalDataFillValue)
 
 % output parameters initialization
 o_profChlaQc = [];
@@ -91,8 +82,7 @@ global g_decArgo_qcStrInterpolated;  % '8'
 global g_decArgo_qcStrMissing;       % '9'
 
 
-SPECIFICATION_DOI_1 = 'http://dx.doi.org/10.13155/35385';
-SPECIFICATION_DOI_2 = 'https://doi.org/10.1002/lom3.10185';
+SPECIFICATION_DOI = 'http://dx.doi.org/10.13155/35385';
 MLD_LIMIT = 0.03;
 DELTA_DEPTH = 200; % in meters
 DELTA_DEPTH_DARK = 50; % in meters
@@ -105,7 +95,7 @@ chlaAdjQcValue = g_decArgo_qcStrGood;
 if (isempty(a_darkChla) || isempty(a_scaleChla))
    fprintf('RTQC_WARNING: Float #%d Cycle #%d: Empty DARK_CHLA/SCALE_CHLA: unable to process RTQC CHLA\n', ...
       a_floatNum, a_cyNum);
-   return
+   return;
 end
 
 % if no adjustement has been performed
@@ -141,9 +131,7 @@ idNoDefAndGood = find((a_profPresFluoChla ~= a_presFluoChlaDataFillValue) & ...
    (a_profPresFluoChlaQc ~= g_decArgo_qcStrBad) & ...
    (a_profFluoChla ~= a_fluoChlaDataFillValue) & ...
    (a_profFluoChlaQc ~= g_decArgo_qcStrCorrectable) & ...
-   (a_profFluoChlaQc ~= g_decArgo_qcStrBad) & ...
-   (a_profChlaQc ~= g_decArgo_qcStrCorrectable) & ...
-   (a_profChlaQc ~= g_decArgo_qcStrBad) ...
+   (a_profFluoChlaQc ~= g_decArgo_qcStrBad) ...
    );
 
 newDarkChla = [];
@@ -158,10 +146,12 @@ if (~isempty(idNoDefAndGood))
       
       % compute potential density around 10 m
       [~, idMin] = min(abs(profPres-10));
-      sigma10 = potential_density_gsw(profPres(idMin), profTemp(idMin), profPsal(idMin), 0, a_lon, a_lat);    
+      potTemp = tetai(profPres(idMin), profTemp(idMin), profPsal(idMin), 0);
+      [~, sigma10] = swstat90(profPsal(idMin), potTemp, 0);
       
       % compute potential temperature and potential density
-      sigma = potential_density_gsw(profPres, profTemp, profPsal, 0, a_lon, a_lat)';
+      potTemp = tetai(profPres, profTemp, profPsal, 0);
+      [~, sigma] = swstat90(profPsal, potTemp, 0);
       
       idF = find((sigma - sigma10) > MLD_LIMIT);
       if (~isempty(idF))
@@ -228,25 +218,19 @@ o_chlaAdjInfo.newDarkChla = newDarkChla;
 o_chlaAdjInfo.scaleChla = a_scaleChla;
 o_chlaAdjInfo.depthNPQ = '';
 o_chlaAdjInfo.chlaNPQ = '';
-o_chlaAdjInfo.doi1 = SPECIFICATION_DOI_1;
-o_chlaAdjInfo.doi2 = SPECIFICATION_DOI_2;
+o_chlaAdjInfo.doi = SPECIFICATION_DOI;
 o_chlaAdjInfo.mldLimit = MLD_LIMIT;
 o_chlaAdjInfo.deltaDepth = DELTA_DEPTH;
 o_chlaAdjInfo.deltaDepthDark = DELTA_DEPTH_DARK;
 
 % compute CHLA_ADJUSTED
 o_profChlaAdj = ones(size(a_profChla))*a_chlaDataFillValue;
-o_profChlaAdjQc = repmat(g_decArgo_qcStrDef, size(a_profFluoChlaQc));
-
-% BEGIN - see 6900796 #83
-idDef = find((a_profFluoChla == a_fluoChlaDataFillValue) & (a_profPresFluoChla ~= a_presFluoChlaDataFillValue));
-o_profChlaAdjQc(idDef) = g_decArgo_qcStrMissing;
-% END - see 6900796 #83
+o_profChlaAdjQc = ones(size(a_profFluoChlaQc))*g_decArgo_qcStrDef;
 
 idNoDef = find(a_profFluoChla ~= a_fluoChlaDataFillValue);
 o_profChlaAdj(idNoDef) = (a_profFluoChla(idNoDef) - newDarkChla)*a_scaleChla;
-o_profChlaAdj(idNoDef) = o_profChlaAdj(idNoDef)/2; % recommendations of Roesler et al., 2017
-o_profChlaAdjQc(idNoDef) = set_qc(a_profChlaAdjQc(idNoDef), chlaAdjQcValue);
+o_profChlaAdjQc(idNoDef) = set_qc(o_profChlaAdjQc(idNoDef), chlaAdjQcValue);
+
 
 % apply range test to CHLA_ADJUSTED
 idToFlag = find((o_profChlaAdj(idNoDef) < -0.1) | (o_profChlaAdj(idNoDef) > 50));
@@ -317,7 +301,7 @@ if (~isempty(mld) && (mldFlag == 0))
          idNoDefChlaAdj = find(o_profChlaAdj ~= a_chlaDataFillValue);
          idToFlag = find(idNoDefChlaAdj <= idNoDefAndGood(idNoPosSpike(depthNpqId)));
          o_profChlaAdj(idNoDefChlaAdj(idToFlag)) = profChlaAdj(depthNpqId);
-         o_profChlaAdjQc(idNoDefChlaAdj(idToFlag)) = set_qc(o_profChlaAdjQc(idNoDefChlaAdj(idToFlag)), g_decArgo_qcStrChanged);
+         o_profChlaAdjQc(idNoDefChlaAdj(idToFlag)) = set_qc(o_profChlaAdjQc(idNoDefChlaAdj(idToFlag)), g_decArgo_qcStrInterpolated);
                   
          % update CHLA_QC
          idNoDefChla = find(a_profChla ~= a_chlaDataFillValue);
@@ -331,8 +315,4 @@ if (~isempty(mld) && (mldFlag == 0))
    end
 end
 
-% assign CHLA QC values to CHLA_ADJUSTED QC that have not been set 
-idDef = find(o_profChlaAdjQc == g_decArgo_qcStrDef);
-o_profChlaAdjQc(idDef) = o_profChlaQc(idDef);
-
-return
+return;

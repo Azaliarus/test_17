@@ -29,14 +29,13 @@ DIR_INPUT_BASE_NC_FILES = 'E:\HDD\201407-ArgoData\coriolis_csio_incois_kordi_nmd
 DIR_INPUT_BASE_NC_FILES = 'C:\users\RNU\Argo\work\nc_output_updated\';
 DIR_INPUT_BASE_NC_FILES = 'E:\DM_3.1\coriolis_csio_incois_kordi_nmdis\';
 DIR_INPUT_BASE_NC_FILES = 'E:\archive_201505\coriolis\selected\';
-DIR_INPUT_BASE_NC_FILES = 'C:\Users\jprannou\_DATA\TMP\BASE\';
 
 % top directory of new NetCDF mono-profile files
 DIR_INPUT_NEW_NC_FILES = 'C:\users\RNU\Argo\work\nc_output_decPrv_argos_sans_EOL\';
 DIR_INPUT_NEW_NC_FILES = 'C:\users\RNU\Argo\work\nc_output_decPrv_argos\';
 DIR_INPUT_NEW_NC_FILES = 'E:\nc_output_decPrv_argos_20150129\';
 DIR_INPUT_NEW_NC_FILES = 'E:\archive_201510\201510-ArgoData\DATA\coriolis\selected\\';
-DIR_INPUT_NEW_NC_FILES = 'C:\Users\jprannou\_DATA\TMP\NEW\';
+
 
 % directory to store the log and the csv files
 DIR_LOG_CSV_FILE = 'C:\Users\jprannou\_RNU\DecArgo_soft\work\';
@@ -45,7 +44,6 @@ DIR_LOG_CSV_FILE = 'C:\Users\jprannou\_RNU\DecArgo_soft\work\';
 FLOAT_LIST_FILE_NAME = 'C:/users/RNU/Argo/Aco/12833_update_decPrv_pour_RT_TRAJ3/lists/nke_all_with_DM_b_file.txt';
 FLOAT_LIST_FILE_NAME = 'C:/users/RNU/Argo/Aco/12833_update_decPrv_pour_RT_TRAJ3/lists/nke_all_with_DM.txt';
 FLOAT_LIST_FILE_NAME = 'C:\Users\jprannou\_RNU\DecArgo_soft\lists\nke_all_with_DM_bis_20151003.txt';
-FLOAT_LIST_FILE_NAME = '';
 
 % flag to print data measurements (when different) in the log file
 PRINT_DIFF_DATA_FLAG = 1;
@@ -79,7 +77,7 @@ if (nargin == 0)
    floatListFileName = FLOAT_LIST_FILE_NAME;
    if ~(exist(floatListFileName, 'file') == 2)
       fprintf('ERROR: File not found: %s\n', floatListFileName);
-      return
+      return;
    end
    
    fprintf('Floats from list: %s\n', floatListFileName);
@@ -124,7 +122,7 @@ fprintf('\n');
 outputFileName = [DIR_LOG_CSV_FILE '/' 'nc_compare_mono_profile_files_prv_in_DM' name '_' datestr(now, 'yyyymmddTHHMMSS') '.csv'];
 fidOut = fopen(outputFileName, 'wt');
 if (fidOut == -1)
-   return
+   return;
 end
 header = ['; ; ; DIFF; DIFF; DIFF; DIFF; DIFF; DIFF; DIFF; DIFF;' ...
    'BASE; BASE; BASE; BASE; BASE; BASE; BASE; BASE; BASE; ' ...
@@ -256,7 +254,7 @@ for idFloat = 1:nbFloats
          descProfNumBase2New(idProf) = descProfNumNew(idMin);
          
          numbers = sprintf(' #%d', descProfNumNew(idF));
-         fprintf('WARNING: %d descent new profiles found around date %s (corresponding to profiles%s) - (the #%d is selected)\n', ...
+         fprintf('WARNING: %d descent new profiles found around date %s (corresponding to profiles%s) => (the #%d is selected)\n', ...
             length(idF), julian_2_gregorian(profDateBase), numbers, idMin);
          
          descProfNumNew(idMin) = [];
@@ -300,7 +298,7 @@ for idFloat = 1:nbFloats
                sprintf('/%d/profiles/D%d_%03dD.nc', floatNum, floatNum, descProfNumBase2New(idProf))];
             if ~(exist(profFileNameNew, 'file') == 2)
                fprintf('WARNING: expected file name is missing (%s)\n', profFileNameNew);
-               continue
+               continue;
             end
          end
          [profDate, profLocDate, profLon, profLat, ...
@@ -337,7 +335,7 @@ for idFloat = 1:nbFloats
                sprintf('/%d/profiles/D%d_%03dD.nc', floatNum, floatNum, descProfNumBase(idProf))];
             if ~(exist(profFileNameBase, 'file') == 2)
                fprintf('WARNING: expected file name is missing (%s)\n', profFileNameBase);
-               continue
+               continue;
             end
          end
          [profDate, profLocDate, profLon, profLat, ...
@@ -375,7 +373,7 @@ for idFloat = 1:nbFloats
                sprintf('/%d/profiles/D%d_%03dD.nc', floatNum, floatNum, descProfNumBase(idProf))];
             if ~(exist(profFileNameBase, 'file') == 2)
                fprintf('WARNING: expected file name is missing (%s)\n', profFileNameBase);
-               continue
+               continue;
             end
          end
          [profDateBase, profLocDateBase, profLonBase, profLatBase, ...
@@ -389,7 +387,7 @@ for idFloat = 1:nbFloats
                sprintf('/%d/profiles/D%d_%03dD.nc', floatNum, floatNum, descProfNumBase2New(idProf))];
             if ~(exist(profFileNameNew, 'file') == 2)
                fprintf('WARNING: expected file name is missing (%s)\n', profFileNameNew);
-               continue
+               continue;
             end
          end
          [profDateNew, profLocDateNew, profLonNew, profLatNew, ...
@@ -428,7 +426,7 @@ for idFloat = 1:nbFloats
             for idLev = 1:size(dataStrBase, 1)
                if (~strcmp(dataStrBase(idLev, :), dataStrNew(idLev, :)))
                   profDataFlag = 1;
-                  break
+                  break;
                end
             end
          end
@@ -509,7 +507,7 @@ for idFloat = 1:nbFloats
          ascProfNumBase2New(idProf) = ascProfNumNew(idMin);
          
          numbers = sprintf(' #%d', ascProfNumNew(idF));
-         fprintf('WARNING: %d ascent new profiles found around date %s (corresponding to profiles%s) - (the #%d is selected)\n', ...
+         fprintf('WARNING: %d ascent new profiles found around date %s (corresponding to profiles%s) => (the #%d is selected)\n', ...
             length(idF), julian_2_gregorian(profDateBase), numbers, idMin);
          
          ascProfNumNew(idMin) = [];
@@ -553,7 +551,7 @@ for idFloat = 1:nbFloats
                sprintf('/%d/profiles/D%d_%03d.nc', floatNum, floatNum, ascProfNumBase2New(idProf))];
             if ~(exist(profFileNameNew, 'file') == 2)
                fprintf('WARNING: expected file name is missing (%s)\n', profFileNameNew);
-               continue
+               continue;
             end
          end
          [profDate, profLocDate, profLon, profLat, ...
@@ -590,7 +588,7 @@ for idFloat = 1:nbFloats
                sprintf('/%d/profiles/D%d_%03d.nc', floatNum, floatNum, ascProfNumBase(idProf))];
             if ~(exist(profFileNameBase, 'file') == 2)
                fprintf('WARNING: expected file name is missing (%s)\n', profFileNameBase);
-               continue
+               continue;
             end
          end
          [profDate, profLocDate, profLon, profLat, ...
@@ -628,7 +626,7 @@ for idFloat = 1:nbFloats
                sprintf('/%d/profiles/D%d_%03d.nc', floatNum, floatNum, ascProfNumBase(idProf))];
             if ~(exist(profFileNameBase, 'file') == 2)
                fprintf('WARNING: expected file name is missing (%s)\n', profFileNameBase);
-               continue
+               continue;
             end
          end
          [profDateBase, profLocDateBase, profLonBase, profLatBase, ...
@@ -643,7 +641,7 @@ for idFloat = 1:nbFloats
                sprintf('/%d/profiles/D%d_%03d.nc', floatNum, floatNum, ascProfNumBase2New(idProf))];
             if ~(exist(profFileNameNew, 'file') == 2)
                fprintf('WARNING: expected file name is missing (%s)\n', profFileNameNew);
-               continue
+               continue;
             end
          end
          [profDateNew, profLocDateNew, profLonNew, profLatNew, ...
@@ -683,7 +681,7 @@ for idFloat = 1:nbFloats
             for idLev = 1:size(dataStrBase, 1)
                if (~strcmp(dataStrBase(idLev, :), dataStrNew(idLev, :)))
                   profDataFlag = 1;
-                  break
+                  break;
                end
             end
          end
@@ -755,7 +753,7 @@ fprintf('done (Elapsed time is %.1f seconds)\n', ellapsedTime);
 
 diary off;
 
-return
+return;
 
 % ------------------------------------------------------------------------------
 % Retrieve information on profile dates of a mono-profile NetCDF file.
@@ -838,13 +836,13 @@ for idFile = 1:length(monoProfFiles)
    
    % do not consider b file (if exists)
    if (fileName(1) == 'B')
-      continue
+      continue;
    end
    
    idF = strfind(fileName, '_');
    cyNum = str2num(fileName(idF+1:idF+3));
    if (cyNum > lastCycle)
-      continue
+      continue;
    end
    
    profFileName = [monoProfDirName fileName];
@@ -855,7 +853,7 @@ for idFile = 1:length(monoProfFiles)
       fCdf = netcdf.open(profFileName, 'NC_NOWRITE');
       if (isempty(fCdf))
          fprintf('ERROR: Unable to open NetCDF input file: %s\n', profFileName);
-         return
+         return;
       end
 
       % retrieve information
@@ -888,9 +886,9 @@ for idFile = 1:length(monoProfFiles)
          
          [uJulD, idA, idC] = unique(julD);
          if (length(uJulD) > 1)
-            fprintf('ERROR: %d profiles in the %s NetCDF input file: %s - file ignored\n', ...
+            fprintf('ERROR: %d profiles in the %s NetCDF input file: %s => file ignored\n', ...
                length(uJulD), a_commentStr, profFileName);
-            continue
+            continue;
          end
            
          if (length(uJulD) ~= length(julD))
@@ -931,7 +929,7 @@ for idFile = 1:length(monoProfFiles)
                a_commentStr, profFileName);
          end
          netcdf.close(fCdf);
-         continue
+         continue;
       end
    end
 end
@@ -951,7 +949,7 @@ o_ascProfNum = profNum(idAsc);
 o_ascProfDate = profDate(idAsc);
 o_ascProfLocDate = profLocDate(idAsc);
 
-return
+return;
 
 % ------------------------------------------------------------------------------
 % Retrieve information on profile of a mono-profile NetCDF file.
@@ -1015,7 +1013,7 @@ if (exist(a_profFilePathName, 'file') == 2)
    fCdf = netcdf.open(a_profFilePathName, 'NC_NOWRITE');
    if (isempty(fCdf))
       fprintf('ERROR: Unable to open NetCDF input file: %s\n', a_profFilePathName);
-      return
+      return;
    end
    
    % retrieve information
@@ -1066,7 +1064,7 @@ if (exist(a_profFilePathName, 'file') == 2)
       
       if (length(julD) > 2)
          fprintf('ERROR: multiple profiles in file: %s\n', a_profFilePathName);
-         return
+         return;
       elseif (length(julD) == 2)
          
          % there are 2 profiles in the file; check that it is because of
@@ -1076,7 +1074,7 @@ if (exist(a_profFilePathName, 'file') == 2)
          
          if (length(unique(julD)) ~= 1)
             fprintf('ERROR: multiple profiles in file: %s\n', a_profFilePathName);
-            return
+            return;
          else
             % collect the station parameter list
             stationParameters = netcdf.getVar(fCdf, netcdf.inqVarID(fCdf, 'STATION_PARAMETERS'));
@@ -1098,7 +1096,7 @@ if (exist(a_profFilePathName, 'file') == 2)
             end
             if (strcmp(paramListStr{1}, paramListStr{2}) == 0)
                fprintf('ERROR: multiple profiles in file: %s\n', a_profFilePathName);
-               return
+               return;
             else
                % output parameters
                o_profDate = julD(1);
@@ -1151,7 +1149,7 @@ if (exist(a_profFilePathName, 'file') == 2)
             fCdfB = netcdf.open(bProfFilePathName, 'NC_NOWRITE');
             if (isempty(fCdfB))
                fprintf('ERROR: Unable to open NetCDF input file: %s\n', bProfFilePathName);
-               return
+               return;
             end
          
             % collect the station parameter list
@@ -1258,7 +1256,7 @@ else
    fprintf('ERROR: file not found: %s\n', a_profFilePathName);
 end
 
-return
+return;
 
 % ------------------------------------------------------------------------------
 % Check if a variable (defined by its name) is present in a NetCDF file.
@@ -1291,11 +1289,11 @@ for idVar= 0:nbVars-1
    [varName, varType, varDims, nbAtts] = netcdf.inqVar(a_ncId, idVar);
    if (strcmp(varName, a_varName))
       o_present = 1;
-      break
+      break;
    end
 end
 
-return
+return;
 
 % ------------------------------------------------------------------------------
 % Convert a julian 1950 date to a gregorian date.
@@ -1337,7 +1335,7 @@ for idDate = 1:length(dayNum)
    end
 end
 
-return
+return;
 
 % ------------------------------------------------------------------------------
 % Split of a julian 1950 date in gregorian date parts.
@@ -1413,4 +1411,4 @@ for id = 1:length(a_juld)
    
 end
 
-return
+return;

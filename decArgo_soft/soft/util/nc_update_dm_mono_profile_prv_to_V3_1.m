@@ -34,7 +34,7 @@
 %         #1- from Argo Quality Control Manual V2.9.1: Please note that whenever
 %             PARAM_ADJUSTED_QC = ‘4’, both PARAM_ADJUSTED and
 %             PARAM_ADJUSTED_ERROR should be set to FillValue
-%         #2- if PRES_QC = '0' set PRES_QC = '1'
+%         #2- if PRES_QC = '0' set PRES_QC = '1' 
 %   06/08/2015 - RNU - V 2.4:
 %      - 1 bug in number of input DM parameters => the SCIENTIFIC_CALIB_* are
 %        not copied for some parameters (the last one of the DM input file)
@@ -78,12 +78,8 @@
 %      - if JULD > DATE_CREATION set DATE_CREATION = JULD
 %   10/04/2015 - RNU - V 2.9:
 %      Correction #10: 'on the fly' correction of output DM data.
-%      - if PSAL ~= fillValue and PSAL_ADJUSTED == fillValue
+%      - if PSAL ~= fillValue and PSAL_ADJUSTED == fillValue 
 %        then PSAL_ADJUSTED_QC = '4'
-%   11/20/2018 - RNU - V 3.0:
-%      Correction #12: 'on the fly' correction of output DM data.
-%      - correct HISTORY_DATE and SCIENTIFIC_CALIB_DATE (or
-%        CALIBRATION_DATE) (format YYYYMMDDHHMISS) when SS = 60
 % ------------------------------------------------------------------------------
 % Version 2.2 (AUM 2.2 08/21/2009
 %  - FIRMWARE_VERSION is missing in Coriolis files
@@ -136,7 +132,7 @@ DIR_INPUT_RT_NC_FILES = 'E:\archive_201510\201510-ArgoData\DATA\coriolis\selecte
 DIR_OUTPUT_NC_FILES = 'C:\Users\jprannou\_DATA\OUT\DM_updated_data_bis_20151003\';
 
 % directory to store the log file
-DIR_LOG_FILE = 'C:\Users\jprannou\_RNU\DecArgo_soft\work\log\';
+DIR_LOG_FILE = 'C:\Users\jprannou\_RNU\DecArgo_soft\work\';
 
 % default list of floats to process
 % FLOAT_LIST_FILE_NAME = 'C:/users/RNU/Argo/Aco/12833_update_decPrv_pour_RT_TRAJ3/lists/nke_all_with_DM_b_file.txt';
@@ -156,7 +152,7 @@ DIR_JSON_FLOAT_META = 'C:\Users\jprannou\_RNU\DecArgo_soft\work/json_float_meta_
 
 % program version
 global g_cofc_ncConvertMonoProfileVersion;
-g_cofc_ncConvertMonoProfileVersion = '3.0';
+g_cofc_ncConvertMonoProfileVersion = '2.9';
 
 % default values initialization
 init_default_values;
@@ -168,7 +164,7 @@ if (nargin == 0)
    floatListFileName = FLOAT_LIST_FILE_NAME;
    if ~(exist(floatListFileName, 'file') == 2)
       fprintf('ERROR: File not found: %s\n', floatListFileName);
-      return
+      return;
    end
    
    fprintf('Floats from list: %s\n', floatListFileName);
@@ -231,7 +227,7 @@ for idFloat = 1:nbFloats
       DIR_INPUT_RT_NC_FILES);
    if (isempty(cutOffPresVal))
       fprintf('ERROR: Unable to compute PCutOff, DM files not converted for float #%d\n', floatNum);
-      continue
+      continue;
    end
    
    dmInFloatPath = [DIR_INPUT_DM_NC_FILES '/' sprintf('/%d/profiles/', floatNum)];
@@ -265,7 +261,7 @@ for idFloat = 1:nbFloats
          if (exist(rtInBFilePathName, 'file') == 2)
             bFileFlag = 1;
             %             fprintf('INFO: B file => exit\n');
-            %             continue
+            %             continue;
          end
          
          % update the file
@@ -288,7 +284,7 @@ fprintf('done (Elapsed time is %.1f seconds)\n', ellapsedTime);
 
 diary off;
 
-return
+return;
 
 % ------------------------------------------------------------------------------
 % Convert a given DM NetCDF mono-profie files from format version V2.2, V2.3 or V3.0
@@ -377,7 +373,7 @@ if ((strcmp(inputFileFormatVersionStr, '3.0') == 0) && ...
    [~, fileName, fileExt] = fileparts(a_inputDmFileName);
    fprintf('ERROR: Input DM file (%s) is expected to be of 2.2 or 2.3 or 3.0 format version (but FORMAT_VERSION = %s)', ...
       [fileName fileExt], inputFileFormatVersionStr);
-   return
+   return;
 end
 inputFileFormatVersion = str2num(inputFileFormatVersionStr);
 
@@ -472,7 +468,7 @@ end
 % output file
 
 % N_PROF and N_LEVELS dimensions
-
+   
 % retrieve PRES measurements from Input DM file
 nLevelsSecondary = 0;
 primaryProfInOutput = 1;
@@ -495,7 +491,7 @@ else
       if (length(idF) == 1)
          cutOffPres = a_cutOffPresVal(idF);
       else
-         fprintf('WARNING: Float #%d: Unable to find the profile cut-off pressure for cycle #%d - profile not cut\n', ...
+         fprintf('WARNING: Float #%d: Unable to find the profile cut-off pressure for cycle #%d => profile not cut\n', ...
             a_floatNum, a_rtCyNum);
          cutOffPres = -9999;
       end
@@ -525,7 +521,7 @@ else
    nParamDimBOutput = 1;
    for idP = 1:length(inputDmParamList)
       param = get_netcdf_param_attributes_3_1(inputDmParamList{idP});
-      if ((param.paramType == 'c') || (param.paramType == 'j'))
+      if (param.paramType == 'c')
          nParamDimCOutput = nParamDimCOutput + 1;
       else
          nParamDimBOutput = nParamDimBOutput + 1;
@@ -642,70 +638,6 @@ for idParam = 1:length(inputDmParamList)
 end
 [inputDmData] = get_data_from_nc_file(a_inputDmFileName, wantedInputVars);
 
-% correction #12: correct HISTORY_DATE and SCIENTIFIC_CALIB_DATE (or
-% CALIBRATION_DATE) (format YYYYMMDDHHMISS) when SS = 60
-idVal = find(strcmp('HISTORY_DATE', inputDmData(1:2:end)) == 1, 1);
-if (~isempty(idVal))
-   updated = 0;
-   inputDmDate = inputDmData{2*idVal};
-   % HISTORY_DATE(N_HISTORY, N_PROF, DATE_TIME)
-   for idNHistory = 1:size(inputDmDate, 3)
-      for idNProf = 1:size(inputDmDate, 2)
-         curDate = inputDmDate(:, idNProf, idNHistory)';
-         if (~isempty(deblank(curDate)))
-            if ((length(deblank(curDate)) == 14) && strcmp(curDate(end-1:end), '60'))
-               curDateNum = datenum(curDate, 'yyyymmddHHMMSS');
-               newDate = datestr(curDateNum, 'yyyymmddHHMMSS');
-               inputDmDate(:, idNProf, idNHistory) = newDate';
-               updated = 1;
-               
-               fprintf('INFO: input ''HISTORY_DATE'' value (%s) updated to (%s) from input DM file %s\n', ...
-                  curDate, newDate, a_inputDmFileName);
-            end
-         end
-      end
-   end
-   if (updated == 1)
-      inputDmData{2*idVal} = inputDmDate;
-   end
-end
-inputDmDate = [];
-idVal = find(strcmp('SCIENTIFIC_CALIB_DATE', inputDmData(1:2:end)) == 1, 1);
-if (~isempty(idVal))
-   inputDmDate = inputDmData{2*idVal};
-else
-   idVal = find(strcmp('CALIBRATION_DATE', inputDmData(1:2:end)) == 1, 1);
-   if (~isempty(idVal))
-      inputDmDate = inputDmData{2*idVal};
-   end
-end
-if (~isempty(inputDmDate))
-   updated = 0;
-   inputDmDate = inputDmData{2*idVal};
-   % SCIENTIFIC_CALIB_DATE (N_PROF, N_CALIB, N_PARAM, DATE_TIME)
-   for idNProf = 1:size(inputDmDate, 4)
-      for idNCalib = 1:size(inputDmDate, 3)
-         for idNParam = 1:size(inputDmDate, 2)
-            curDate = inputDmDate(:, idNParam, idNCalib, idNProf)';
-            if (~isempty(deblank(curDate)))
-               if ((length(deblank(curDate)) == 14) && strcmp(curDate(end-1:end), '60'))
-                  curDateNum = datenum(curDate, 'yyyymmddHHMMSS');
-                  newDate = datestr(curDateNum, 'yyyymmddHHMMSS');
-                  inputDmDate(:, idNParam, idNCalib, idNProf) = newDate';
-                  updated = 1;
-                  
-                  fprintf('INFO: input ''SCIENTIFIC_CALIB_DATE'' value (%s) updated to (%s) from input DM file %s\n', ...
-                     curDate, newDate, a_inputDmFileName);
-               end
-            end
-         end
-      end
-   end
-   if (updated == 1)
-      inputDmData{2*idVal} = inputDmDate;
-   end
-end
-
 % retrieve information from input RT C file
 wantedInputVars = [ ...
    {'DATA_TYPE'} ...
@@ -736,7 +668,7 @@ wantedInputVars = [ ...
 [inputRtCData] = get_data_from_nc_file(a_inputRtCFileName, wantedInputVars);
 
 if (a_bFileFlag == 1)
-   
+
    % retrieve information from input RT B file
    wantedInputVars = [ ...
       {'DATA_TYPE'} ...
@@ -790,7 +722,7 @@ for idFile = 1:nbOutputFiles
    fCdf = netcdf.open(outputFileName, 'NC_WRITE');
    if (isempty(fCdf))
       fprintf('ERROR: Unable to open NetCDF output c file: %s\n', outputFileName);
-      return
+      return;
    end
    
    netcdf.reDef(fCdf);
@@ -829,11 +761,11 @@ for idFile = 1:nbOutputFiles
          idVal = find(strcmp(varNameIn, inputRtData(1:2:end)) == 1, 1);
          varValue = inputRtData{2*idVal};
          if (isempty(varValue))
-            continue
+            continue;
          end
          netcdf.putVar(fCdf, netcdf.inqVarID(fCdf, varNameOut), varValue);
       else
-         fprintf('INFO: Variable %s not present in output format - not copied in output file\n', ...
+         fprintf('INFO: Variable %s not present in output format => not copied in output file\n', ...
             varNameOut);
       end
    end
@@ -853,11 +785,11 @@ for idFile = 1:nbOutputFiles
          idVal = find(strcmp(varNameIn, inputDmData(1:2:end)) == 1, 1);
          varValue = inputDmData{2*idVal};
          if (isempty(varValue))
-            continue
+            continue;
          end
          netcdf.putVar(fCdf, netcdf.inqVarID(fCdf, varNameOut), varValue);
       else
-         fprintf('INFO: Variable %s not present in output format - not copied in output file\n', ...
+         fprintf('INFO: Variable %s not present in output format => not copied in output file\n', ...
             varNameOut);
       end
    end
@@ -911,17 +843,17 @@ for idFile = 1:nbOutputFiles
    if (primaryProfInRtInput ~= primaryProfInOutput)
       [~, fileName, fileExt] = fileparts(a_inputDmFileName);
       if ((primaryProfInRtInput == 0) && (primaryProfInOutput == 1))
-         fprintf('ERROR: File %s no primary in RT input but exists in DM output - exit. We must create a new VSS for output primary profile\n', ...
+         fprintf('ERROR: File %s no primary in RT input but exists in DM output => exit. We must create a new VSS for output primary profile\n', ...
             [fileName fileExt]);
-         return
+         return;
       else
-         fprintf('INFO: File %s no primary in DM output but exists in RT input - RT data are ignored\n', ...
+         fprintf('INFO: File %s no primary in DM output but exists in RT input => RT data are ignored\n', ...
             [fileName fileExt]);
       end
    end
    
    if (primaryProfInOutput == 0)
-      fprintf('INFO: File %s no primary in DM output - a default primary profile is created (from secondary profile information)\n', ...
+      fprintf('INFO: File %s no primary in DM output => a default primary profile is created (from secondary profile information)\n', ...
          [fileName fileExt]);
    end
    
@@ -936,7 +868,7 @@ for idFile = 1:nbOutputFiles
          idVal = find(strcmp(varNameIn, inputRtData(1:2:end)) == 1, 1);
          varValue = inputRtData{2*idVal};
          if (isempty(varValue))
-            continue
+            continue;
          end
          
          for idProf = 1:nProfDimOutput
@@ -1082,7 +1014,7 @@ for idFile = 1:nbOutputFiles
             end
          end
       else
-         fprintf('INFO: Variable %s not present in output format - not copied in output file\n', ...
+         fprintf('INFO: Variable %s not present in output format => not copied in output file\n', ...
             varNameOut);
       end
    end
@@ -1137,7 +1069,7 @@ for idFile = 1:nbOutputFiles
       varNameOut = varNameIn;
       
       if (strcmp(varNameOut, 'PARAMETER'))
-         continue
+         continue;
       end
       
       if ((inputFileFormatVersion == 2.2) || ...
@@ -1151,7 +1083,7 @@ for idFile = 1:nbOutputFiles
          idVal = find(strcmp(varNameIn, inputDmData(1:2:end)) == 1, 1);
          varValue = inputDmData{2*idVal};
          if (isempty(varValue))
-            continue
+            continue;
          end
          
          for idProf = 1:nProfDimOutput
@@ -1199,12 +1131,12 @@ for idFile = 1:nbOutputFiles
                         if (~strcmp(param, 'PRES'))
                            paramStruct = get_netcdf_param_attributes_3_1(param);
                            if (idFile == 1)
-                              if ((paramStruct.paramType ~= 'c') && (paramStruct.paramType ~= 'j'))
-                                 continue
+                              if (paramStruct.paramType ~= 'c')
+                                 continue;
                               end
                            else
-                              if ((paramStruct.paramType == 'c') || (paramStruct.paramType == 'j'))
-                                 continue
+                              if (paramStruct.paramType == 'c')
+                                 continue;
                               end
                            end
                         end
@@ -1219,7 +1151,7 @@ for idFile = 1:nbOutputFiles
                            fliplr([1 1 1 length(data)]), data');
                      end
                   end
-                  
+
                elseif (strncmp(varNameOut, 'HISTORY_', length('HISTORY_')))
                   
                   % variables with a (N_HISTORY, N_PROF, STRING) or (N_HISTORY, N_PROF) dimension
@@ -1262,7 +1194,7 @@ for idFile = 1:nbOutputFiles
          end
          
       else
-         fprintf('INFO: Variable %s not present in output format - not copied in output file\n', ...
+         fprintf('INFO: Variable %s not present in output format => not copied in output file\n', ...
             varNameOut);
       end
    end
@@ -1293,10 +1225,10 @@ for idFile = 1:nbOutputFiles
                         netcdf.putVar(fCdf, netcdf.inqVarID(fCdf, 'SCIENTIFIC_CALIB_DATE'), ...
                            fliplr([idProf-1 idCalib-1 idParam-1 0]), ...
                            fliplr([1 1 1 length(inputDmDateUpdate)]), inputDmDateUpdate');
-                        fprintf('INFO: ''SCIENTIFIC_CALIB_DATE'' is empty for %s parameter - set to ''DATE_UPDATE'' of input DM file (= %s) (file %s)\n', ...
+                        fprintf('INFO: ''SCIENTIFIC_CALIB_DATE'' is empty for %s parameter => set to ''DATE_UPDATE'' of input DM file (= %s) (file %s)\n', ...
                            param, inputDmDateUpdate, outputFileName);
                      else
-                        fprintf('WARNING: ''SCIENTIFIC_CALIB_DATE'' is empty for %s parameter - nothing done since ''DATE_UPDATE'' of input DM file is empty (file %s)\n', ...
+                        fprintf('WARNING: ''SCIENTIFIC_CALIB_DATE'' is empty for %s parameter => nothing done since ''DATE_UPDATE'' of input DM file is empty (file %s)\n', ...
                            param, outputFileName);
                      end
                   end
@@ -1306,17 +1238,17 @@ for idFile = 1:nbOutputFiles
                      netcdf.putVar(fCdf, netcdf.inqVarID(fCdf, 'SCIENTIFIC_CALIB_COMMENT'), ...
                         fliplr([idProf-1 idCalib-1 idParam-1 0]), ...
                         fliplr([1 1 1 length(defaultComment)]), defaultComment');
-                     fprintf('INFO: ''SCIENTIFIC_CALIB_COMMENT'' is empty for %s parameter - set to ''%s'' (file %s)\n', ...
+                     fprintf('INFO: ''SCIENTIFIC_CALIB_COMMENT'' is empty for %s parameter => set to ''%s'' (file %s)\n', ...
                         param, defaultComment,outputFileName);
                   end
                end
             end
          end
       end
-   end
+   end     
    
    % correction #9:
-   % if JULD > DATE_CREATION set DATE_CREATION = JULD
+   % if JULD > DATE_CREATION set DATE_CREATION = JULD 
    if (var_is_present(fCdf, 'DATE_CREATION') && ...
          var_is_present(fCdf, 'JULD'))
       dateCreation = netcdf.getVar(fCdf, netcdf.inqVarID(fCdf, 'DATE_CREATION'));
@@ -1329,11 +1261,11 @@ for idFile = 1:nbOutputFiles
          julDateCreationNew = max(julD);
          dateCreationNew = datestr(julDateCreationNew + g_decArgo_janFirst1950InMatlab, 'yyyymmddHHMMSS');
          netcdf.putVar(fCdf, netcdf.inqVarID(fCdf, 'DATE_CREATION'), dateCreationNew);
-         fprintf('INFO: ''DATE_CREATION'' (%s) is before ''JULD'' (%s) - ''DATE_CREATION'' set to ''JULD'' (file %s)\n', ...
+         fprintf('INFO: ''DATE_CREATION'' (%s) is before ''JULD'' (%s) => ''DATE_CREATION'' set to ''JULD'' (file %s)\n', ...
             dateCreation, julian_2_gregorian_dec_argo(julDateCreationNew), outputFileName);
       end
    end
-   
+
    if (idFile == 2)
       
       % retrieve parameter of RT input file (same as DM output file) used to
@@ -1354,7 +1286,7 @@ for idFile = 1:nbOutputFiles
             outputStationParameters{idProf, idParam} = deblank(stationParameters(:, idParam, idProf)');
          end
       end
-   end
+   end   
    
    % copy of the DM input measurements into the DM output file
    sufixList = [{''} {'_QC'} {'_ADJUSTED'} {'_ADJUSTED_QC'} {'_ADJUSTED_ERROR'}];
@@ -1364,19 +1296,19 @@ for idFile = 1:nbOutputFiles
       if (~strcmp(paramNamePrefix, 'PRES'))
          paramStruct = get_netcdf_param_attributes_3_1(paramNamePrefix);
          if (idFile == 1)
-            if ((paramStruct.paramType ~= 'c') && (paramStruct.paramType ~= 'j'))
-               continue
+            if (paramStruct.paramType ~= 'c')
+               continue;
             end
          else
-            if ((paramStruct.paramType == 'c') || (paramStruct.paramType == 'j'))
-               continue
+            if (paramStruct.paramType == 'c')
+               continue;
             end
          end
       end
       
       if (~isempty(find(strcmp(paramNamePrefix, inputDmMissingParamList) ==1, 1)))
          % this parameter desn't exist in DM input file
-         continue
+         continue;
       end
       
       for idS = 1:length(sufixList)
@@ -1385,13 +1317,13 @@ for idFile = 1:nbOutputFiles
          
          if (idFile == 2)
             if (strcmp(paramNamePrefix, 'PRES')  && (idS > 1))
-               continue
+               continue;
             end
          end
-         
+                  
          paramStruct = get_netcdf_param_attributes_3_1(paramNamePrefix);
          if (~isempty(paramStruct) && (paramStruct.adjAllowed == 0) && (idS > 2))
-            continue
+            continue;
          end
          
          if (var_is_present(fCdf, varNameOut))
@@ -1399,12 +1331,12 @@ for idFile = 1:nbOutputFiles
             if (~isempty(idVal))
                varValue = inputDmData{2*idVal};
                if (isempty(varValue))
-                  continue
+                  continue;
                end
             else
                fprintf('WARNING: Variable %s not present in DM input file\n', ...
                   varNameOut);
-               continue
+               continue;
             end
             
             % input DM data correction #1
@@ -1532,7 +1464,7 @@ for idFile = 1:nbOutputFiles
                   end
                end
             end
-            
+
             % input DM data correction #6
             % if <PARAM>_ADJUSTED = fillValue and <PARAM>_QC ~= ' ' and
             % <PARAM>_QC ~= '9' and <PARAM>_QC ~= '4'
@@ -1672,7 +1604,7 @@ for idFile = 1:nbOutputFiles
                   profParamQcName = ['PROFILE_' paramNamePrefix '_QC'];
                   profQualityFlag = compute_profile_quality_flag(varValue(1:nLevelsSecondary));
                   netcdf.putVar(fCdf, netcdf.inqVarID(fCdf, profParamQcName), 1, 1, profQualityFlag);
-                  
+
                   if (idFile == 2)
                      
                      % find the place of the current parameter in the DM output
@@ -1694,7 +1626,7 @@ for idFile = 1:nbOutputFiles
                end
             end
          else
-            fprintf('INFO: Variable %s not present in output format - not copied in output file\n', ...
+            fprintf('INFO: Variable %s not present in output format => not copied in output file\n', ...
                varNameOut);
          end
       end
@@ -1705,7 +1637,7 @@ for idFile = 1:nbOutputFiles
       % corresponding levels is recognized using PRES TEMP and PSAL values)
       molarDoxyAdded = 0;
       if (~isempty(find(strcmp('MOLAR_DOXY', inputDmMissingParamList) ==1, 1)))
-         
+
          % retrieve measurements from input RT C file
          wantedInputVars = [ ...
             {'PRES'} ...
@@ -1720,7 +1652,7 @@ for idFile = 1:nbOutputFiles
          tempInputCMeas = inputRtCMeas{2*idVal};
          idVal = find(strcmp('PSAL', inputRtCMeas(1:2:end)) == 1, 1);
          psalInputCMeas = inputRtCMeas{2*idVal};
-         
+
          % retrieve measurements from input RT B file
          wantedInputVars = [ ...
             {'MOLAR_DOXY'} ...
@@ -1729,7 +1661,7 @@ for idFile = 1:nbOutputFiles
          
          idVal = find(strcmp('MOLAR_DOXY', inputRtBMeas(1:2:end)) == 1, 1);
          molarDoxyInputBMeas = inputRtBMeas{2*idVal};
-         
+
          % retrieve measurements from output DM C file
          wantedInputVars = [ ...
             {'PRES'} ...
@@ -1744,7 +1676,7 @@ for idFile = 1:nbOutputFiles
          tempOutputCMeas = ouputDmCMeas{2*idVal};
          idVal = find(strcmp('PSAL', ouputDmCMeas(1:2:end)) == 1, 1);
          psalOutputCMeas = ouputDmCMeas{2*idVal};
-         
+
          presParam = get_netcdf_param_attributes_3_1('PRES');
          tempParam = get_netcdf_param_attributes_3_1('TEMP');
          psalParam = get_netcdf_param_attributes_3_1('PSAL');
@@ -1765,7 +1697,7 @@ for idFile = 1:nbOutputFiles
                      molarDoxy(idLev) = molarDoxyInputBMeas(idF, idProf);
                   else
                      ok = 0;
-                     break
+                     break;
                   end
                end
             end
@@ -1792,7 +1724,7 @@ for idFile = 1:nbOutputFiles
                % update PARAMETER_DATA_MODE
                netcdf.putVar(fCdf, netcdf.inqVarID(fCdf, 'PARAMETER_DATA_MODE'), ...
                   fliplr([idProf-1 idF-1]), 'R');
-               
+
                fprintf('INFO: MOLAR_DOXY data added in DM output file for profile #%d\n', ...
                   idProf);
                molarDoxyAdded = 1;
@@ -1824,7 +1756,7 @@ for idFile = 1:nbOutputFiles
          psalOutputCMeas = ouputDmCMeas{2*idVal};
          
          molarDoxyOutputBMeas = netcdf.getVar(fCdf, netcdf.inqVarID(fCdf, 'MOLAR_DOXY'));
-         
+
          presParam = get_netcdf_param_attributes_3_1('PRES');
          tempParam = get_netcdf_param_attributes_3_1('TEMP');
          psalParam = get_netcdf_param_attributes_3_1('PSAL');
@@ -1888,8 +1820,8 @@ for idFile = 1:nbOutputFiles
          else
             fprintf('@#@%d@%s@ @DOXY added\n', ...
                a_floatNum, fileName);
-         end
-      end
+         end            
+      end      
    end
    
    % add history information that concerns the current program
@@ -1919,7 +1851,7 @@ end
 
 o_ok = 1;
 
-return
+return;
 
 % ------------------------------------------------------------------------------
 % Compute DOXY values.
@@ -1952,7 +1884,7 @@ return
 function [o_doxyValues] = compute_DOXY(a_floatNum, ...
    a_jsonFloatInfoDirName, a_jsonFloatMetaDirName, ...
    a_molarDoxyValues, a_presValues, a_tempValues, a_salValues)
-
+  
 % output parameters initialization
 o_doxyValues = [];
 
@@ -1967,10 +1899,10 @@ if (length(floatInfoFileNames) == 1)
    floatInfoFileName = [a_jsonFloatInfoDirName '/' floatInfoFileNames(1).name];
 elseif (isempty(floatInfoFileNames))
    fprintf('ERROR: Float information file not found for float #%d\n', a_floatNum);
-   return
+   return;
 else
    fprintf('ERROR: Multiple float information files for float #%d\n', a_floatNum);
-   return
+   return;
 end
 
 % read information file
@@ -1985,14 +1917,14 @@ if (floatDecId == -1)
    
    fprintf('WARNING: Float #%d (FLOAT_TYPE:%s, Coriolis version: %s not enough information to compute DOXY\n', ...
       a_floatNum, floatType, floatDecVersion);
-   return
+   return;
 end
 
 % retrieve the name of the JSON float meta-data file
 floatMetaDataFileName = [a_jsonFloatMetaDirName '/' sprintf('%d_meta.json', a_floatNum)];
 if ~(exist(floatMetaDataFileName, 'file') == 2)
    fprintf('ERROR: Json meta-data file not found: %s\n', floatMetaDataFileName);
-   return
+   return;
 end
 
 % read meta-data file
@@ -2012,12 +1944,12 @@ if ((floatDecId == 4) || (floatDecId == 19))
          end
       end
    end
-   
+
    if (isempty(g_decArgo_calibInfo))
       fprintf('WARNING: Float #%d: DOXY calibration coefficients are missing in the Json meta-data file: %s\n', ...
          a_floatNum, ...
          a_jsonFloatMetaDirName);
-      return
+      return;
    end
    
    % current float WMO number
@@ -2030,18 +1962,18 @@ if ((floatDecId == 4) || (floatDecId == 19))
    
    % default values initialization
    init_default_values;
-   
+
    % compute DOXY
    [o_doxyValues] = compute_DOXY_4_19_25(a_molarDoxyValues, ...
       a_presValues, a_tempValues, a_salValues);
-   
+
 else
    
    fprintf('WARNING: Float #%d: DOXY processing not implemented yet for decId #%d\n', ...
       a_floatNum, floatDecId);
 end
 
-return
+return;
 
 % ------------------------------------------------------------------------------
 % Compute the profile cut-off pressure of an Argos float and retrieve the
@@ -2071,7 +2003,7 @@ return
 % ------------------------------------------------------------------------------
 function [o_cutOffPresVal, o_cutOffPresCy] = get_cutoff_pres(a_floatNum, ...
    a_jsonFloatInfoDirName, a_jsonFloatMetaDirName, a_rtNcDirName)
-
+  
 % output parameters initialization
 o_cutOffPresVal = [];
 o_cutOffPresCy = [];
@@ -2084,10 +2016,10 @@ if (length(floatInfoFileNames) == 1)
 elseif (isempty(floatInfoFileNames))
    fprintf('ERROR: Float information file not found for float #%d\n', a_floatNum);
    o_cutOffPresVal = -1;
-   return
+   return;
 else
    fprintf('ERROR: Multiple float information files for float #%d\n', a_floatNum);
-   return
+   return;
 end
 
 % read information file
@@ -2120,7 +2052,7 @@ else
       floatMetaDataFileName = [a_jsonFloatMetaDirName '/' sprintf('%d_meta.json', a_floatNum)];
       if ~(exist(floatMetaDataFileName, 'file') == 2)
          fprintf('ERROR: Json meta-data file not found: %s\n', floatMetaDataFileName);
-         return
+         return;
       end
       
       % read meta-data file
@@ -2182,7 +2114,7 @@ else
                   
                   if (isempty(ctdPumpSwitchOffPres))
                      ctdPumpSwitchOffPres = 5;
-                     fprintf('INFO: Float #%d: CTD switch off pressure parameter is missing in the Json meta-data file - using default value (5 dbars)\n', ...
+                     fprintf('INFO: Float #%d: CTD switch off pressure parameter is missing in the Json meta-data file => using default value (5 dbars)\n', ...
                         a_floatNum);
                   end
                else
@@ -2238,7 +2170,7 @@ else
                   if (strcmp(strtrim(techParamName(idForCy(id), :)), 'PRES_LastAscentPumpedRawSample_dbar'))
                      o_cutOffPresVal(end+1) = str2num(techParamValue(idForCy(id), :));
                      o_cutOffPresCy(end+1) = idCycle;
-                     continue
+                     continue;
                   end
                end
             end
@@ -2247,10 +2179,10 @@ else
          fprintf('WARNING: Float #%d: Unable to find the nc TECH file of this float\n', ...
             a_floatNum);
       end
-   end
+   end  
 end
 
-return
+return;
 
 % ------------------------------------------------------------------------------
 % Modify the value of a dimension in a NetCDF schema.
@@ -2300,7 +2232,7 @@ end
 
 o_outputSchema = a_inputSchema;
 
-return
+return;
 
 % ------------------------------------------------------------------------------
 % Check if a variable (defined by its name) is present in a NetCDF file.
@@ -2333,8 +2265,8 @@ for idVar = 0:nbVars-1
    [varName, varType, varDims, nbAtts] = netcdf.inqVar(a_ncId, idVar);
    if (strcmp(varName, a_varName))
       o_present = 1;
-      break
+      break;
    end
 end
 
-return
+return;

@@ -78,7 +78,7 @@ switch (a_decoderId)
             %       % they are considered only the next cycle
             %       updateNowPtPvPm = 0;
             %       if (a_floatSoftVersion == -1)
-            %          fprintf('WARNING: Float #%d: float software version is unknown - 254 and 255 message types are considered the next cycle\n', ...
+            %          fprintf('WARNING: Float #%d: float software version is unknown => 254 and 255 message types are considered the next cycle\n', ...
             %             g_decArgo_floatNum);
             %          if (~isempty(find(uProf == 0, 1)))
             %             updateNowPtPvPm = 1;
@@ -104,7 +104,7 @@ switch (a_decoderId)
                         configName = tmpConfNames{id};
                         if (isempty(strfind(configName, 'CONFIG_PC_')))
                            if (updateNowPtPvPm == 0)
-                              continue
+                              continue;
                            end
                         end
                         idPos = find(strcmp(configName, configNames) == 1, 1);
@@ -151,13 +151,13 @@ switch (a_decoderId)
                                     confName = sprintf('CONFIG_PV_%d', 3+(idCP-1)*4);
                                     idFCyclePeriod = find(strcmp(confName, configNames) == 1, 1);
                                     currentConfig(idFPV03) = currentConfig(idFCyclePeriod);
-                                    break
+                                    break;
                                  end
                               else
                                  confName = sprintf('CONFIG_PV_%d', 3+(idCP-1)*4);
                                  idFCyclePeriod = find(strcmp(confName, configNames) == 1, 1);
                                  currentConfig(idFPV03) = currentConfig(idFCyclePeriod);
-                                 break
+                                 break;
                               end
                            end
                         end
@@ -194,7 +194,7 @@ switch (a_decoderId)
                      
                      if (~isempty(idUsedConf))
                         
-                        fprintf('WARNING: Float #%d: config already exists for cycle #%d and profile #%d - updating the current one\n', ...
+                        fprintf('WARNING: Float #%d: config already exists for cycle #%d and profile #%d => updating the current one\n', ...
                            g_decArgo_floatNum, cyNum, profNum);
                         
                         if ((configNum == -1) || (configNum == 0))
@@ -228,7 +228,7 @@ switch (a_decoderId)
                end
             end
             
-%             create_csv_to_print_config_ir_rudics_sbd2('setConfig_', 1, g_decArgo_floatConfig);
+%             print_config_in_csv_file_ir_rudics_sbd2('setConfig_', 1, g_decArgo_floatConfig);
          end
       end
       
@@ -271,7 +271,7 @@ switch (a_decoderId)
             % they are considered only the next cycle
             updateNowPtPvPm = 0;
             if (a_floatSoftVersion == -1)
-               fprintf('DEC_WARNING: Float #%d: float software version is unknown - 254 and 255 message types are considered the next cycle\n', ...
+               fprintf('DEC_WARNING: Float #%d: float software version is unknown => 254 and 255 message types are considered the next cycle\n', ...
                   g_decArgo_floatNum);
                if (~isempty(find(uProf == 0, 1)))
                   updateNowPtPvPm = 1;
@@ -297,7 +297,7 @@ switch (a_decoderId)
                         configName = tmpConfNames{id};
                         if (isempty(strfind(configName, 'CONFIG_PC_')))
                            if (updateNowPtPvPm == 0)
-                              continue
+                              continue;
                            end
                         end
                         idPos = find(strcmp(configName, configNames) == 1, 1);
@@ -344,13 +344,13 @@ switch (a_decoderId)
                                     confName = sprintf('CONFIG_PV_%d', 3+(idCP-1)*4);
                                     idFCyclePeriod = find(strcmp(confName, configNames) == 1, 1);
                                     currentConfig(idFPV03) = currentConfig(idFCyclePeriod);
-                                    break
+                                    break;
                                  end
                               else
                                  confName = sprintf('CONFIG_PV_%d', 3+(idCP-1)*4);
                                  idFCyclePeriod = find(strcmp(confName, configNames) == 1, 1);
                                  currentConfig(idFPV03) = currentConfig(idFCyclePeriod);
-                                 break
+                                 break;
                               end
                            end
                         end
@@ -377,7 +377,7 @@ switch (a_decoderId)
                                  zoneThreshold = currentConfig(idPos);
                                  if (configPC014 <= zoneThreshold)
                                     depthZoneNum = id;
-                                    break
+                                    break;
                                  end
                               end
                            end
@@ -419,7 +419,7 @@ switch (a_decoderId)
                      
                      if (~isempty(idUsedConf))
                         
-                        fprintf('WARNING: Float #%d: config already exists for cycle #%d and profile #%d - updating the current one\n', ...
+                        fprintf('WARNING: Float #%d: config already exists for cycle #%d and profile #%d => updating the current one\n', ...
                            g_decArgo_floatNum, cyNum, profNum);
                         
                         if ((configNum == -1) || (configNum == 0))
@@ -453,7 +453,7 @@ switch (a_decoderId)
                end
             end
             
-%             create_csv_to_print_config_ir_rudics_sbd2('setConfig_', 1, g_decArgo_floatConfig);
+%             print_config_in_csv_file_ir_rudics_sbd2('setConfig_', 1, g_decArgo_floatConfig);
          end
       end
    otherwise
@@ -461,4 +461,4 @@ switch (a_decoderId)
          a_decoderId);
 end
 
-return
+return;

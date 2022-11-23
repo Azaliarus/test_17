@@ -19,61 +19,51 @@
 % ------------------------------------------------------------------------------
 function nc_trace_disp(varargin)
 
-% to switch between Coriolis and JPR configurations
-CORIOLIS_CONFIGURATION_FLAG = 0;
-
 global g_NTD_NC_DIR;
 global g_NTD_PDF_DIR;
-
-if (CORIOLIS_CONFIGURATION_FLAG)
-
-   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-   % CORIOLIS CONFIGURATION - START
-
-   % top directory of NetCDF files to plot
-   g_NTD_NC_DIR = '/home/coriolis_exp/binlx/co04/co0414/co041402/data/nc/';
-
-   % directory to store pdf output
-   g_NTD_PDF_DIR = '/home/coriolis_exp/binlx/co04/co0414/co041402/data/pdf/';
-
-   % default list of floats to plot
-   FLOAT_LIST_FILE_NAME = '/home/idmtmp7/vincent/matlab/list/new_iridium.txt';
-
-   % CORIOLIS CONFIGURATION - END
-   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-else
-
-   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-   % JPR CONFIGURATION - START
-
-   % top directory of NetCDF files to plot
-   g_NTD_NC_DIR = 'C:\Users\jprannou\_DATA\OUT\nc_output_decArgo\';
-
-   % directory to store pdf output
-   g_NTD_PDF_DIR = 'C:\Users\jprannou\_RNU\DecArgo_soft\work\';
-
-   % default list of floats to plot
-   FLOAT_LIST_FILE_NAME = 'C:\Users\jprannou\_RNU\DecArgo_soft\lists\tmp.txt';
-
-   % JPR CONFIGURATION - END
-   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-end
-
 global g_NTD_FIG_HANDLE;
 global g_NTD_ID_FLOAT;
 global g_NTD_FLOAT_LIST;
 global g_NTD_DEFAULT_NB_PLOT_CYCLE;
 global g_NTD_NB_PLOT_CYCLE;
 global g_NTD_ISOBATH;
-global g_NTD_ISO_GEBCO;
+global g_NTD_ISO_SRTM;
 global g_NTD_PRINT;
 global g_NTD_QC;
 global g_NTD_LOAD_FLOAT;
 
 global g_NTD_ZOOM_MODE;
 global g_NTD_COMPUTE_BOUNDARIES;
+
+% top directory of NetCDF files to plot
+g_NTD_NC_DIR = 'C:\Users\jprannou\_DATA\OUT\nc_output_decArgo\';
+% g_NTD_NC_DIR = 'C:\Users\jprannou\_DATA\OUT\nc_output_decPrv_rem_for_rtqc\';
+
+% directory to store pdf output
+g_NTD_PDF_DIR = 'C:\Users\jprannou\_RNU\DecArgo_soft\work\';
+
+% default list of floats to plot
+% FLOAT_LIST_FILE_NAME = 'C:\Users\jprannou\_RNU\DecArgo_soft\lists\arvor_cm.txt';
+% FLOAT_LIST_FILE_NAME = 'C:\Users\jprannou\_RNU\DecArgo_soft\lists\_apex_argos_071412.txt';
+% FLOAT_LIST_FILE_NAME = 'C:\Users\jprannou\_RNU\DecArgo_soft\lists\_apex_argos_062608.txt';
+% FLOAT_LIST_FILE_NAME = 'C:\Users\jprannou\_RNU\DecArgo_soft\lists\_apex_argos_061609.txt';
+% FLOAT_LIST_FILE_NAME = 'C:\Users\jprannou\_RNU\DecArgo_soft\lists\_apex_argos_021009.txt';
+% FLOAT_LIST_FILE_NAME = 'C:\Users\jprannou\_RNU\DecArgo_soft\lists\_apex_argos_061810.txt';
+% FLOAT_LIST_FILE_NAME = 'C:\Users\jprannou\_RNU\DecArgo_soft\lists\_apex_argos_093008.txt';
+FLOAT_LIST_FILE_NAME = 'C:\Users\jprannou\_RNU\DecArgo_soft\lists\_apex_argos_matlab_all_2.txt';
+% FLOAT_LIST_FILE_NAME = 'C:\Users\jprannou\_RNU\DecArgo_soft\lists\_apex_argos_021208.txt';
+% FLOAT_LIST_FILE_NAME = 'C:\Users\jprannou\_RNU\DecArgo_soft\lists\_apex_argos_032213.txt';
+% % FLOAT_LIST_FILE_NAME = 'C:\Users\jprannou\_RNU\DecArgo_soft\lists\_apex_argos_110613.txt';
+% FLOAT_LIST_FILE_NAME = 'C:\Users\jprannou\_RNU\DecArgo_soft\lists\_apex_argos_090413.txt';
+% FLOAT_LIST_FILE_NAME = 'C:\Users\jprannou\_RNU\DecArgo_soft\lists\_apex_argos_121512.txt';
+% FLOAT_LIST_FILE_NAME = 'C:\Users\jprannou\_RNU\DecArgo_soft\lists\_apex_argos_110813.txt';
+% FLOAT_LIST_FILE_NAME = 'C:\Users\jprannou\_RNU\DecArgo_soft\lists\_apex_argos_082213.txt';
+% FLOAT_LIST_FILE_NAME = 'C:\Users\jprannou\_RNU\DecArgo_soft\lists\_apex_argos_082213_1.txt';
+% FLOAT_LIST_FILE_NAME = 'C:\Users\jprannou\_RNU\DecArgo_soft\lists\_nova.txt';
+% FLOAT_LIST_FILE_NAME = 'C:\Users\jprannou\_RNU\DecArgo_soft\lists\_dova.txt';
+% FLOAT_LIST_FILE_NAME = 'C:\Users\jprannou\_RNU\DecArgo_soft\lists\_nova_dova.txt';
+% FLOAT_LIST_FILE_NAME = 'C:\Users\jprannou\_RNU\DecArgo_soft\lists\arvor_arn_ir.txt';
+% FLOAT_LIST_FILE_NAME = 'C:\Users\jprannou\_RNU\DecArgo_soft\lists\arvor_4.54.txt';
 
 % number of displacements to plot
 g_NTD_DEFAULT_NB_PLOT_CYCLE = 5;
@@ -91,7 +81,7 @@ fprintf('   d  : back to plot %d displacements per set\n', ...
    g_NTD_DEFAULT_NB_PLOT_CYCLE);
 fprintf('Misc:\n');
 fprintf('   i: plot useful isobath (ETOPO2)\n');
-fprintf('   s: switch between bathymetric atlas to plot isobath (ETOPO2 or GEBCO)\n');
+fprintf('   s: switch between bathymetric atlas to plot isobath (ETOPO2 or SRTM30+)\n');
 fprintf('   p: pdf output file generation\n');
 fprintf('   h: write help and current configuration\n');
 fprintf('Escape: exit\n\n');
@@ -100,7 +90,7 @@ fprintf('Escape: exit\n\n');
 g_NTD_ISOBATH = 0;
 
 % use the ETOPO2 atlas
-g_NTD_ISO_GEBCO = 0;
+g_NTD_ISO_SRTM = 0;
 
 % no pdf generation
 g_NTD_PRINT = 0;
@@ -127,7 +117,7 @@ if (nargin == 0)
    floatListFileName = FLOAT_LIST_FILE_NAME;
    if ~(exist(floatListFileName, 'file') == 2)
       fprintf('ERROR: File not found: %s\n', floatListFileName);
-      return
+      return;
    end
    
    fprintf('Floats from list: %s\n', floatListFileName);
@@ -153,7 +143,7 @@ set(g_NTD_ZOOM_MODE, 'ActionPostCallback', @after_zoom);
 % plot the first cycle of the first float
 plot_argos(0, 0);
 
-return
+return;
 
 % ------------------------------------------------------------------------------
 % Plot of surface locations and raw deep displacements of a given float for a
@@ -187,7 +177,7 @@ global g_NTD_ID_CYCLE;
 global g_NTD_NB_CYCLE;
 global g_NTD_NB_PLOT_CYCLE;
 global g_NTD_ISOBATH;
-global g_NTD_ISO_GEBCO;
+global g_NTD_ISO_SRTM;
 global g_NTD_PRINT;
 global g_NTD_QC;
 global g_NTD_LOAD_FLOAT;
@@ -219,9 +209,6 @@ global g_NTD_latMax;
 
 % default values initialization
 init_valdef;
-
-% default values initialization
-init_default_values;
 
 global g_dateDef;
 global g_latDef;
@@ -290,7 +277,7 @@ if ((g_NTD_ID_FLOAT ~= a_idFloat) || (g_NTD_LOAD_FLOAT == 1))
    if (~strcmp(metaFileFormatVersion, '3.1'))
       fprintf('ERROR: Input meta file (%s) is expected to be of 3.1 format version (but FORMAT_VERSION = %s)', ...
          metaFileName, metaFileFormatVersion);
-      return
+      return;
    end
    
    % retrieve the needed configuration parameters
@@ -351,12 +338,12 @@ if ((g_NTD_ID_FLOAT ~= a_idFloat) || (g_NTD_LOAD_FLOAT == 1))
    if (parkPres == -1)
       fprintf('ERROR: Unable to retrieve CONFIG_ParkPressure_dbar from meta file (%s)', ...
          metaFileName);
-%       return
+      return;
    end
    if (profPres == -1)
       fprintf('ERROR: Unable to retrieve CONFIG_ProfilePressure_dbar from meta file (%s)', ...
          metaFileName);
-%       return
+      return;
    end   
    g_NTD_parkingPressure = parkPres;
    g_NTD_deepestPressure = profPres;
@@ -418,17 +405,17 @@ if ((g_NTD_ID_FLOAT ~= a_idFloat) || (g_NTD_LOAD_FLOAT == 1))
       label = sprintf('%02d/%02d : %d (no data)', ...
          a_idFloat+1, length(g_NTD_FLOAT_LIST), g_NTD_FLOAT_LIST(a_idFloat+1));
       title(label, 'FontSize', 14);
-      return
+      return;
    end
    
    idVal = find(strcmp('FORMAT_VERSION', trajData(1:2:end)) == 1, 1);
    trajFileFormatVersion = strtrim(trajData{2*idVal}');
    
    % check the traj file format version
-   if (~ismember(trajFileFormatVersion, [{'3.1'} {'3.2'}]))
+   if (~strcmp(trajFileFormatVersion, '3.1'))
       fprintf('ERROR: Input traj file (%s) is expected to be of 3.1 format version (but FORMAT_VERSION = %s)', ...
          trajFileName, trajFileFormatVersion);
-      return
+      return;
    end
 
    idVal = find(strcmp('CYCLE_NUMBER', trajData(1:2:end)) == 1, 1);
@@ -624,7 +611,7 @@ if (isempty(g_NTD_cycles))
    label = sprintf('%02d/%02d : %d (no data)', ...
       a_idFloat+1, length(g_NTD_FLOAT_LIST), g_NTD_FLOAT_LIST(a_idFloat+1));
    title(label, 'FontSize', 14);
-   return
+   return;
 end
 
 % define the cycles to plot
@@ -689,7 +676,7 @@ if (g_NTD_ISOBATH == 1)
       isoProfilLevels = [isoProfilLevels isoProfilLevels];
    end
 
-   if (g_NTD_ISO_GEBCO == 0)
+   if (g_NTD_ISO_SRTM == 0)
       [contourMatrix, contourHdl] = m_etopo2('contour', [-g_NTD_parkingPressure-30 -g_NTD_parkingPressure+30], 'g');
       if (~isempty(contourMatrix))
          set(contourHdl, 'ShowText', 'off', 'TextStep', get(contourHdl, 'LevelStep')*4);
@@ -720,13 +707,13 @@ if (g_NTD_ISOBATH == 1)
          g_NTD_legendLabels = [g_NTD_legendLabels {'Coastline (ETOPO)'}];
       end
    else
-      [elev, lon , lat] = get_gebco_elev_zone(lonMin, lonMax, latMin, latMax, '');
+      [elev, lon , lat] = get_srtm_elev(lonMin, lonMax, latMin, latMax);
       
       [contourMatrix, contourHdl] = m_contour(lon, lat, elev, [-g_NTD_parkingPressure-30 -g_NTD_parkingPressure+30], 'g');
       if (~isempty(contourMatrix))
          set(contourHdl, 'ShowText', 'off', 'TextStep', get(contourHdl, 'LevelStep')*4);
          g_NTD_legendPlots = [g_NTD_legendPlots contourHdl];
-         g_NTD_legendLabels = [g_NTD_legendLabels {'Park. press. iso. (GEBCO)'}];
+         g_NTD_legendLabels = [g_NTD_legendLabels {'Park. press. iso. (SRTM)'}];
       end
 
       [contourMatrix, contourHdl] = m_contour(lon, lat, elev, [0:-100:-isoDerive]', 'b');
@@ -738,7 +725,7 @@ if (g_NTD_ISOBATH == 1)
       if (~isempty(contourMatrix))
          set(contourHdl, 'ShowText', 'off', 'TextStep', get(contourHdl, 'LevelStep')*4);
          g_NTD_legendPlots = [g_NTD_legendPlots contourHdl];
-         g_NTD_legendLabels = [g_NTD_legendLabels {'Prof. press. iso. (GEBCO)'}];
+         g_NTD_legendLabels = [g_NTD_legendLabels {'Prof. press. iso. (SRTM)'}];
       end
 
       [contourMatrix, contourHdl] = m_contour(lon, lat, elev, isoProfilLevels, 'm');
@@ -749,9 +736,8 @@ if (g_NTD_ISOBATH == 1)
       [contourMatrix, contourHdl] = m_contour(lon, lat, elev, [0 0], 'k');
       if (~isempty(contourMatrix))
          g_NTD_legendPlots = [g_NTD_legendPlots contourHdl];
-         g_NTD_legendLabels = [g_NTD_legendLabels {'Coastline (GEBCO)'}];
+         g_NTD_legendLabels = [g_NTD_legendLabels {'Coastline (SRTM)'}];
       end
-      clear elev lon lat
    end
    
    fprintf('done\n');
@@ -990,7 +976,7 @@ if (g_NTD_PRINT)
    orient portrait
 end
 
-return
+return;
 
 % ------------------------------------------------------------------------------
 % Callback to manage plots:
@@ -1004,7 +990,7 @@ return
 %   - "d"         : back to plot the default number of displacements per set
 %   - "i"         : plot useful isobath (ETOPO2)
 %   - "s"         : switch between bathymetric atlas to plot isobath (ETOPO2 or
-%                   GEBCO)
+%                   SRTM30+)
 %   - "p"         : pdf output file generation
 %   - "h"         : write help and current configuration
 %   - escape      : exit
@@ -1036,7 +1022,7 @@ global g_NTD_NB_CYCLE;
 global g_NTD_DEFAULT_NB_PLOT_CYCLE;
 global g_NTD_NB_PLOT_CYCLE;
 global g_NTD_ISOBATH;
-global g_NTD_ISO_GEBCO;
+global g_NTD_ISO_SRTM;
 global g_NTD_PRINT;
 global g_NTD_QC;
 global g_NTD_LOAD_FLOAT;
@@ -1086,21 +1072,17 @@ elseif (strcmp(a_eventData.Key, 'leftarrow'))
 elseif (strcmp(a_eventData.Key, 'i'))
    g_NTD_ISOBATH = mod(g_NTD_ISOBATH+1, 2);
    if (g_NTD_ISOBATH == 0)
-      g_NTD_ISO_GEBCO = 0;
+      g_NTD_ISO_SRTM = 0;
    end
    plot_argos(g_NTD_ID_FLOAT, g_NTD_ID_CYCLE);
    
-   display_current_config;
-   
    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-   % switch between bathymetric atlas to plot isobath (ETOPO2 or GEBCO)
+   % switch between bathymetric atlas to plot isobath (ETOPO2 or SRTM30+)
 elseif (strcmp(a_eventData.Key, 's'))
    if (g_NTD_ISOBATH == 1)
-      g_NTD_ISO_GEBCO = mod(g_NTD_ISO_GEBCO+1, 2);
+      g_NTD_ISO_SRTM = mod(g_NTD_ISO_SRTM+1, 2);
       plot_argos(g_NTD_ID_FLOAT, g_NTD_ID_CYCLE);
    end
-   
-   display_current_config;
 
    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
    % decrease the number of displacements per set
@@ -1112,8 +1094,6 @@ elseif (strcmp(a_eventData.Character, '-'))
    fprintf('Plot of %d displacements per set\n', g_NTD_NB_PLOT_CYCLE);
    plot_argos(g_NTD_ID_FLOAT, g_NTD_ID_CYCLE);
    
-   display_current_config;
-   
    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
    % increase the number of displacements per set
 elseif (strcmp(a_eventData.Character, '+'))
@@ -1124,8 +1104,6 @@ elseif (strcmp(a_eventData.Character, '+'))
    fprintf('Plot of %d displacements per set\n', g_NTD_NB_PLOT_CYCLE);
    plot_argos(g_NTD_ID_FLOAT, g_NTD_ID_CYCLE);
    
-   display_current_config;
-   
    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
    % plot all the displacements of the float
 elseif (strcmp(a_eventData.Key, 'a'))
@@ -1135,8 +1113,6 @@ elseif (strcmp(a_eventData.Key, 'a'))
    g_NTD_ID_CYCLE = 0;
    plot_argos(g_NTD_ID_FLOAT, g_NTD_ID_CYCLE);
    
-   display_current_config;
-   
    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
    % back to plot the default number of displacements per set
 elseif (strcmp(a_eventData.Key, 'd'))
@@ -1145,8 +1121,6 @@ elseif (strcmp(a_eventData.Key, 'd'))
    fprintf('Plot of %d displacements per set\n', g_NTD_NB_PLOT_CYCLE);
    g_NTD_ID_CYCLE = 0;
    plot_argos(g_NTD_ID_FLOAT, g_NTD_ID_CYCLE);
-   
-   display_current_config;
    
    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
    % pdf output file generation
@@ -1161,8 +1135,6 @@ elseif (strcmp(a_eventData.Key, 'q'))
    g_NTD_LOAD_FLOAT = 1;
    g_NTD_QC = mod(g_NTD_QC+1, 2);
    plot_argos(g_NTD_ID_FLOAT, g_NTD_ID_CYCLE);
-   
-   display_current_config;
    
    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
    % write help and current configuration
@@ -1180,48 +1152,19 @@ elseif (strcmp(a_eventData.Key, 'h'))
       g_NTD_DEFAULT_NB_PLOT_CYCLE);
    fprintf('Misc:\n');
    fprintf('   i: plot useful isobath (ETOPO2)\n');
-   fprintf('   s: switch between bathymetric atlas to plot isobath (ETOPO2 or GEBCO)\n');
+   fprintf('   s: switch between bathymetric atlas to plot isobath (ETOPO2 or SRTM30+)\n');
    fprintf('   p: pdf output file generation\n');
    fprintf('   h: write help and current configuration\n');
    fprintf('Escape: exit\n\n');
 
-   display_current_config;
+   fprintf('Current configuration:\n');
+   fprintf('NB DISP / SET: %d\n', g_NTD_NB_PLOT_CYCLE);
+   fprintf('QC           : %d\n', g_NTD_QC);
+   fprintf('ISOBATH      : %d\n', g_NTD_ISOBATH);
+   fprintf('ISOBATH SRTM : %d\n', g_NTD_ISO_SRTM);
 end
 
-return
-
-% ------------------------------------------------------------------------------
-% Display the current visualization configuration.
-%
-% SYNTAX :
-%   display_current_config
-%
-% INPUT PARAMETERS :
-%
-% OUTPUT PARAMETERS :
-%
-% EXAMPLES :
-%
-% SEE ALSO :
-% AUTHORS  : Jean-Philippe Rannou (Altran)(jean-philippe.rannou@altran.com)
-% ------------------------------------------------------------------------------
-% RELEASES :
-%   10/18/2016 - RNU - creation
-% ------------------------------------------------------------------------------
-function display_current_config
-
-global g_NTD_NB_PLOT_CYCLE;
-global g_NTD_ISOBATH;
-global g_NTD_ISO_GEBCO;
-global g_NTD_QC;
-
-fprintf('\nCurrent configuration:\n');
-fprintf('NB DISP / SET: %d\n', g_NTD_NB_PLOT_CYCLE);
-fprintf('QC           : %d\n', g_NTD_QC);
-fprintf('ISOBATH      : %d\n', g_NTD_ISOBATH);
-fprintf('ISOBATH GEBCO: %d\n', g_NTD_ISO_GEBCO);
-
-return
+return;
 
 %------------------------------------------------------------------------------
 % Callback used to update the plot after a zoom
@@ -1270,4 +1213,4 @@ end
 
 plot_argos(g_NTD_ID_FLOAT, g_NTD_ID_CYCLE);
 
-return
+return;

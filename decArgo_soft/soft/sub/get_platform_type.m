@@ -37,70 +37,38 @@ switch (a_decoderId)
       % ARVOR Argos
       o_platformType = 'ARVOR';
       
-   case {105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 301}
-      % PROVOR CTS4
+   case {105, 106, 107, 108, 109, 301}
+      % PROVOR REMOCEAN
       o_platformType = 'PROVOR_III';
       
-   case {121, 122, 123, 124, 125}
-      % PROVOR APMT-OSEAN (CTS5)
-      o_platformType = 'PROVOR_IV';
-      
-   case {126, 127, 128, 129}
-      % PROVOR APMT-USEA (CTS5)
-      o_platformType = 'PROVOR_V';
-      
-   case {201, 202, 203, 215, 216, 218, 221}
+   case {201, 202, 203}
       % DEEP ARVOR
       o_platformType = 'ARVOR_D';
       
-   case {205, 204, 209, 210, 211, 212, 222, 224}
+   case {205, 204, 209, 210, 211}
       % ARVOR Iridium
       o_platformType = 'ARVOR';
       
-   case {206, 207, 208, 213, 214, 225}
+   case {206, 207, 208}
       % Provor-DO Iridium
       o_platformType = 'PROVOR';
             
-   case {217, 223}
-      % ARVOR-DO Iridium
-      o_platformType = 'ARVOR';
-      
-   case {219, 220}
-      % ARVOR-C Iridium
-      o_platformType = 'ARVOR_C';
-      
    case {302, 303}
       % Arvor CM
       o_platformType = 'ARVOR_C';
       
-   case {1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008, 1009, 1010, 1011, ...
-         1012, 1013, 1014, 1015, 1016, 1021, 1022}
+   case {1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008, 1009, 1010, 1011, 1012}
       % Apex Argos
       o_platformType = 'APEX';
       
-   case {1101, 1102, 1103, 1104, 1105, 1106, 1107, 1108, 1109, 1110, 1111, 1112, 1113, 1114, ...
-         1314, ...
-         1121, 1122, 1123, 1124, 1125, 1126, 1127, 1128, ...
-         1321, 1322, 1323}
-      % Apex Iridium
-      o_platformType = 'APEX';
-      
-   case {1201}
-      % Navis
-      o_platformType = 'NAVIS_A';
-      
-   case {2001, 2002, 2003}
-      % Nova & Dova
+   case {2001}
+      % Nova
       o_platformType = 'NOVA';
       
-      %    case {2002}
-      %       % Dova
-      %       o_platformType = 'DOVA';
+   case {2002}
+      % Dova
+      o_platformType = 'DOVA';
       
-   case {3001}
-      % NEMO
-      o_platformType = 'NEMO';
-
    otherwise
       o_platformType = '';
       fprintf('WARNING: Float #%d: No platform type assigned to decoderId #%d\n', ...
@@ -109,4 +77,4 @@ switch (a_decoderId)
       
 end
 
-return
+return;

@@ -61,17 +61,9 @@ switch (a_decoderId)
       
       %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
       
-   case {210, 211, 213}
-      % Arvor-ARN Iridium
-      % Provor-ARN-DO Iridium
+   case {210, 211} % Arvor-ARN Iridium
       
-      update_float_config_ir_sbd_210_211_213(a_floatParam);
-      
-      %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-            
-   case {215} % Arvor-deep 4000 with "Near Surface" & "In Air" measurements
-      
-      update_float_config_ir_sbd_215(a_floatParam);
+      update_float_config_ir_sbd_210_211(a_floatParam);
       
    otherwise
       fprintf('WARNING: Float #%d: Nothing implemented yet to update configuration for decoderId #%d\n', ...
@@ -79,4 +71,4 @@ switch (a_decoderId)
          a_decoderId);
 end
 
-return
+return;

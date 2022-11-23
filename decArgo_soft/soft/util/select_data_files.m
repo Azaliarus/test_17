@@ -20,26 +20,12 @@
 % ------------------------------------------------------------------------------
 function select_data_files()
 
-floatListFileName = 'C:\Users\jprannou\_RNU\Argo\ActionsCoriolis\ConvertApexOldVersionsTo3.1\list\Apex_all.txt';
-floatListFileName = 'C:\Users\jprannou\_RNU\Argo\ActionsCoriolis\ConvertApexOldVersionsTo3.1\list\Apex_36.txt';
-floatListFileName = 'C:\Users\jprannou\_RNU\DecArgo_soft\lists\tmpAll_nova.txt';
-floatListFileName = 'C:\Users\jprannou\_RNU\DecArgo_soft\lists\tmpAll_nke_atlantos.txt';
-floatListFileName = 'C:\Users\jprannou\_RNU\DecArgo_soft\lists\_apex_argos_all.txt';
-floatListFileName = 'C:\Users\jprannou\_RNU\DecArgo_soft\lists\_apex_apf11_argos_all.txt';
-floatListFileName = 'C:\Users\jprannou\_RNU\DecArgo_soft\lists\_apex_ir_sbd_090215.txt';
-floatListFileName = 'C:\Users\jprannou\_RNU\DecArgo_soft\lists\_apex_ir_rudics_all.txt';
-floatListFileName = 'C:\Users\jprannou\_RNU\DecArgo_soft\lists\_apex_apf11_iridium-sbd_all.txt';
-% floatListFileName = 'C:\Users\jprannou\_RNU\DecArgo_soft\lists\_apex_apf11_iridium-rudics_all.txt';
-% floatListFileName = 'C:\Users\jprannou\_RNU\DecArgo_soft\lists\_nemo_all.txt';
-floatListFileName = '\Users\jprannou\_RNU\DecArgo_soft\lists\_arvor_deep_all.txt';
-% floatListFileName = '\Users\jprannou\_RNU\DecArgo_soft\lists\arvor_C_all.txt';
-% floatListFileName = '\Users\jprannou\_RNU\DecArgo_soft\lists\tmp.txt';
-% floatListFileName = '\Users\jprannou\_RNU\DecArgo_soft\lists\_nke_all_decId_2xx.txt';
+floatListFileName = 'C:\Users\jprannou\_RNU\DecArgo_soft\lists\_apex_argos_061609.txt';
+floatListFileName = 'C:\Users\jprannou\_RNU\DecArgo_soft\lists\tmp.txt';
 
-inputDirName = 'C:\Users\jprannou\_DATA\201905-ArgoData\coriolis\';
-inputDirName = 'C:\Users\jprannou\_DATA\Conversion_en_3.1\IN\';
-inputDirName = 'C:\Users\jprannou\_DATA\OUT\nc_output_decArgo\';
-inputDirName = 'C:\Users\jprannou\Contacts\Desktop\TEST_NR\TEST_NR_APRES\Nke_2xx\';
+inputDirName = 'H:\archive_201603\coriolis\';
+inputDirName = 'H:\archive_201603\incois\';
+inputDirName = 'C:\Users\jprannou\_DATA\OUT\test_update_format_tech - copie\coriolis\';
 
 fprintf('Floats from list: %s\n', floatListFileName);
 floatList = load(floatListFileName);
@@ -48,7 +34,7 @@ floatList = load(floatListFileName);
 outputDirName = [inputDirName '/selected/'];
 if (exist(outputDirName, 'dir') == 7)
    fprintf('Le répertoire %s existe déjà, arrêt du programme\n', outputDirName);
-   return
+   return;
 else
    mkdir(outputDirName);
 end
@@ -65,9 +51,9 @@ for idFloat = 1:nbFloats
    if ~(exist(txtDirName, 'dir') == 7)
       fprintf(': répertoire absent: %s\n', txtDirName);
    else
-      move_file(txtDirName, outputDirName);
+      movefile(txtDirName, outputDirName);
       fprintf('\n');
    end
 end
 
-return
+return;

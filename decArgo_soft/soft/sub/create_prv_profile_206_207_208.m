@@ -67,13 +67,13 @@ global g_decArgo_tempDoxyDef;
 
 
 if (isempty(a_dataCTDO))
-   return
+   return;
 end
 
-for type = [1 3]
-   idForType = find(a_dataCTDO(:, 1) == type);
-   for idP = 1:length(idForType)
-      data = a_dataCTDO(idForType(idP), :);
+for idT = [1 3]
+   idDesc = find(a_dataCTDO(:, 1) == idT);
+   for idP = 1:length(idDesc)
+      data = a_dataCTDO(idDesc(idP), :);
       for idMeas = 1:7
          if (idMeas == 1)
             data(idMeas+1) = data(idMeas+1) + a_refDay;
@@ -84,11 +84,11 @@ for type = [1 3]
                   (data(idMeas+1+7*5) == g_decArgo_c1C2PhaseDoxyDef) && ...
                   (data(idMeas+1+7*6) == g_decArgo_c1C2PhaseDoxyDef) && ...
                   (data(idMeas+1+7*7) == g_decArgo_tempDoxyDef))
-               break
+               break;
             end
          end
          
-         if (type == 1)
+         if (idT == 1)
             o_descProfDate = [o_descProfDate; data(idMeas+1)];
             o_descProfPres = [o_descProfPres; data(idMeas+1+7*2)];
             o_descProfTemp = [o_descProfTemp; data(idMeas+1+7*3)];
@@ -126,4 +126,4 @@ o_ascProfC1PhaseDoxy = o_ascProfC1PhaseDoxy(idSorted);
 o_ascProfC2PhaseDoxy = o_ascProfC2PhaseDoxy(idSorted);
 o_ascProfTempDoxy = o_ascProfTempDoxy(idSorted);
 
-return
+return;

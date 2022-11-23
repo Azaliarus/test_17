@@ -30,15 +30,15 @@ global g_decArgo_iridiumMailData;
 
 
 if (isempty(a_dataCTDX))
-   return
+   return;
 end
 
 % retrieve the cycle time from the configuration (the processing is done under
 % the assumption that this configuration parameter has not been modified)
 [configNames, configValues] = get_float_config_ir_sbd(a_cycleNumberPrev);
 cycleTimeDays = get_config_value('CONFIG_PM01', configNames, configValues);
-if (isempty(cycleTimeDays))
-   return
+if (isempty(cycleTimeDays) || isnan(cycleTimeDays))
+   return;
 end
 
 % retrieve the last message time of the previous cycle
@@ -85,4 +85,4 @@ else
    end
 end
 
-return
+return;

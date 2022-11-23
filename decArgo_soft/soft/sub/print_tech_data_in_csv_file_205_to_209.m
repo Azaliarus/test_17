@@ -31,7 +31,7 @@ global g_decArgo_outputCsvFileId;
 
 
 if (isempty(a_tabTech))
-   return
+   return;
 end
 
 if (size(a_tabTech, 1) > 1)
@@ -156,9 +156,9 @@ elseif (size(a_tabTech, 1) == 1)
       fprintf(g_decArgo_outputCsvFileId, '%d; %d; Tech; TECH: LAST PUMPED ASCENT RAW MEAS\n', ...
          g_decArgo_floatNum, g_decArgo_cycleNum);
       fprintf(g_decArgo_outputCsvFileId, '%d; %d; Tech; "Subsurface" meas PRES; %d; => %.1f; dbar\n', ...
-         g_decArgo_floatNum, g_decArgo_cycleNum, a_tabTech(id, 41), sensor_2_value_for_pressure_204_to_209_219_220(a_tabTech(id, 41)));
-      fprintf(g_decArgo_outputCsvFileId, '%d; %d; Tech; "Subsurface" meas TEMP; %d; => %.3f; degC\n', ...
-         g_decArgo_floatNum, g_decArgo_cycleNum, a_tabTech(id, 42), sensor_2_value_for_temp_204_to_214_217_219_220_222_to_225(a_tabTech(id, 42)));
+         g_decArgo_floatNum, g_decArgo_cycleNum, a_tabTech(id, 41), sensor_2_value_for_pressure_204_to_209(a_tabTech(id, 41)));
+      fprintf(g_decArgo_outputCsvFileId, '%d; %d; Tech; "Subsurface" meas TEMP; %d; => %.3f; °C\n', ...
+         g_decArgo_floatNum, g_decArgo_cycleNum, a_tabTech(id, 42), sensor_2_value_for_temperature_204_to_211(a_tabTech(id, 42)));
       fprintf(g_decArgo_outputCsvFileId, '%d; %d; Tech; "Subsurface" meas PSAL; %d; => %.3f; PSU\n', ...
          g_decArgo_floatNum, g_decArgo_cycleNum, a_tabTech(id, 43), a_tabTech(id, 43)/1000);
    end
@@ -179,8 +179,8 @@ elseif (size(a_tabTech, 1) == 1)
       g_decArgo_floatNum, g_decArgo_cycleNum, a_tabTech(id, 49));
    fprintf(g_decArgo_outputCsvFileId, '%d; %d; Tech; => Float time; %s\n', ...
       g_decArgo_floatNum, g_decArgo_cycleNum, julian_2_gregorian_dec_argo(a_tabTech(id, end-3)));
-   fprintf(g_decArgo_outputCsvFileId, '%d; %d; Tech; Pressure offset; %.1f; dbar\n', ...
-      g_decArgo_floatNum, g_decArgo_cycleNum, a_tabTech(id, 50));
+   fprintf(g_decArgo_outputCsvFileId, '%d; %d; Tech; Pressure offset; %d; cbar\n', ...
+      g_decArgo_floatNum, g_decArgo_cycleNum, twos_complement_dec_argo(a_tabTech(id, 50), 8));
    fprintf(g_decArgo_outputCsvFileId, '%d; %d; Tech; Internal vacuum (5 mbar resolution); %d; => %d mbar\n', ...
       g_decArgo_floatNum, g_decArgo_cycleNum, a_tabTech(id, 51), a_tabTech(id, 51)*5);
    fprintf(g_decArgo_outputCsvFileId, '%d; %d; Tech; Battery voltage (voltage dropout from 10V, resolution 0.1V); %d; => %.1f; V\n', ...
@@ -243,9 +243,8 @@ elseif (size(a_tabTech, 1) == 1)
       g_decArgo_floatNum, g_decArgo_cycleNum, a_tabTech(id, 72));
    fprintf(g_decArgo_outputCsvFileId, '%d; %d; Tech; GPS longitude direction (0=East 1=West); %d\n', ...
       g_decArgo_floatNum, g_decArgo_cycleNum, a_tabTech(id, 73));
-   [lonStr, latStr] = format_position(a_tabTech(id, end-2), a_tabTech(id, end-1));
-   fprintf(g_decArgo_outputCsvFileId, '%d; %d; Tech; => GPS position (lon, lat); %.4f; %.4f; =>; %s; %s\n', ...
-      g_decArgo_floatNum, g_decArgo_cycleNum, a_tabTech(id, end-2), a_tabTech(id, end-1), lonStr, latStr);
+   fprintf(g_decArgo_outputCsvFileId, '%d; %d; Tech; => GPS position (lon, lat); %.4f; %.4f\n', ...
+      g_decArgo_floatNum, g_decArgo_cycleNum, a_tabTech(id, end-2), a_tabTech(id, end-1));
    fprintf(g_decArgo_outputCsvFileId, '%d; %d; Tech; GPS valid fix (1=Valid, 0=Not valid); %d\n', ...
       g_decArgo_floatNum, g_decArgo_cycleNum, a_tabTech(id, 74));
    
@@ -258,4 +257,4 @@ elseif (size(a_tabTech, 1) == 1)
    end
 end
 
-return
+return;

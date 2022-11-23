@@ -94,6 +94,7 @@ global g_MC_FMT;
 global g_MC_Surface;
 global g_MC_LMT;
 global g_MC_TET;
+global g_MC_InAirSingleMeas;
 
 % global time status
 global g_JULD_STATUS_1;
@@ -128,7 +129,7 @@ if (a_addLaunchData == 1)
       a_floatSurfData.launchDate, ...
       a_floatSurfData.launchLon, ...
       a_floatSurfData.launchLat, ...
-      ' ', ' ', '0', 0);
+      ' ', ' ', '0');
    
    trajNMeasStruct.surfOnly = 1;
    trajNMeasStruct.tabMeas = [trajNMeasStruct.tabMeas; measStruct];
@@ -153,7 +154,7 @@ cycleSurfData = a_floatSurfData.cycleData(end);
 if (cycleSurfData.firstMsgTime ~= g_decArgo_dateDef)
    measStruct = create_one_meas_surface(g_MC_FMT, ...
       cycleSurfData.firstMsgTime, ...
-      g_decArgo_argosLonDef, [], [], [], [], ~isempty(a_floatClockDrift));
+      g_decArgo_argosLonDef, [], [], [], []);
    trajNMeasStruct.tabMeas = [trajNMeasStruct.tabMeas; measStruct];
    
    trajNCycleStruct.juldFirstMessage = cycleSurfData.firstMsgTime;
@@ -168,8 +169,7 @@ for idpos = 1:length(cycleSurfData.argosLocDate)
       cycleSurfData.argosLocLat(idpos), ...
       cycleSurfData.argosLocAcc(idpos), ...
       cycleSurfData.argosLocSat(idpos), ...
-      cycleSurfData.argosLocQc(idpos), ...
-      ~isempty(a_floatClockDrift));
+      cycleSurfData.argosLocQc(idpos));
    trajNMeasStruct.tabMeas = [trajNMeasStruct.tabMeas; measStruct];
 end
 
@@ -185,7 +185,7 @@ end
 if (cycleSurfData.lastMsgTime ~= g_decArgo_dateDef)
    measStruct = create_one_meas_surface(g_MC_LMT, ...
       cycleSurfData.lastMsgTime, ...
-      g_decArgo_argosLonDef, [], [], [], [], ~isempty(a_floatClockDrift));
+      g_decArgo_argosLonDef, [], [], [], []);
    trajNMeasStruct.tabMeas = [trajNMeasStruct.tabMeas; measStruct];
    
    trajNCycleStruct.juldLastMessage = cycleSurfData.lastMsgTime;
@@ -385,41 +385,31 @@ end
 % IN AIR MEASUREMENTS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% The following code is removed (set as comment) to be compliant with the
-% following decision:
-% From "Minutes of the 6th BGC-Argo meeting 27, 28 November 2017, Hamburg"
-% http://www.argodatamgt.org/content/download/30911/209493/file/minutes_BGC6_ADMT18.pdf
-% If oxygen data follow the same vertical sampling scheme(s) as CTD data, they
-% are stored in the same N_PROF(s) as the TEMP and PSAL data. 
-% If oxygen data follow an independent vertical sampling scheme, their data are
-% not split into two, a profile and near-surface sampling, but put into one
-% single vertical sampling scheme (N_PROF>1). 
-
-% for idProf = 1:length(a_cycleProfiles)
-%    profile = a_cycleProfiles(idProf);
-%    if ((profile.direction == 'A') && any(strfind(profile.vertSamplingScheme, 'unpumped')))
-%       
-%       [inAirMeasProfile] = create_in_air_meas_profile(a_decoderId, profile);
-%       
-%       if (~isempty(inAirMeasProfile))
-%          
-%          inAirMeasDates = inAirMeasProfile.dates;
-%          dateFillValue = inAirMeasProfile.dateList.fillValue;
-%          
-%          for idMeas = 1:length(inAirMeasDates)
-%             if (inAirMeasDates(idMeas) ~= dateFillValue)
-%                measStruct = create_one_meas_float_time(g_MC_InAirSeriesOfMeas, inAirMeasDates(idMeas), g_JULD_STATUS_2, floatClockDrift);
-%             else
-%                measStruct = get_traj_one_meas_init_struct();
-%                measStruct.measCode = g_MC_InAirSeriesOfMeas;
-%             end
-%             measStruct.paramList = inAirMeasProfile.paramList;
-%             measStruct.paramData = inAirMeasProfile.data(idMeas, :);
-%             trajNMeasStruct.tabMeas = [trajNMeasStruct.tabMeas; measStruct];
-%          end
-%       end
-%    end
-% end
+for idProf = 1:length(a_cycleProfiles)
+   profile = a_cycleProfiles(idProf);
+   if ((profile.direction == 'A') && any(strfind(profile.vertSamplingScheme, 'unpumped')))
+      
+      [inAirMeasProfile] = create_in_air_meas_profile(a_decoderId, profile);
+      
+      if (~isempty(inAirMeasProfile))
+         
+         inAirMeasDates = inAirMeasProfile.dates;
+         dateFillValue = inAirMeasProfile.dateList.fillValue;
+         
+         for idMeas = 1:length(inAirMeasDates)
+            if (inAirMeasDates(idMeas) ~= dateFillValue)
+               measStruct = create_one_meas_float_time(g_MC_InAirSingleMeas, inAirMeasDates(idMeas), g_JULD_STATUS_2, floatClockDrift);
+            else
+               measStruct = get_traj_one_meas_init_struct();
+               measStruct.measCode = g_MC_InAirSingleMeas;
+            end
+            measStruct.paramList = inAirMeasProfile.paramList;
+            measStruct.paramData = inAirMeasProfile.data(idMeas, :);
+            trajNMeasStruct.tabMeas = [trajNMeasStruct.tabMeas; measStruct];
+         end
+      end
+   end
+end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % MISCELLANEOUS MEASUREMENTS
@@ -585,16 +575,14 @@ if (a_cycleNum >= firstDeepCycle)
 end
 
 % configuration mission number
-if (a_cycleNum > 0) % we don't assign any configuration to cycle #0 data
-   configMissionNumber = get_config_mission_number_argos( ...
-      a_cycleNum, a_repRateMetaData, a_decoderId);
-   if (~isempty(configMissionNumber))
-      trajNCycleStruct.configMissionNumber = configMissionNumber;
-   end
+configMissionNumber = get_config_mission_number_argos( ...
+   a_cycleNum, a_repRateMetaData, a_decoderId);
+if (~isempty(configMissionNumber))
+   trajNCycleStruct.configMissionNumber = configMissionNumber;
 end
 
 % output data
 o_tabTrajNMeas = [o_tabTrajNMeas; trajNMeasStruct];
 o_tabTrajNCycle = trajNCycleStruct;
 
-return
+return;

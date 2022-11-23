@@ -3,11 +3,10 @@
 %
 % SYNTAX :
 %  print_data_in_csv_file_ir_sbd2_SEAPOINT_mean_stdMed( ...
-%    a_decoderId, a_cycleNum, a_profNum, a_phaseNum, ...
+%    a_cycleNum, a_profNum, a_phaseNum, ...
 %    a_dataSEAPOINTMean, a_dataSEAPOINTStdMed)
 %
 % INPUT PARAMETERS :
-%   a_decoderId          : float decoder Id
 %   a_cycleNum           : cycle number of the packet
 %   a_profNum            : profile number of the packet
 %   a_phaseNum           : phase number of the packet
@@ -25,7 +24,7 @@
 %   11/26/2015 - RNU - creation
 % ------------------------------------------------------------------------------
 function print_data_in_csv_file_ir_sbd2_SEAPOINT_mean_stdMed( ...
-   a_decoderId, a_cycleNum, a_profNum, a_phaseNum, ...
+   a_cycleNum, a_profNum, a_phaseNum, ...
    a_dataSEAPOINTMean, a_dataSEAPOINTStdMed)
 
 % current float WMO number
@@ -82,7 +81,7 @@ if (isempty(idDataStdMed))
    idDel = find((dataMean(:, 3) == 0) & (dataMean(:, 4) == 0));
    dataMean(idDel, :) = [];
 
-   dataMean(:, 3) = sensor_2_value_for_pressure_ir_rudics_sbd2(dataMean(:, 3), a_decoderId);
+   dataMean(:, 3) = sensor_2_value_for_pressure_ir_rudics_sbd2(dataMean(:, 3));
    dataMean(:, 4) = sensor_2_value_for_turbi_volt_303(dataMean(:, 4));
 
    for idL = 1:size(dataMean, 1)
@@ -150,9 +149,9 @@ else
                if (~isempty(idF))
                   idOk = idOk(idF);
                else
-                  fprintf('WARNING: Float #%d Cycle #%d: cannot fit SEAPOINT standard deviation and median data with associated mean data - standard deviation and median data ignored\n', ...
+                  fprintf('WARNING: Float #%d Cycle #%d: cannot fit SEAPOINT standard deviation and median data with associated mean data => standard deviation and median data ignored\n', ...
                      g_decArgo_floatNum, a_cycleNum);
-                  continue
+                  continue;
                end
             end
             data(idOk, 5:6) = dataStdMed(idL, 2:3);
@@ -162,7 +161,7 @@ else
          end
       end
 
-      data(:, 3) = sensor_2_value_for_pressure_ir_rudics_sbd2(data(:, 3), a_decoderId);
+      data(:, 3) = sensor_2_value_for_pressure_ir_rudics_sbd2(data(:, 3));
       data(:, 4) = sensor_2_value_for_turbi_volt_303(data(:, 4));
       data(:, 5) = sensor_2_value_for_turbi_volt_303(data(:, 5));
       data(:, 6) = sensor_2_value_for_turbi_volt_303(data(:, 6));
@@ -186,4 +185,4 @@ else
    end
 end
 
-return
+return;

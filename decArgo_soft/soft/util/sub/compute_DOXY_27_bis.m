@@ -30,9 +30,6 @@ function [o_doxyValues] = compute_DOXY_27_bis(a_tPhaseDoxyValues, ...
 % output parameters initialization
 o_doxyValues = [];
 
-% current cycle number
-global g_decArgo_cycleNum;
-
 % default values
 global g_decArgo_tPhaseDoxyCountsDef;
 global g_decArgo_doxyDef;
@@ -57,7 +54,7 @@ global g_decArgo_doxy_202_204_204_pCoef3;
 
 % 07/07/2011 C.Lagadec/J.P.Rannou (needed on Linux platform?)
 if isempty(a_tPhaseDoxyValues)
-   return
+   return;
 end
 
 o_doxyValues = ones(length(a_tPhaseDoxyValues), 1)*g_decArgo_doxyDef;
@@ -104,14 +101,10 @@ if (~isempty(idNoDef))
       );
    
    % units convertion (micromol/L to micromol/kg)
-   [measLon, measLat] = get_meas_location(g_decArgo_cycleNum, -1, '');
-   rho = potential_density_gsw(presValues, tempValues, psalValues, 0, measLon, measLat);
-   rho = rho/1000;
-   
+   rho = potential_density(presValues, tempValues, psalValues);
    oxyValues = oxygenPresComp ./ rho;
-   idNoNan = find(~isnan(oxyValues));
    
-   o_doxyValues(idNoDef(idNoNan)) = oxyValues(idNoNan);
+   o_doxyValues(idNoDef) = oxyValues;
 end
 
-return
+return;

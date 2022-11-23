@@ -331,7 +331,7 @@ if (~isempty(a_tabSensors))
             % sensor data
             
             if (a_procLevel == 2)
-               continue
+               continue;
             end
             
             % sensor data type
@@ -343,7 +343,7 @@ if (~isempty(a_tabSensors))
             % empty msg
             uMsgdata = unique(msgData);
             if ((length(uMsgdata) == 1) && (uMsgdata == 0))
-               continue
+               continue;
             end
             
             switch (sensorDataType)
@@ -365,16 +365,16 @@ if (~isempty(a_tabSensors))
                   g_decArgo_cycleNum = cycleNum;
                   
                   if (profNum > 9)
-                     fprintf('DEC_WARNING: Float #%d Cycle #%d: inconsistent profile number (#%d) - ignoring packet data\n', ...
+                     fprintf('DEC_WARNING: Float #%d Cycle #%d: inconsistent profile number (#%d) => ignoring packet data\n', ...
                         g_decArgo_floatNum, g_decArgo_cycleNum, ...
                         profNum);
-                     continue
+                     continue;
                   end
                   
                   if (a_procLevel == 0)
                      g_decArgo_0TypeReceivedData = [g_decArgo_0TypeReceivedData; ...
                         sensorDataType cycleNum profNum phaseNum];
-                     continue
+                     continue;
                   end
                                     
                   measDate = ones(1, 21)*g_decArgo_dateDef;
@@ -418,16 +418,16 @@ if (~isempty(a_tabSensors))
                   g_decArgo_cycleNum = cycleNum;
                   
                   if (profNum > 9)
-                     fprintf('DEC_WARNING: Float #%d Cycle #%d: inconsistent profile number (#%d) - ignoring packet data\n', ...
+                     fprintf('DEC_WARNING: Float #%d Cycle #%d: inconsistent profile number (#%d) => ignoring packet data\n', ...
                         g_decArgo_floatNum, g_decArgo_cycleNum, ...
                         profNum);
-                     continue
+                     continue;
                   end
                   
                   if (a_procLevel == 0)
                      g_decArgo_0TypeReceivedData = [g_decArgo_0TypeReceivedData; ...
                         sensorDataType cycleNum profNum phaseNum];
-                     continue
+                     continue;
                   end
                                     
                   measDate = ones(1, 13)*g_decArgo_dateDef;
@@ -481,16 +481,16 @@ if (~isempty(a_tabSensors))
                   g_decArgo_cycleNum = cycleNum;
                   
                   if (profNum > 9)
-                     fprintf('DEC_WARNING: Float #%d Cycle #%d: inconsistent profile number (#%d) - ignoring packet data\n', ...
+                     fprintf('DEC_WARNING: Float #%d Cycle #%d: inconsistent profile number (#%d) => ignoring packet data\n', ...
                         g_decArgo_floatNum, g_decArgo_cycleNum, ...
                         profNum);
-                     continue
+                     continue;
                   end
 
                   if (a_procLevel == 0)
                      g_decArgo_0TypeReceivedData = [g_decArgo_0TypeReceivedData; ...
                         sensorDataType cycleNum profNum phaseNum];
-                     continue
+                     continue;
                   end
                   
                   measDate = ones(1, 10)*g_decArgo_dateDef;
@@ -534,16 +534,16 @@ if (~isempty(a_tabSensors))
                   g_decArgo_cycleNum = cycleNum;
                   
                   if (profNum > 9)
-                     fprintf('DEC_WARNING: Float #%d Cycle #%d: inconsistent profile number (#%d) - ignoring packet data\n', ...
+                     fprintf('DEC_WARNING: Float #%d Cycle #%d: inconsistent profile number (#%d) => ignoring packet data\n', ...
                         g_decArgo_floatNum, g_decArgo_cycleNum, ...
                         profNum);
-                     continue
+                     continue;
                   end
                   
                   if (a_procLevel == 0)
                      g_decArgo_0TypeReceivedData = [g_decArgo_0TypeReceivedData; ...
                         sensorDataType cycleNum profNum phaseNum];
-                     continue
+                     continue;
                   end
                   
                   measDate = ones(1, 7)*g_decArgo_dateDef;
@@ -594,16 +594,16 @@ if (~isempty(a_tabSensors))
                   g_decArgo_cycleNum = cycleNum;
                   
                   if (profNum > 9)
-                     fprintf('DEC_WARNING: Float #%d Cycle #%d: inconsistent profile number (#%d) - ignoring packet data\n', ...
+                     fprintf('DEC_WARNING: Float #%d Cycle #%d: inconsistent profile number (#%d) => ignoring packet data\n', ...
                         g_decArgo_floatNum, g_decArgo_cycleNum, ...
                         profNum);
-                     continue
+                     continue;
                   end
                   
                   if (a_procLevel == 0)
                      g_decArgo_0TypeReceivedData = [g_decArgo_0TypeReceivedData; ...
                         sensorDataType cycleNum profNum phaseNum];
-                     continue
+                     continue;
                   end
                   
                   measDate = ones(1, 21)*g_decArgo_dateDef;
@@ -647,16 +647,16 @@ if (~isempty(a_tabSensors))
                   g_decArgo_cycleNum = cycleNum;
                   
                   if (profNum > 9)
-                     fprintf('DEC_WARNING: Float #%d Cycle #%d: inconsistent profile number (#%d) - ignoring packet data\n', ...
+                     fprintf('DEC_WARNING: Float #%d Cycle #%d: inconsistent profile number (#%d) => ignoring packet data\n', ...
                         g_decArgo_floatNum, g_decArgo_cycleNum, ...
                         profNum);
-                     continue
+                     continue;
                   end
                   
                   if (a_procLevel == 0)
                      g_decArgo_0TypeReceivedData = [g_decArgo_0TypeReceivedData; ...
                         sensorDataType cycleNum profNum phaseNum];
-                     continue
+                     continue;
                   end
                   
                   measDate = ones(1, 16)*g_decArgo_dateDef;
@@ -707,16 +707,16 @@ if (~isempty(a_tabSensors))
                   g_decArgo_cycleNum = cycleNum;
                   
                   if (profNum > 9)
-                     fprintf('DEC_WARNING: Float #%d Cycle #%d: inconsistent profile number (#%d) - ignoring packet data\n', ...
+                     fprintf('DEC_WARNING: Float #%d Cycle #%d: inconsistent profile number (#%d) => ignoring packet data\n', ...
                         g_decArgo_floatNum, g_decArgo_cycleNum, ...
                         profNum);
-                     continue
+                     continue;
                   end
                   
                   if (a_procLevel == 0)
                      g_decArgo_0TypeReceivedData = [g_decArgo_0TypeReceivedData; ...
                         sensorDataType cycleNum profNum phaseNum];
-                     continue
+                     continue;
                   end
                   
                   measDate = ones(1, 32)*g_decArgo_dateDef;
@@ -757,16 +757,16 @@ if (~isempty(a_tabSensors))
                   g_decArgo_cycleNum = cycleNum;
                   
                   if (profNum > 9)
-                     fprintf('DEC_WARNING: Float #%d Cycle #%d: inconsistent profile number (#%d) - ignoring packet data\n', ...
+                     fprintf('DEC_WARNING: Float #%d Cycle #%d: inconsistent profile number (#%d) => ignoring packet data\n', ...
                         g_decArgo_floatNum, g_decArgo_cycleNum, ...
                         profNum);
-                     continue
+                     continue;
                   end
                   
                   if (a_procLevel == 0)
                      g_decArgo_0TypeReceivedData = [g_decArgo_0TypeReceivedData; ...
                         sensorDataType cycleNum profNum phaseNum];
-                     continue
+                     continue;
                   end
                   
                   measDate = ones(1, 26)*g_decArgo_dateDef;
@@ -810,16 +810,16 @@ if (~isempty(a_tabSensors))
                   g_decArgo_cycleNum = cycleNum;
                   
                   if (profNum > 9)
-                     fprintf('DEC_WARNING: Float #%d Cycle #%d: inconsistent profile number (#%d) - ignoring packet data\n', ...
+                     fprintf('DEC_WARNING: Float #%d Cycle #%d: inconsistent profile number (#%d) => ignoring packet data\n', ...
                         g_decArgo_floatNum, g_decArgo_cycleNum, ...
                         profNum);
-                     continue
+                     continue;
                   end
                   
                   if (a_procLevel == 0)
                      g_decArgo_0TypeReceivedData = [g_decArgo_0TypeReceivedData; ...
                         sensorDataType cycleNum profNum phaseNum];
-                     continue
+                     continue;
                   end
                   
                   measDate = ones(1, 32)*g_decArgo_dateDef;
@@ -860,16 +860,16 @@ if (~isempty(a_tabSensors))
                   g_decArgo_cycleNum = cycleNum;
                   
                   if (profNum > 9)
-                     fprintf('DEC_WARNING: Float #%d Cycle #%d: inconsistent profile number (#%d) - ignoring packet data\n', ...
+                     fprintf('DEC_WARNING: Float #%d Cycle #%d: inconsistent profile number (#%d) => ignoring packet data\n', ...
                         g_decArgo_floatNum, g_decArgo_cycleNum, ...
                         profNum);
-                     continue
+                     continue;
                   end
                   
                   if (a_procLevel == 0)
                      g_decArgo_0TypeReceivedData = [g_decArgo_0TypeReceivedData; ...
                         sensorDataType cycleNum profNum phaseNum];
-                     continue
+                     continue;
                   end
                   
                   measDate = ones(1, 26)*g_decArgo_dateDef;
@@ -907,7 +907,7 @@ if (~isempty(a_tabSensors))
             % sensor tech data
             
             if (a_procLevel == 2)
-               continue
+               continue;
             end
             
             % message data frame
@@ -946,7 +946,7 @@ if (~isempty(a_tabSensors))
             if (a_procLevel == 0)
                g_decArgo_250TypeReceivedData = [g_decArgo_250TypeReceivedData; ...
                   sensorType cycleNum profNum nbPackDesc nbPackDrift nbPackAsc];
-               continue
+               continue;
             end
             
             % store ko sensor state
@@ -1152,7 +1152,7 @@ if (~isempty(a_tabSensors))
             % sensor parameter
             
             if ((a_procLevel == 0) || (a_procLevel == 1))
-               continue
+               continue;
             end
             
             % message data frame
@@ -1207,14 +1207,14 @@ if (~isempty(a_tabSensors))
                251 -1 -1 -1 -1 sbdFileDate];
             
             % update float configuration
-            update_float_config_ir_rudics_105_to_110_112_sbd2(251, sbdFileDate, ...
+            update_float_config_ir_rudics_sbd2(251, sbdFileDate, ...
                [measModSensorNum' measParamType' measParamNum' measOldVal' measNewVal']);
             
          case 252
             % float pressure data
             
             if ((a_procLevel == 0) || (a_procLevel == 2))
-               continue
+               continue;
             end
             
             % message data frame
@@ -1239,7 +1239,7 @@ if (~isempty(a_tabSensors))
                time = values(5*(idBin-1)+6);
                
                if ((profNum == 0) && (phaseNum == 0) && (pumpOrEv == 0) && (actPres == 0) && (time == 0))
-                  continue
+                  continue;
                end
                
                o_floatPresPumpOrEv = [o_floatPresPumpOrEv; ...
@@ -1257,7 +1257,7 @@ if (~isempty(a_tabSensors))
             % float technical data
             
             if (a_procLevel == 2)
-               continue
+               continue;
             end
             
             % message data frame
@@ -1276,12 +1276,12 @@ if (~isempty(a_tabSensors))
             if (a_procLevel == 0)
                g_decArgo_253TypeReceivedData = [g_decArgo_253TypeReceivedData; ...
                   tabTech(9) tabTech(10) tabTech(13)];
-               continue
+               continue;
             end
             
             cycleNum = tabTech(9);
             g_decArgo_cycleNum = cycleNum;
-
+            
             % packet date
             packJulD = datenum(sprintf('%02d%02d%02d%02d%02d%02d', tabTech(1:6)), 'ddmmyyHHMMSS') - g_decArgo_janFirst1950InMatlab;
             
@@ -1326,7 +1326,7 @@ if (~isempty(a_tabSensors))
             % float prog technical data
             
             if (a_procLevel == 1)
-               continue
+               continue;
             end
             
             % message data frame
@@ -1342,16 +1342,12 @@ if (~isempty(a_tabSensors))
             if (a_procLevel == 0)
                g_decArgo_254TypeReceivedData = [g_decArgo_254TypeReceivedData; ...
                   values(7) values(8)];
-               continue
+               continue;
             end
             
             % calibration coefficients
             values(35) = values(35)/1000;
-            if (values(36) < 32768) % 32768 = 65536/2
-               values(36) = -values(36);
-            else
-               values(36) = 65536 - values(36);
-            end
+            values(36) = -values(36);
             
             cycleNum = values(7);
             g_decArgo_cycleNum = cycleNum;
@@ -1367,13 +1363,13 @@ if (~isempty(a_tabSensors))
                254 -1 values(7) values(8) -1 sbdFileDate];
             
             % update float configuration
-            update_float_config_ir_rudics_105_to_110_112_sbd2(254, packJulD, values(7:36));
+            update_float_config_ir_rudics_sbd2(254, packJulD, values(7:36));
             
          case 255
             % float prog param data
             
             if (a_procLevel == 1)
-               continue
+               continue;
             end
             
             % message data frame
@@ -1391,7 +1387,7 @@ if (~isempty(a_tabSensors))
             if (a_procLevel == 0)
                g_decArgo_255TypeReceivedData = [g_decArgo_255TypeReceivedData; ...
                   values(7) values(8)];
-               continue
+               continue;
             end
 
             g_decArgo_cycleNum = values(7);
@@ -1411,7 +1407,7 @@ if (~isempty(a_tabSensors))
                255 -1 values(7) values(8) -1 sbdFileDate];
             
             % update float configuration
-            update_float_config_ir_rudics_105_to_110_112_sbd2(255, packJulD, values(7:84));
+            update_float_config_ir_rudics_sbd2(255, packJulD, values(7:84));
             
          otherwise
             fprintf('WARNING: Float #%d Cycle #%d: Nothing done yet for packet type #%d\n', ...
@@ -1624,4 +1620,4 @@ o_floatPres{1} = o_floatPresPumpOrEv;
 o_floatPres{2} = o_floatPresActPres;
 o_floatPres{3} = o_floatPresTime;
 
-return
+return;

@@ -21,82 +21,16 @@
 function get_meta_data_from_data_base_bis()
 
 % meta-data file exported from Coriolis data base
-% dataBaseFileName = 'C:\Users\jprannou\_RNU\DecPrv_info\ASFAR\DBexport_ASFAR_fromVB20151029.txt';
-% dataBaseFileName = 'C:\Users\jprannou\_RNU\DecNemo_info\_configParamNames\nemo_DB_export_from_VB_20160818.txt';
-% dataBaseFileName = 'C:\Users\jprannou\_RNU\DecApx_info\_configParamNames\apex_DB_export_fromVB_20160817_20160823.txt';
-% dataBaseFileName = 'C:\Users\jprannou\_RNU\DecPrv_info\_configParamNames\exportJPR_5900A04_from_VB_20170825.txt';
-% dataBaseFileName = 'C:\Users\jprannou\_RNU\DecPrv_info\_configParamNames\exportJPR_ArvorDeep_from_VB_20170825.txt';
-% dataBaseFileName = 'C:\Users\jprannou\_RNU\DecApx_info\APEX_IR\DB_export_Finland_From_VB_20180904.txt';
-% dataBaseFileName = 'C:\Users\jprannou\_RNU\DecNemo_info\_configParamNames\DB_Export\DB_export_NEMO_from_VB_20170911.txt';
-% dataBaseFileName = 'C:\Users\jprannou\_RNU\DecPrv_info\APMT\CTS5_float_config\DB_export_CTS5_from_VB_20170912.txt';
-% dataBaseFileName = 'C:\Users\jprannou\_RNU\DecApx_info\APEX_IR_SBD\DB_Export_APEX_Poland_from_vb_20171020.txt';
-% dataBaseFileName = 'C:\Users\jprannou\_RNU\DecApx_info\APEX_IR_SBD\DB_Export_APEX_Poland_from_vb_20171020.txt';
-% dataBaseFileName = 'C:\Users\jprannou\_RNU\DecPrv_info\_configParamNames\DBexport_DeepIce_5.65_from_VB_20171005.txt';
-% dataBaseFileName = 'C:\Users\jprannou\_RNU\DecNova_info\_configParamNames\DB_export_Nova_from_VB_20171121.txt';
-% dataBaseFileName = 'C:\Users\jprannou\_RNU\DecPrv_info\APMT\CTS5_float_config\DB_export_pH_Float.txt';
-% dataBaseFileName = 'C:\Users\jprannou\_RNU\DecNova_info\_configParamNames\DB_export_Nova_historiques_allemands_et_grecs_from_vb_20180201.txt';
-% dataBaseFileName = 'C:\Users\jprannou\_RNU\DecPrv_info\_configParamNames\DB_export_DeepIce_5.65_20180201.txt';
-% dataBaseFileName = 'C:\Users\jprannou\_RNU\DecPrv_info\_configParamNames\db_export-3902101_Arvor-Ir-Do_5.46_from_VB_20180216.txt';
-% dataBaseFileName = 'C:\Users\jprannou\_RNU\DecPrv_info\_configParamNames\DB_export_BioAtlantos_from_VB_20180222.txt';
-% dataBaseFileName = 'C:\Users\jprannou\_RNU\DecPrv_info\_configParamNames\DBexport_BioIndia_6.11_from_VB_20180308.txt';
-% dataBaseFileName = 'C:\Users\jprannou\_RNU\DecPrv_info\_configParamNames\DB_export_BioAtlantos_lot2_from_VB_20180319.txt';
-% dataBaseFileName = 'C:\Users\jprannou\_RNU\DecApx_info\APEX_APF11\Argos\DB_export_APF11_Argos_from_VB_20171204.txt';
-% dataBaseFileName = 'C:\Users\jprannou\_RNU\DecApx_info\APEX_APF11\Iridium\DB_export_APF11_Iridium-SBD_from_VB_20180410.txt';
-% dataBaseFileName = 'C:\Users\jprannou\_RNU\DecApx_info\APEX_APF11\Argos\DB_export_APF11_Argos_lot2&3_from_VB_20180514.txt';
-% dataBaseFileName = 'C:\Users\jprannou\_RNU\DecApx_info\APEX_APF11\Iridium\DB_export_APEX_APF11Bio_frm_VB_20180615.txt';
-% dataBaseFileName = 'C:\Users\jprannou\_RNU\DecPrv_info\_configParamNames\DB_Export\DBexport_CTS5_1.06.012_fromVB_20180904.txt';
-% dataBaseFileName = 'C:\Users\jprannou\_RNU\DecApx_info\_configParamNames\DB_Export\DBexport_Finland_APF11_Rudics_from_VB_20181023.txt';
-% dataBaseFileName = 'C:\Users\jprannou\_RNU\DecPrv_info\_configParamNames\DB_Export\6901763_dbexport_inclinometre.txt';
-% dataBaseFileName = 'C:\Users\jprannou\_RNU\Argo\ActionsCoriolis\Reste_a_basculer_en_3.1\Apex_013108_042408_111509\float_metadata.txt';
-% dataBaseFileName = 'C:\Users\jprannou\_RNU\DecApx_info\_configParamNames\DB_Export\Apex_APF11_Norway_DB_export.txt';
-% dataBaseFileName = 'C:\Users\jprannou\_RNU\Argo\ActionsCoriolis\ConvertApexOldVersionsTo3.1\Apex_pts\float_metadata_pts.txt';
-% dataBaseFileName = 'C:\Users\jprannou\_RNU\Argo\ActionsCoriolis\ConvertApexOldVersionsTo3.1\Apex_bgc\float_metadata_bgc.txt';
-% dataBaseFileName = 'C:\Users\jprannou\_RNU\DecPrv_info\_configParamNames\DB_Export\cts4_norway_6903551.txt';
-% dataBaseFileName = 'C:\Users\jprannou\_RNU\Andro\ANDRO_update_2019\listes_ANDRO_2019\DB_export\APEX_ARGOS_dbExport_USED.txt';
-% dataBaseFileName = 'C:\Users\jprannou\_RNU\Andro\ANDRO_update_2019\listes_ANDRO_2019\DB_export\APEX_IRIDIUM_dbExport_USED.txt';
-% dataBaseFileName = 'C:\Users\jprannou\_RNU\Andro\ANDRO_update_2019\listes_ANDRO_2019\DB_export\PROVOR_ARGOS_dbExport_USED.txt';
-% dataBaseFileName = 'C:\Users\jprannou\_RNU\Andro\ANDRO_update_2019\listes_ANDRO_2019\DB_export\PROVOR_IRIDIUM_dbExport_USED.txt';
-% dataBaseFileName = 'C:\Users\jprannou\_RNU\DecPrv_info\_configParamNames\DB_Export\ARVORC_dbExport.txt';
-% dataBaseFileName = 'C:\Users\jprannou\_RNU\DecPrv_info\_configParamNames\DB_Export\DB_export_CTS5_UVP.txt';
-% dataBaseFileName = 'C:\Users\jprannou\_RNU\DecApx_info\_configParamNames\DB_Export\APF11_2.11.3.R_7900562.txt';
-% dataBaseFileName = 'C:\Users\jprannou\_RNU\DecPrv_info\_configParamNames\DB_Export\6903268_DBexport.txt';
-% dataBaseFileName = 'C:\Users\jprannou\_RNU\DecPrv_info\_configParamNames\DB_Export\5900A05_DBexport.txt';
-% dataBaseFileName = 'C:\Users\jprannou\_RNU\DecApx_info\_configParamNames\DB_Export\DB_export_ApexRudics_Norway_APF11_2.13.1.R_from_vb_20200528.txt';
-% dataBaseFileName = 'C:\Users\jprannou\_RNU\DecPrv_info\_configParamNames\DB_Export\db_export_5.47_with_DO_3902110.txt';
-% dataBaseFileName = 'C:\Users\jprannou\_RNU\DecPrv_info\_configParamNames\DB_Export\DB_export_CTS5-USEA_6903069.txt';
-% dataBaseFileName = 'C:\Users\jprannou\_RNU\DecApx_info\_configParamNames\DB_Export\DB_export_APF11_2.12.3.R_7900566.txt';
-% dataBaseFileName = 'C:\Users\jprannou\_RNU\DecApx_info\_configParamNames\DB_Export\DB_export_APF11_6903552.txt';
-% dataBaseFileName = 'C:\Users\jprannou\_RNU\DecPrv_info\_configParamNames\DB_Export\DB_export_RBR_6903075_6903076.txt';
-% dataBaseFileName = 'C:\Users\jprannou\_RNU\DecPrv_info\_configParamNames\DB_Export\DB_export_CTS5_USEA.txt';
-% dataBaseFileName = 'C:\Users\jprannou\_RNU\DecPrv_info\_configParamNames\DB_Export\DBexport_CTS5_USEA_HB_6904117.txt';
-% dataBaseFileName = 'C:\Users\jprannou\_RNU\DecApx_info\_configParamNames\DB_Export\DB_export_APF11_2.15.0.R_7900973_RAFOS.txt';
-% dataBaseFileName = 'C:\Users\jprannou\_RNU\DecApx_info\_configParamNames\DB_Export\DB_export_APF11_2.14.3.R_7900563_RAMSES.txt';
-% dataBaseFileName = 'C:\Users\jprannou\_RNU\DecPrv_info\_configParamNames\DB_Export\DB_export_EuroSea_6.13_all.txt';
-% dataBaseFileName = 'C:\Users\jprannou\_RNU\DecApx_info\_configParamNames\DB_Export\DB_export_APF9i_6903708_6903711.txt';
-dataBaseFileName = 'C:\Users\jprannou\_RNU\DecPrv_info\_configParamNames\DB_Export\DB_export_CTS5_7.12_Ramses_6903706.txt';
-dataBaseFileName = 'C:\Users\jprannou\_RNU\DecPrv_info\_configParamNames\DB_Export\CTS4_6.14_with_2BB_6904134_DBexport.txt';
-dataBaseFileName = 'C:\Users\jprannou\_RNU\Argo\ActionsCoriolis\ConvertNkeOldVersionsTo3.1_20210913\misc_info\DB_export_provor_4.6_4.61_20210913.txt';
-dataBaseFileName = 'C:\Users\jprannou\_RNU\Argo\ActionsCoriolis\GenerateMeta3.1WhenNoData_20210920\DB_export_float_with_no_data_20210920.txt';
-dataBaseFileName = 'C:\Users\jprannou\_RNU\DecPrv_info\_configParamNames\DB_Export\DBexport_CTS5_7.12_new_PAR.txt';
-dataBaseFileName = 'C:\Users\jprannou\_RNU\DecApx_info\_configParamNames\DB_Export\db_export_APF11_Rafos_20220408.txt';
-dataBaseFileName = 'C:\Users\jprannou\_RNU\DecPrv_info\_configParamNames\DB_Export\db_export_CTS4_7901001_reuse.txt';
-dataBaseFileName = 'C:\Users\jprannou\_RNU\DecPrv_info\_configParamNames\DB_Export\db_export_CTS4_5906868.txt';
-dataBaseFileName = 'C:\Users\jprannou\_RNU\DecPrv_info\_configParamNames\DB_Export\db_export_CTS5_6904226.txt';
-dataBaseFileName = 'C:\Users\jprannou\_RNU\DecPrv_info\_configParamNames\DB_Export\db_export_CTS5_6904226.txt';
-dataBaseFileName = 'C:\Users\jprannou\_RNU\DecPrv_info\_configParamNames\DB_Export\DB_export_Jumbo.txt';
-
+dataBaseFileName = 'C:\Users\jprannou\_RNU\DecPrv_info\ASFAR\DBexport_ASFAR_fromVB20151029.txt';
+dataBaseFileName = 'C:\Users\jprannou\_RNU\DecNemo_info\_configParamNames\nemo_DB_export_from_VB_20160818.txt';
+dataBaseFileName = 'C:\Users\jprannou\_RNU\DecApx_info\_configParamNames\apex_DB_export_fromVB_20160817_20160823.txt';
 
 % list of concerned floats
-% floatListFileName = 'C:\Users\jprannou\_RNU\DecArgo_soft\lists\arvor_asfar.txt';
-% floatListFileName = 'C:\Users\jprannou\_RNU\Andro\ANDRO_update_2019\listes_ANDRO_2019\lists\CO_APEX_IRIDIUM_24_SBD.txt';
-% floatListFileName = 'C:\Users\jprannou\_RNU\Andro\ANDRO_update_2019\listes_ANDRO_2019\lists\CO_APEX_IRIDIUM_24_RUDICS.txt';
+floatListFileName = 'C:\Users\jprannou\_RNU\DecArgo_soft\lists\arvor_asfar.txt';
 floatListFileName = '';
-% floatListFileName = 'C:\Users\jprannou\_RNU\DecArgo_soft\lists\_nemo_collecte_v2.txt';
-% floatListFileName = 'C:\Users\jprannou\_RNU\DecArgo_soft\lists\arvor_rbr_5.49.txt';
-% floatListFileName = 'C:\Users\jprannou\_RNU\DecArgo_soft\lists\cts5_usea_6903093_6903094.txt';
 
 % directory to store the log and csv file
-DIR_LOG_CSV_FILE = 'C:\Users\jprannou\_RNU\DecArgo_soft\work\csv\';
+DIR_LOG_CSV_FILE = 'C:\Users\jprannou\_RNU\DecArgo_soft\work\';
 
 
 % create and start log file recording
@@ -110,10 +44,10 @@ outputFileName = [DIR_LOG_CSV_FILE '/get_meta_data_from_data_base_bis_' datestr(
 fidOut = fopen(outputFileName, 'wt');
 if (fidOut == -1)
    fprintf('Erreur ouverture fichier: %s\n', outputFileName);
-   return
+   return;
 end
 
-header = ['PI Name; Trans system; Activity flag; Data center; Decoder version; Serial No; Cycle length (days); Parking PRES; Profile PRES; IMEI; WMO #; Decoder Id; PTT #;  Frame length (bytes); Cycle length (hours); Drift sampling period (hours); DELAI parameter (hours); Launch date (yyyymmddHHMMSS); Launch longitude; Launch latitude; Day of the first descent (yyyymmdd); End decoding date; DM flag; Decoder version'];
+header = ['Trans system; Activity flag; Data center; Decoder version; Serial No; Cycle length (days); Parking PRES; Profile PRES; WMO #; Decoder Id; PTT #;  Frame length (bytes); Cycle length (hours); Drift sampling period (hours); DELAI parameter (hours); Launch date (yyyymmddHHMMSS); Launch longitude; Launch latitude; Day of the first descent (yyyymmdd); End decoding date; DM flag; Decoder version'];
 fprintf(fidOut, '%s\n', header);
 
 % read meta file
@@ -121,7 +55,7 @@ fprintf('Processing file: %s\n', dataBaseFileName);
 fId = fopen(dataBaseFileName, 'r');
 if (fId == -1)
    fprintf('ERROR: Unable to open file: %s\n', dataBaseFileName);
-   return
+   return;
 end
 metaFileContents = textscan(fId, '%s', 'delimiter', '\t');
 metaFileContents = metaFileContents{:};
@@ -135,7 +69,7 @@ metaWmoList = metaData(:, 1);
 for id = 1:length(metaWmoList)
    if (isempty(str2num(metaWmoList{id})))
       fprintf('%s is not a valid WMO number\n', metaWmoList{id});
-      return
+      return;
    end
 end
 S = sprintf('%s*', metaWmoList{:});
@@ -155,12 +89,10 @@ end
 
 % process the floats
 tabFloatNum = [];
-tabPiName = [];
 tabTransSystem = [];
 tabActivity = [];
 tabDataCenter = [];
 tabPtt = [];
-tabImei = [];
 tabSerialNum = [];
 tabCycleTime = [];
 tabParkPres = [];
@@ -187,13 +119,6 @@ for idFloat = 1:length(floatList)
    end
    tabTransSystem{end+1} = transSystem;
    
-   idPiName = find(strcmp(paramCodeList(idForWmo), 'PI_NAME') == 1, 1);
-   piName = '';
-   if (~isempty(idPiName))
-      piName = paramValueList{idForWmo(idPiName)};
-   end
-   tabPiName{end+1} = piName;
-   
    idActivityFlag = find(strcmp(paramCodeList(idForWmo), 'PF_ACTIVITY_FLAG') == 1, 1);
    activityFlag = '';
    if (~isempty(idActivityFlag))
@@ -214,13 +139,6 @@ for idFloat = 1:length(floatList)
       ptt = paramValueList{idForWmo(idPtt)};
    end
    tabPtt{end+1} = ptt;
-
-   idImei = find(strcmp(paramCodeList(idForWmo), 'IMEI') == 1, 1);
-   imei = '';
-   if (~isempty(idImei))
-      imei = paramValueList{idForWmo(idImei)};
-   end
-   tabImei{end+1} = imei;
 
    idSerialNum = find(strcmp(paramCodeList(idForWmo), 'INST_REFERENCE') == 1, 1);
    serialNum = '';
@@ -324,12 +242,10 @@ for idTS = 1:length(refTransSystem)
          (strcmp(tabCoVersion, refCoVersion{idCV}) == 1));
       [~, idSort] = sort([tabFloatNum{idF}]);
       tabFloatNum(idF) = tabFloatNum(idF(idSort));
-      tabPiName(idF) = tabPiName(idF(idSort));
       tabTransSystem(idF) = tabTransSystem(idF(idSort));
       tabActivity(idF) = tabActivity(idF(idSort));
       tabDataCenter(idF) = tabDataCenter(idF(idSort));
       tabPtt(idF) = tabPtt(idF(idSort));
-      tabImei(idF) = tabImei(idF(idSort));
       tabSerialNum(idF) = tabSerialNum(idF(idSort));
       tabCycleTime(idF) = tabCycleTime(idF(idSort));
       tabParkPres(idF) = tabParkPres(idF(idSort));
@@ -343,9 +259,9 @@ for idTS = 1:length(refTransSystem)
       
       for idL = 1:length(idF)
          id = idF(idL);
-         fprintf(fidOut, '%s; %s; %s; %s;''%s; %s; %g; %s; %s; %s; %d; ; %s; 31; %s; %s; -1; %s; %s; %s; %s; 99999999999999; 0; %s\n', ...
-            tabPiName{id}, tabTransSystem{id}, tabActivity{id}, tabDataCenter{id}, tabCoVersion{id}, tabSerialNum{id}, ...
-            str2num(tabCycleTime{id})/24, tabParkPres{id}, tabProfPres{id}, tabImei{id}, ...
+         fprintf(fidOut, '%s; %s; %s;''%s; %s; %g; %s; %s; %d; ; %s; 31; %s; %s; -1; %s; %s; %s; %s; 99999999999999; 0; %s\n', ...
+            tabTransSystem{id}, tabActivity{id}, tabDataCenter{id}, tabCoVersion{id}, tabSerialNum{id}, ...
+            str2num(tabCycleTime{id})/24, tabParkPres{id}, tabProfPres{id}, ...
             tabFloatNum{id}, tabPtt{id}, tabCycleTime{id}, tabDriftPeriod{id}, ...
             tabLaunchDate{id}, tabLaunchLon{id}, tabLaunchLat{id}, ...
             tabDayFirstDesc{id}, tabCoVersion{id});
@@ -369,4 +285,4 @@ fclose(fidOut);
 
 diary off;
 
-return
+return;

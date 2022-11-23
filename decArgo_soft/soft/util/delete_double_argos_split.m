@@ -34,8 +34,7 @@ function delete_double_argos_split()
 % DIR_INPUT_OUTPUT_ARGOS_FILES = 'C:\Users\jprannou\Desktop\recup\argos_split_CORRECT\';
 % DIR_INPUT_OUTPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\ArgosApex_processing_ALL\recup_mail_VB_20160830\final_processing\';
 % DIR_INPUT_OUTPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\ArgosApex_processing_20160823\split_raw_sans_doubles_FINAL_119Apex\tmp\';
-% DIR_INPUT_OUTPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\ArgosApex_processing_ALL\historical_processing\';
-DIR_INPUT_OUTPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\IN\APEX_ARGOS_APF11\IN\ori_split';
+DIR_INPUT_OUTPUT_ARGOS_FILES = 'C:\Users\jprannou\_DATA\ArgosApex_processing_20160914\base_traitements_20160823\';
 
 
 % directory to store the log file
@@ -96,7 +95,7 @@ for idDir = 1:nbDirs
                      fid1 = fopen(fileName1, 'r');
                      if (fid1 == -1)
                         fprintf('ERROR: Unable to open file: %s\n', fileName1);
-                        return
+                        return;
                      end
                      file1Contents = textscan(fid1, '%s');
                      fclose(fid1);
@@ -108,7 +107,7 @@ for idDir = 1:nbDirs
                         fid2 = fopen(fileName2, 'r');
                         if (fid2 == -1)
                            fprintf('ERROR: Unable to open file: %s\n', fileName2);
-                           return
+                           return;
                         end
                         file2Contents = textscan(fid2, '%s');
                         fclose(fid2);
@@ -120,42 +119,42 @@ for idDir = 1:nbDirs
                            if ((length(file1Contents) >= idL) && (length(file2Contents) >= idL))
                               if (strcmp(file1Contents{idL}, file2Contents{idL}) == 0)
                                  compRes = 2;
-                                 break
+                                 break;
                               end
                            elseif (length(file1Contents) >= idL)
                               compRes = 3;
-                              break
+                              break;
                            elseif (length(file2Contents) >= idL)
                               compRes = 4;
-                              break
+                              break;
                            end
                         end
 
                         if (compRes == 1)
 
                            % files are identical
-                           fprintf('INFO: Files %s and %s are identical - %s deleted\n', dFiles(id1).name, dFiles(id2).name, dFiles(id2).name);
+                           fprintf('INFO: Files %s and %s are identical => %s deleted\n', dFiles(id1).name, dFiles(id2).name, dFiles(id2).name);
                            delete(fileName2);
                            deleted = 1;
-                           break
+                           break;
                         elseif (compRes == 3)
 
                            % new file contents is included in base file
-                           fprintf('INFO: File %s includes file %s contents - %s deleted\n', dFiles(id1).name, dFiles(id2).name, dFiles(id2).name);
+                           fprintf('INFO: File %s includes file %s contents => %s deleted\n', dFiles(id1).name, dFiles(id2).name, dFiles(id2).name);
                            delete(fileName2);
                            deleted = 1;
-                           break
+                           break;
                         elseif (compRes == 4)
 
                            % base file contents is included in new file
-                           fprintf('INFO: File %s includes file %s contents - %s deleted\n', dFiles(id2).name, dFiles(id1).name, dFiles(id1).name);
+                           fprintf('INFO: File %s includes file %s contents => %s deleted\n', dFiles(id2).name, dFiles(id1).name, dFiles(id1).name);
                            delete(fileName1);
                            deleted = 1;
-                           break
+                           break;
                         end
                      end
                      if (deleted == 1)
-                        break
+                        break;
                      end
                   end
 
@@ -176,4 +175,4 @@ fprintf('done (Elapsed time is %.1f seconds)\n', ellapsedTime);
 
 diary off;
 
-return
+return;

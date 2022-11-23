@@ -24,11 +24,22 @@ function create_float_config_argos(a_floatParam, a_decoderId)
 % current float WMO number
 global g_decArgo_floatNum;
 
-% json meta-data
+% directory of json meta-data files
+global g_decArgo_dirInputJsonFloatMetaDataFile;
+
+% structure to store miscellaneous meta-data
 global g_decArgo_jsonMetaData;
+g_decArgo_jsonMetaData = [];
 
 % float configuration
 global g_decArgo_floatConfig;
+
+% arrays to store RT offset information
+global g_decArgo_rtOffsetInfo;
+g_decArgo_rtOffsetInfo = [];
+
+% default values
+global g_decArgo_janFirst1950InMatlab;
 
 % configuration creation flag
 global g_decArgo_configDone;
@@ -36,13 +47,24 @@ global g_decArgo_configDone;
 
 % create the configurations
 
+% json meta-data file for this float
+jsonInputFileName = [g_decArgo_dirInputJsonFloatMetaDataFile '/' sprintf('%d_meta.json', g_decArgo_floatNum)];
+
+if ~(exist(jsonInputFileName, 'file') == 2)
+   fprintf('ERROR: Json meta-data file not found: %s\n', jsonInputFileName);
+   return;
+end
+
+% read meta-data file
+metaData = loadjson(jsonInputFileName);
+
 % retrieve the configuration
 configNames = [];
 configValues = [];
-if ((isfield(g_decArgo_jsonMetaData, 'CONFIG_PARAMETER_NAME')) && ...
-      (isfield(g_decArgo_jsonMetaData, 'CONFIG_PARAMETER_VALUE')))
-   configNames = struct2cell(g_decArgo_jsonMetaData.CONFIG_PARAMETER_NAME);
-   cellConfigValues = struct2cell(g_decArgo_jsonMetaData.CONFIG_PARAMETER_VALUE);
+if ((isfield(metaData, 'CONFIG_PARAMETER_NAME')) && ...
+      (isfield(metaData, 'CONFIG_PARAMETER_VALUE')))
+   configNames = struct2cell(metaData.CONFIG_PARAMETER_NAME);
+   cellConfigValues = struct2cell(metaData.CONFIG_PARAMETER_VALUE);
    configValues = nan(size(configNames));
    for id = 1:size(configNames, 1)
       if (~isempty(cellConfigValues{id}))
@@ -92,16 +114,14 @@ agosTransDur = configValues(idPosAc3);
 confName = 'CONFIG_AC6_';
 idPosAc6 = find(strncmp(confName, configNames, length(confName)) == 1, 1);
 agosPreludeDur = configValues(idPosAc6);
-confName = 'CONFIG_MC002_';
-idPosMc002 = find(strncmp(confName, configNames, length(confName)) == 1, 1);
 if (~isnan(refDay) && ~isnan(timeAtSurf) && ~isnan(delayBeforeMission) && ...
       ~isnan(agosTransDur) && ~isnan(agosPreludeDur))
+   confName = 'CONFIG_MC002_';
+   idPosMc002 = find(strncmp(confName, configNames, length(confName)) == 1, 1);
    % refDay start when the magnet is removed, the float start to dive after
    % delayBeforeMission + agosPreludeDur minutes
    configValues(idPosMc002) = (refDay + timeAtSurf/24 + agosTransDur/24 - ...
       delayBeforeMission/1440 - agosPreludeDur/1440)*24;
-else
-   configValues(idPosMc002) = nan;
 end
 
 % update MC010 and MC011 for the cycle #1
@@ -153,7 +173,7 @@ if (~isnan(configValues(idPosTc18)))
    ctdPumpSwitchOffPres = configValues(idPosTc18);
 else
    ctdPumpSwitchOffPres = 5;
-   fprintf('INFO: Float #%d: CTD switch off pressure parameter is missing in the Json meta-data file - using default value (%d dbars)\n', ...
+   fprintf('INFO: Float #%d: CTD switch off pressure parameter is missing in the Json meta-data file => using default value (%d dbars)\n', ...
       g_decArgo_floatNum, ctdPumpSwitchOffPres);
 end
 
@@ -229,4 +249,4 @@ end
 [g_decArgo_jsonMetaData.PRES_CUT_OFF_PROF, ...
    g_decArgo_jsonMetaData.PRES_STOP_CTD_PUMP] = compute_cutoff_pres(a_decoderId);
 
-return
+return;

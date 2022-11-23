@@ -178,7 +178,7 @@ for idL = 1:size(a_sensorData, 1)
          dataStruct.value = format_date_yyyymmddhhmiss_dec_argo(mean(decDateBis' - decDataBis(:, 6)/86400));
          dataStruct.techParamCode = 'STARTUP_DATE';
          dataStruct.techParamId = 2089;
-         dataStruct.techParamValue = datestr(mean(decDateBis' - decDataBis(:, 6)/86400)+g_decArgo_janFirst1950InMatlab, 'yyyymmddHHMMSS');
+         dataStruct.techParamValue = datestr(mean(decDateBis' - decDataBis(:, 6)/86400)+g_decArgo_janFirst1950InMatlab, 'dd/mm/yyyy HH:MM:SS');
          o_metaData = [o_metaData; dataStruct];
       else
          dataStruct = get_apx_meta_data_init_struct(msgRed);
@@ -188,7 +188,7 @@ for idL = 1:size(a_sensorData, 1)
          dataStruct.value = format_date_yyyymmddhhmiss_dec_argo(msgDate - decData(6)/86400);
          dataStruct.techParamCode = 'STARTUP_DATE';
          dataStruct.techParamId = 2089;
-         dataStruct.techParamValue = datestr(msgDate - decData(6)/86400+g_decArgo_janFirst1950InMatlab, 'yyyymmddHHMMSS');
+         dataStruct.techParamValue = datestr(msgDate - decData(6)/86400+g_decArgo_janFirst1950InMatlab, 'dd/mm/yyyy HH:MM:SS');
          o_metaData = [o_metaData; dataStruct];
       end
       
@@ -978,9 +978,9 @@ for idL = 1:size(a_sensorData, 1)
       o_metaData = [o_metaData; dataStruct];
 
    else
-      fprintf('WARNING: Float #%d Cycle #%d: message #%d is not allowed as test message - not considered\n', ...
+      fprintf('WARNING: Float #%d Cycle #%d: message #%d is not allowed as test message => not considered\n', ...
          g_decArgo_floatNum, g_decArgo_cycleNum, msgNum);
    end
 end
 
-return
+return;

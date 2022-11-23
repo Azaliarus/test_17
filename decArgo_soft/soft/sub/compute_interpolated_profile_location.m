@@ -1,5 +1,5 @@
 % ------------------------------------------------------------------------------
-% Compute a profile location using existing good locations of the surface
+% Compute a profile location using existing good locations of the surafce
 % trajectory.
 %
 % SYNTAX :
@@ -75,7 +75,7 @@ if (~isempty(idPrevCycles))
       end
       
       if (prevLocDate ~= g_decArgo_dateDef)
-         break
+         break;
       end
    end
 end
@@ -114,21 +114,19 @@ if (prevLocDate ~= g_decArgo_dateDef)
    if (curLocDate ~= g_decArgo_dateDef)
       % interpolate the positions
       o_profLocDate = a_profDate;
-      [o_profLocLon, o_profLocLat] = interpolate_between_2_locations(...
-         prevLocDate, prevLocLon, prevLocLat, ...
-         curLocDate, curLocLon, curLocLat, ...
-         a_profDate);
-
+      o_profLocLon = interp1q([prevLocDate; curLocDate], [prevLocLon; curLocLon], a_profDate);
+      o_profLocLat = interp1q([prevLocDate; curLocDate], [prevLocLat; curLocLat], a_profDate);
+      
       if (isnan(o_profLocLon))
          o_profLocDate = [];
          o_profLocLon = [];
          o_profLocLat = [];
          
-         fprintf('WARNING: Float #%d Cycle #%d: time inconsistency detected while interpolating for profile location processing - profile not located\n', ...
+         fprintf('WARNING: Float #%d Cycle #%d: time inconsistency detected while interpolating for profile location processing => profile not located\n', ...
             a_cycleNum, ...
             g_decArgo_cycleNum);
       end
    end
 end
 
-return
+return;

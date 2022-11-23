@@ -37,45 +37,25 @@ switch (a_decoderId)
       % ARVOR Argos
       o_platformFamily = 'FLOAT';
       
-   case {105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 301}
-      % PROVOR CTS4
+   case {105, 106, 107, 108, 109, 301}
+      % PROVOR REMOCEAN
       o_platformFamily = 'FLOAT';
       
-   case {121, 122, 123, 124, 125, 126, 127, 128, 129}
-      % PROVOR CTS5
-      o_platformFamily = 'FLOAT';
-      
-   case {201, 202, 203, 215, 216, 218, 221}
+   case {201, 202, 203}
       % DEEP ARVOR
       o_platformFamily = 'FLOAT_DEEP';
       
-   case {205, 204, 210, 211, 212, 222, 224}
+   case {205, 204, 210, 211}
       % ARVOR Iridium
       o_platformFamily = 'FLOAT';
       
-   case {206, 207, 208, 209, 213, 214, 225}
+   case {206, 207, 208, 209}
       % Provor-DO Iridium
-      o_platformFamily = 'FLOAT';
-            
-   case {217, 223}
-      % Arvor-DO Iridium
       o_platformFamily = 'FLOAT';
             
    case {302, 303}
       % Arvor CM
       o_platformFamily = 'FLOAT_COASTAL';
-      
-   case {2001, 2002, 2003}
-      % NOVA & DOVA
-      o_platformFamily = 'FLOAT';
-         
-   case {1321, 1322, 1323, 1121, 1122, 1123, 1124, 1125, 1126, 1127, 1128}
-      % Apex APF11
-      o_platformFamily = 'FLOAT';
-
-   case {1010}
-      % Apex APF9
-      o_platformFamily = 'FLOAT';
       
    otherwise
       fprintf('ERROR: Float #%d: No platform family assigned to decoderId #%d\n', ...
@@ -84,4 +64,4 @@ switch (a_decoderId)
       
 end
 
-return
+return;

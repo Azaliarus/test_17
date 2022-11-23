@@ -20,27 +20,15 @@ function compare_data_base_export()
 
 % meta-data BASE file exported from Coriolis data base
 baseFileName = 'C:\Users\jprannou\_RNU\DecPrv_info\_configParamNames\meta_PRV_from_VB_REFERENCE_20150217.txt';
-baseFileName = 'C:\Users\jprannou\Desktop\Sensor CTD\1-IN_DBexport_Apex_fromVB_20160122_pourMAJ_liste_avant_bascule.txt';
-baseFileName = 'C:\Users\jprannou\Desktop\Sensor CTD\2-IN_apex_DB_export_fromVB_20160817.txt';
-baseFileName = 'C:\Users\jprannou\Desktop\Sensor CTD\3-IN_apex_DB_export_fromVB_20160817.txt';
-baseFileName = 'C:\Users\jprannou\Desktop\Sensor CTD\3-IN_APEX_102015_DBExport.txt';
-baseFileName = 'C:\Users\jprannou\Desktop\Sensor CTD\4-IN_DB_export_Apx_Ir_&_Navis.txt';
-baseFileName = 'C:\Users\jprannou\Desktop\Sensor CTD\5-IN_DB_Export_APEX_Poland.txt';
 
 % meta-data NEW file exported from Coriolis data base
 newFileName = 'C:\Users\jprannou\_RNU\DecPrv_info\_configParamNames\meta_PRV_from_VB_REFERENCE_20150507.txt';
-newFileName = 'C:\Users\jprannou\Desktop\Sensor CTD\1-OUT_export_meta_APEX_from_VB_20150703.txt';
-newFileName = 'C:\Users\jprannou\Desktop\Sensor CTD\2-OUT_apex_DB_export_fromVB_20160817_20160823.txt';
-newFileName = 'C:\Users\jprannou\Desktop\Sensor CTD\3-OUT_apex_DB_export_fromVB_20160817_20160823.txt';
-newFileName = 'C:\Users\jprannou\Desktop\Sensor CTD\3-OUT_APEX_102015_DBExport_20160920.txt';
-newFileName = 'C:\Users\jprannou\Desktop\Sensor CTD\4-OUT_DB_export_Apx_Ir_&_Navis.txt';
-newFileName = 'C:\Users\jprannou\Desktop\Sensor CTD\5-OUT_DB_export_ApexSbd_from_VB_20171026.txt';
 
 % list of concerned floats
 floatListFileName = 'C:\Users\jprannou\_RNU\DecArgo_soft\lists/decoded_all.txt';
 floatListFileName = 'C:\Users\jprannou\_RNU\DecArgo_soft\lists/_nke_ir_rudics_rem_all.txt';
 floatListFileName = 'C:\Users\jprannou\_RNU\DecArgo_soft\lists/tmp.txt';
-floatListFileName = '';
+% floatListFileName = '';
 
 % directory to store the log and csv file
 DIR_LOG_CSV_FILE = 'C:\Users\jprannou\_RNU\DecArgo_soft\work\';
@@ -57,7 +45,7 @@ outputFileName = [DIR_LOG_CSV_FILE '/compare_data_base_export_' datestr(now, 'yy
 fidOut = fopen(outputFileName, 'wt');
 if (fidOut == -1)
    fprintf('Erreur ouverture fichier: %s\n', outputFileName);
-   return
+   return;
 end
 
 header = ['WMO; in BASE; in NEW; TECH Id; dim level; BASE value; NEW value'];
@@ -69,7 +57,7 @@ fprintf('Processing BASE file: %s\n', baseFileName);
 fId = fopen(baseFileName, 'r');
 if (fId == -1)
    fprintf('ERROR: Unable to open file: %s\n', baseFileName);
-   return
+   return;
 end
 baseFileContents = textscan(fId, '%s', 'delimiter', '\t');
 baseFileContents = baseFileContents{:};
@@ -83,7 +71,7 @@ baseWmoList = baseMetaData(:, 1);
 for id = 1:length(baseWmoList)
    if (isempty(str2num(baseWmoList{id})))
       fprintf('%s is not a valid WMO number\n', baseWmoList{id});
-      return
+      return;
    end
 end
 S = sprintf('%s*', baseWmoList{:});
@@ -102,7 +90,7 @@ fprintf('Processing NEW file: %s\n', newFileName);
 fId = fopen(newFileName, 'r');
 if (fId == -1)
    fprintf('ERROR: Unable to open file: %s\n', newFileName);
-   return
+   return;
 end
 newFileContents = textscan(fId, '%s', 'delimiter', '\t');
 newFileContents = newFileContents{:};
@@ -116,7 +104,7 @@ newWmoList = newMetaData(:, 1);
 for id = 1:length(newWmoList)
    if (isempty(str2num(newWmoList{id})))
       fprintf('%s is not a valid WMO number\n', newWmoList{id});
-      return
+      return;
    end
 end
 S = sprintf('%s*', newWmoList{:});
@@ -165,6 +153,7 @@ for idFloat = 1:length(floatList)
       paramId = baseParamIdList(idBaseForWmo(idB));
       dimLev = baseDimLevList(idBaseForWmo(idB));
       paramVal = baseMetaData{idBaseForWmo(idB), 4};
+      
       idF = find((newWmoList == floatNum) & ...
          (newParamIdList == paramId) & ...
          (newDimLevList == dimLev));
@@ -200,4 +189,4 @@ fclose(fidOut);
 
 diary off;
 
-return
+return;

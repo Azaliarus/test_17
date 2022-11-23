@@ -72,7 +72,7 @@ global g_decArgo_dateDef;
 
 
 if (isempty(a_dataCTDO))
-   return
+   return;
 end
 
 packType = [10 29; 30 49];
@@ -86,31 +86,26 @@ for idT = 1:2
             % ascent profile
             if (idMeas == 1)
                
-               if (~isempty(a_ascentStartDateAdj))
-                  % convert AST in tenths of an hour
-                  ascentStartDateAdj = fix(a_ascentStartDateAdj) + ...
-                     ((floor(((a_ascentStartDateAdj-fix(a_ascentStartDateAdj))*1440)/6))*6)/1440;
-                  measDate = fix(ascentStartDateAdj) + data(idMeas+3)/24;
-                  clockOffset = get_nva_clock_offset(measDate, g_decArgo_cycleNum, [], [], []);
-                  if (~isempty(clockOffset))
+               % convert AST in tenths of an hour
+               ascentStartDateAdj = fix(a_ascentStartDateAdj) + ...
+                  ((floor(((a_ascentStartDateAdj-fix(a_ascentStartDateAdj))*1440)/6))*6)/1440;
+               measDate = fix(ascentStartDateAdj) + data(idMeas+3)/24;
+               clockOffset = get_nva_clock_offset(measDate, g_decArgo_cycleNum, [], [], []);
+               if (~isempty(clockOffset))
+                  % round clock offset to 6 minutes
+                  clockOffset = round(clockOffset*1440/6)*6/1440;
+                  measDateAdj = measDate - clockOffset;
+                  if (measDateAdj < ascentStartDateAdj)
+                     measDate = fix(ascentStartDateAdj) + data(idMeas+3)/24 + 1;
+                     clockOffset = get_nva_clock_offset(measDate, g_decArgo_cycleNum, [], [], []);
                      % round clock offset to 6 minutes
                      clockOffset = round(clockOffset*1440/6)*6/1440;
                      measDateAdj = measDate - clockOffset;
-                     if (measDateAdj < ascentStartDateAdj)
-                        measDate = fix(ascentStartDateAdj) + data(idMeas+3)/24 + 1;
-                        clockOffset = get_nva_clock_offset(measDate, g_decArgo_cycleNum, [], [], []);
-                        % round clock offset to 6 minutes
-                        clockOffset = round(clockOffset*1440/6)*6/1440;
-                        measDateAdj = measDate - clockOffset;
-                     end
-                     o_ascProfDate = [o_ascProfDate; measDate];
-                     o_ascProfDateAdj = [o_ascProfDateAdj; measDateAdj];
-                  else
-                     o_ascProfDate = [o_ascProfDate; measDate];
-                     o_ascProfDateAdj = [o_ascProfDateAdj; g_decArgo_dateDef];
                   end
+                  o_ascProfDate = [o_ascProfDate; measDate];
+                  o_ascProfDateAdj = [o_ascProfDateAdj; measDateAdj];
                else
-                  o_ascProfDate = [o_ascProfDate; g_decArgo_dateDef];
+                  o_ascProfDate = [o_ascProfDate; measDate];
                   o_ascProfDateAdj = [o_ascProfDateAdj; g_decArgo_dateDef];
                end
             else
@@ -126,31 +121,26 @@ for idT = 1:2
             % descent profile
             if (idMeas == 1)
                
-               if (~isempty(a_descentToParkStartDateAdj))
-                  % convert DST in tenths of an hour
-                  descentToParkStartDateAdj = fix(a_descentToParkStartDateAdj) + ...
-                     ((floor(((a_descentToParkStartDateAdj-fix(a_descentToParkStartDateAdj))*1440)/6))*6)/1440;
-                  measDate = fix(descentToParkStartDateAdj) + data(idMeas+3)/24;
-                  clockOffset = get_nva_clock_offset(measDate, g_decArgo_cycleNum, [], [], []);
-                  if (~isempty(clockOffset))
+               % convert DST in tenths of an hour
+               descentToParkStartDateAdj = fix(a_descentToParkStartDateAdj) + ...
+                  ((floor(((a_descentToParkStartDateAdj-fix(a_descentToParkStartDateAdj))*1440)/6))*6)/1440;
+               measDate = fix(descentToParkStartDateAdj) + data(idMeas+3)/24;
+               clockOffset = get_nva_clock_offset(measDate, g_decArgo_cycleNum, [], [], []);
+               if (~isempty(clockOffset))
+                  % round clock offset to 6 minutes
+                  clockOffset = round(clockOffset*1440/6)*6/1440;
+                  measDateAdj = measDate - clockOffset;
+                  if (measDateAdj < descentToParkStartDateAdj)
+                     measDate = fix(descentToParkStartDateAdj) + data(idMeas+3)/24 + 1;
+                     clockOffset = get_nva_clock_offset(measDate, g_decArgo_cycleNum, [], [], []);
                      % round clock offset to 6 minutes
                      clockOffset = round(clockOffset*1440/6)*6/1440;
                      measDateAdj = measDate - clockOffset;
-                     if (measDateAdj < descentToParkStartDateAdj)
-                        measDate = fix(descentToParkStartDateAdj) + data(idMeas+3)/24 + 1;
-                        clockOffset = get_nva_clock_offset(measDate, g_decArgo_cycleNum, [], [], []);
-                        % round clock offset to 6 minutes
-                        clockOffset = round(clockOffset*1440/6)*6/1440;
-                        measDateAdj = measDate - clockOffset;
-                     end
-                     o_descProfDate = [o_descProfDate; measDate];
-                     o_descProfDateAdj = [o_descProfDateAdj; measDateAdj];
-                  else
-                     o_descProfDate = [o_descProfDate; measDate];
-                     o_descProfDateAdj = [o_descProfDateAdj; g_decArgo_dateDef];
                   end
+                  o_descProfDate = [o_descProfDate; measDate];
+                  o_descProfDateAdj = [o_descProfDateAdj; measDateAdj];
                else
-                  o_descProfDate = [o_descProfDate; g_decArgo_dateDef];
+                  o_descProfDate = [o_descProfDate; measDate];
                   o_descProfDateAdj = [o_descProfDateAdj; g_decArgo_dateDef];
                end
             else
@@ -184,4 +174,4 @@ o_ascProfSal = o_ascProfSal(idSorted);
 o_ascProfTempDoxy = o_ascProfTempDoxy(idSorted);
 o_ascProfPhaseDelayDoxy = o_ascProfPhaseDelayDoxy(idSorted);
 
-return
+return;

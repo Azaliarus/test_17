@@ -27,6 +27,12 @@ global g_decArgo_floatNum;
 global g_decArgo_dirOutputNetcdfFile;
 global g_decArgo_applyRtqc;
 
+% directory of json meta-data files
+global g_decArgo_dirInputJsonFloatMetaDataFile;
+
+% decoder version
+global g_decArgo_decoderVersion;
+
 % mode processing flags
 global g_decArgo_realtimeFlag;
 global g_decArgo_delayedModeFlag;
@@ -40,139 +46,28 @@ global g_decArgo_outputNcConfParamId;
 % output NetCDF configuration parameter labels
 global g_decArgo_outputNcConfParamLabel;
 
-% output NetCDF configuration parameter descriptions
-global g_decArgo_outputNcConfParamDescription;
-
-% json meta-data
+% structure to store miscellaneous meta-data
 global g_decArgo_jsonMetaData;
-
-% meta-data retrieved from APMT tech files
-global g_decArgo_apmtMetaFromTech;
-
-% output NetCDF technical parameter Ids
-global g_decArgo_outputNcParamId;
-
-% output NetCDF technical parameter labels
-global g_decArgo_outputNcParamLabel;
-global g_decArgo_outputNcParamDescription;
-
-% decoder version
-global g_decArgo_decoderVersion;
-
-% lists of managed decoders
-global g_decArgo_decoderIdListNkeCts5Usea;
-
-% sensor list
-global g_decArgo_sensorMountedOnFloat;
 
 
 % verbose mode flag
 VERBOSE_MODE = 1;
 
+% json meta-data file for this float
+jsonInputFileName = [g_decArgo_dirInputJsonFloatMetaDataFile '/' sprintf('%d_meta.json', g_decArgo_floatNum)];
+
+if ~(exist(jsonInputFileName, 'file') == 2)
+   fprintf('ERROR: Float #%d: Json meta-data file not found: %s\n', ...
+      g_decArgo_floatNum, ...
+      jsonInputFileName);
+   return;
+end
+
+% read meta-data file
+metaData = loadjson(jsonInputFileName);
+
 % update the meta-data contents
-metaData = update_meta_data(g_decArgo_jsonMetaData, a_decoderId);
-
-% initialize create_nc_meta_aux_file input parameters
-inputAuxMetaName = [];
-inputAuxMetaId = [];
-inputAuxMetaValue = [];
-inputAuxMetaDescription = [];
-
-inputAuxStaticConfigName = [];
-inputAuxStaticConfigId = [];
-inputAuxStaticConfigValue = [];
-
-launchAuxConfigName = [];
-launchAuxConfigId = [];
-launchAuxConfigValue = [];
-
-missionAuxConfigName = [];
-missionAuxConfigId = [];
-missionAuxConfigValue = [];
-configMissionNumber = [];
-
-metaDataAux = [];
-metaDataAux.DATA_CENTRE = metaData.DATA_CENTRE;
-metaDataAux.PLATFORM_NUMBER = metaData.PLATFORM_NUMBER;
-metaDataAux.FLOAT_SERIAL_NO = metaData.FLOAT_SERIAL_NO;
-
-% collect AUX meta-data information
-% for SENSOR
-sensorAux = [];
-fieldSensorList = [ ...
-   {'SENSOR'} ...
-   {'SENSOR_MAKER'} ...
-   {'SENSOR_MODEL'} ...
-   {'SENSOR_SERIAL_NO'} ...
-   ];
-if (~isempty(metaData.(fieldSensorList{1})))
-   tabSensor = metaData.(fieldSensorList{1});
-   idAux = [];
-   fieldNames = fieldnames(tabSensor);
-   for idF = 1:length(fieldNames)
-      sensorName = tabSensor.(fieldNames{idF});
-      if (strncmp(sensorName, 'AUX_', length('AUX_')))
-         idAux = [idAux idF];
-         sensorAux{end+1} = sensorName;
-      end
-   end
-   if (~isempty(idAux))
-      for idFS = 1:length(fieldSensorList)
-         item = fieldSensorList{idFS};
-         if (~isempty(metaData.(item)))
-            tabData = metaData.(item);
-            tabDataAux = [];
-            for id = 1:length(idAux)
-               tabDataAux.([item '_' num2str(idAux(id))]) = tabData.([item '_' num2str(idAux(id))]);
-               tabData = rmfield(tabData, [item '_' num2str(idAux(id))]);
-            end
-            metaData.(item) = tabData;
-            metaDataAux.(item) = tabDataAux;
-         end
-      end
-   end
-end
-
-% for PARAMETER
-fieldParamList = [ ...
-   {'PARAMETER_SENSOR'} ...
-   {'PARAMETER'} ...
-   {'PARAMETER_UNITS'} ...
-   {'PARAMETER_ACCURACY'} ...
-   {'PARAMETER_RESOLUTION'} ...
-   {'PREDEPLOYMENT_CALIB_EQUATION'} ...
-   {'PREDEPLOYMENT_CALIB_COEFFICIENT'} ...
-   {'PREDEPLOYMENT_CALIB_COMMENT'} ...
-   ];
-if (~isempty(metaData.(fieldParamList{1})))
-   tabParam = metaData.(fieldParamList{1});
-   idAux = [];
-   fieldNames = fieldnames(tabParam);
-   for idF = 1:length(fieldNames)
-      sensorName = tabParam.(fieldNames{idF});
-      if (any(strcmp(sensorName, sensorAux)))
-         idAux = [idAux idF];
-      end
-   end
-   if (~isempty(idAux))
-      for idFS = 1:length(fieldParamList)
-         item = fieldParamList{idFS};
-         if (~isempty(metaData.(item)))
-            tabData = metaData.(item);
-            tabDataAux = [];
-            for id = 1:length(idAux)
-               fieldName = [item '_' num2str(idAux(id))];
-               if (isfield(tabData, fieldName))
-                  tabDataAux.([item '_' num2str(idAux(id))]) = tabData.([item '_' num2str(idAux(id))]);
-                  tabData = rmfield(tabData, [item '_' num2str(idAux(id))]);
-               end
-            end
-            metaData.(item) = tabData;
-            metaDataAux.(item) = tabDataAux;
-         end
-      end
-   end
-end
+metaData = update_meta_data(metaData, a_decoderId);
 
 % collect dimensions in input meta-data
 nbSensor = 0;
@@ -249,11 +144,11 @@ switch (a_decoderId)
                configParamNum = -1;
                fieldNames = fieldnames(metaData.CONFIG_PARAMETER_NAME);
                for idConfParam = 1:length(fieldNames)
-                  confParamName = metaData.CONFIG_PARAMETER_NAME.(fieldNames{idConfParam});
+                  confParamName = getfield(metaData.CONFIG_PARAMETER_NAME, fieldNames{idConfParam});
                   if (~isempty(confParamName))
                      if (strcmp(confParamName, 'CONFIG_PT20_CTDPumpSwitchOffPres'))
                         configParamNum = idConfParam;
-                        break
+                        break;
                      end
                   end
                end
@@ -289,7 +184,7 @@ switch (a_decoderId)
       if (~isempty(confParamNameStruct))
          fieldNames = fieldnames(confParamNameStruct);
          for idConfParam = 1:length(fieldNames)
-            confParamName = confParamNameStruct.(fieldNames{idConfParam});
+            confParamName = getfield(confParamNameStruct, fieldNames{idConfParam});
             if (~isempty(confParamName))
                idF = strfind(confParamName, '_');
                if ((strncmp(confParamName, 'CONFIG_P', length('CONFIG_P')) == 1) && ...
@@ -316,7 +211,7 @@ switch (a_decoderId)
       configName = [];
       fieldNames = fieldnames(metaData.CONFIG_PARAMETER_NAME);
       for idL = 1:length(fieldNames)
-         configName{end+1} = metaData.CONFIG_PARAMETER_NAME.(fieldNames{idL});
+         configName{end+1} = getfield(metaData.CONFIG_PARAMETER_NAME, fieldNames{idL});
       end
       configName = configName';
       
@@ -326,7 +221,7 @@ switch (a_decoderId)
          if (~isempty(conf))
             fieldNames = fieldnames(conf);
             for idL = 1:length(fieldNames)
-               confParamVal = conf.(fieldNames{idL});
+               confParamVal = getfield(conf, fieldNames{idL});
                if (~isempty(confParamVal))
                   configValue(idL, idC) = str2num(confParamVal);
                end
@@ -351,9 +246,9 @@ switch (a_decoderId)
       for idL = 1:length(mandatoryConfigName)
          for idC = 1:length(configName)
             if (~isempty(strfind(configName{idC}, mandatoryConfigName{idL})))
-               mandatoryList = [mandatoryList; idC];
+               mandatoryList = [mandatoryList idC];
                if (idL < length(mandatoryConfigName))
-                  break
+                  break;
                end
             end
          end
@@ -391,7 +286,6 @@ switch (a_decoderId)
       
       nbConfigParam = length(missionConfigName);
       
-      %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
    case {30, 32}
       
       % Arvor ARN
@@ -406,9 +300,9 @@ switch (a_decoderId)
       for idL = 1:length(mandatoryConfigName)
          for idC = 1:length(configName)
             if (~isempty(strfind(configName{idC}, mandatoryConfigName{idL})))
-               mandatoryList = [mandatoryList; idC];
+               mandatoryList = [mandatoryList idC];
                if (idL < length(mandatoryConfigName))
-                  break
+                  break;
                end
             end
          end
@@ -447,43 +341,9 @@ switch (a_decoderId)
       
       nbConfigParam = length(missionConfigName);
       
-      %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-   case {105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 301, 302}
+   case {105, 106, 107, 108, 109, 301, 302, 303}
       
       % Remocean floats
-      
-      % select Argo and Auxiliary configuration information
-      staticConfigName = a_structConfig.STATIC_NC.NAMES;
-      staticConfigValue = a_structConfig.STATIC_NC.VALUES;
-      
-      inputStaticConfigName = [];
-      inputStaticConfigValue = [];
-      inputAuxStaticConfigName = [];
-      inputAuxStaticConfigValue = [];
-      inputAuxMetaName = [];
-      inputAuxMetaValue = [];
-      inputAuxMetaDescription = [];
-      for idC = 1:length(staticConfigName)
-         if (strncmp(staticConfigName{idC}, 'CONFIG_AUX_', length('CONFIG_AUX_')))
-            inputAuxStaticConfigName = [inputAuxStaticConfigName; staticConfigName(idC)];
-            inputAuxStaticConfigValue = [inputAuxStaticConfigValue; staticConfigValue(idC)];
-         elseif (strncmp(staticConfigName{idC}, 'META_AUX_', length('META_AUX_')))
-            inputAuxMetaName = [inputAuxMetaName; staticConfigName(idC)];
-            inputAuxMetaValue = [inputAuxMetaValue; staticConfigValue(idC)];
-            inputAuxMetaDescription = [inputAuxMetaDescription; ...
-               g_decArgo_outputNcConfParamDescription(find(strcmp(staticConfigName(idC), g_decArgo_outputNcConfParamLabel), 1))];
-         elseif (strncmp(staticConfigName{idC}, 'META_', length('META_')))
-            % not used
-         else
-            inputStaticConfigName = [inputStaticConfigName; staticConfigName(idC)];
-            inputStaticConfigValue = [inputStaticConfigValue; staticConfigValue(idC)];
-         end
-      end
-      
-      % we create the dynamic configurations including AUX parameters (they will
-      % be selected later)
-      inputDynamicConfigName = a_structConfig.DYNAMIC_NC.NAMES;
-      inputDynamicConfigValue = a_structConfig.DYNAMIC_NC.VALUES;
       
       % retrieve mandatory configuration names for this decoder
       [mandatoryConfigName] = get_config_param_mandatory(a_decoderId);
@@ -491,16 +351,19 @@ switch (a_decoderId)
       % concat the input configuration information
       inputStaticConfigName = a_structConfig.STATIC_NC.NAMES;
       inputStaticConfigValue = a_structConfig.STATIC_NC.VALUES;
-            
+      
+      inputDynamicConfigName = a_structConfig.DYNAMIC_NC.NAMES;
+      inputDynamicConfigValue = a_structConfig.DYNAMIC_NC.VALUES;
+      
       configName = [inputStaticConfigName; inputDynamicConfigName];
       
       mandatoryList = [];
       for idL = 1:length(mandatoryConfigName)
          for idC = 1:length(configName)
             if (~isempty(strfind(configName{idC}, mandatoryConfigName{idL})))
-               mandatoryList = [mandatoryList; idC];
+               mandatoryList = [mandatoryList idC];
                if (idL < length(mandatoryConfigName))
-                  break
+                  break;
                end
             end
          end
@@ -514,27 +377,12 @@ switch (a_decoderId)
       else
          configValue = inputDynamicConfigValue;
       end
-            
+      
       % create the launch configuration
       launchConfigName = configName;
       launchConfigValue = configValue(:, 1);
-
-      % clean AUX parameters from output Argo launch configuration
-      launchAuxConfigName = [];
-      launchAuxConfigValue = [];
-      idDel = [];
-      for idC = 1:length(launchConfigName)
-         if (strncmp(launchConfigName{idC}, 'CONFIG_AUX_', length('CONFIG_AUX_')))
-            launchAuxConfigName = [launchAuxConfigName; launchConfigName(idC)];
-            launchAuxConfigValue = [launchAuxConfigValue; launchConfigValue(idC, :)];
-            idDel = [idDel; idC];
-         end
-      end
-      launchConfigName(idDel) = [];
-      launchConfigValue(idDel, :) = [];
+      nbLaunchConfigParam = length(configName);
       
-      nbLaunchConfigParam = length(launchConfigName);
-
       % create the mission configuration
       missionConfigName = configName;
       missionConfigValue = configValue;
@@ -560,532 +408,16 @@ switch (a_decoderId)
          missionConfigValue = configValue(mandatoryList, 1);
          configMissionNumber = 1;
       end
-            
-      % clean AUX parameters from output Argo configuration
-      missionAuxConfigName = [];
-      missionAuxConfigValue = [];
-      idDel = [];
-      for idC = 1:length(missionConfigName)
-         if (strncmp(missionConfigName{idC}, 'CONFIG_AUX_', length('CONFIG_AUX_')))
-            missionAuxConfigName = [missionAuxConfigName; missionConfigName(idC)];
-            missionAuxConfigValue = [missionAuxConfigValue; missionConfigValue(idC, :)];
-            idDel = [idDel; idC];
-         end
-      end
-      missionConfigName(idDel) = [];
-      missionConfigValue(idDel, :) = [];
-
-      % create/update NetCDF META_AUX file
-      create_nc_meta_aux_file( ...
-         inputAuxMetaName, [], inputAuxMetaValue, inputAuxMetaDescription, ...
-         inputAuxStaticConfigName, [], inputAuxStaticConfigValue, ...
-         launchAuxConfigName, [], launchAuxConfigValue, ...
-         missionAuxConfigName, [], missionAuxConfigValue, configMissionNumber, ...
-         metaDataAux);
-      
-      nbConfigParam = length(missionConfigName);
-
-      %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-   case {303}
-      
-      % Remocean floats
-      
-      % select Argo and Auxiliary configuration information
-      staticConfigName = a_structConfig.STATIC_NC.NAMES;
-      staticConfigId = a_structConfig.STATIC_NC.IDS;
-      staticConfigValue = a_structConfig.STATIC_NC.VALUES;
-      
-      inputStaticConfigName = [];
-      inputStaticConfigId = [];
-      inputStaticConfigValue = [];
-      inputAuxStaticConfigName = [];
-      inputAuxStaticConfigId = [];
-      inputAuxStaticConfigValue = [];
-      inputAuxMetaName = [];
-      inputAuxMetaId = [];
-      inputAuxMetaValue = [];
-      inputAuxMetaDescription = [];
-      for idC = 1:length(staticConfigName)
-         if (strncmp(staticConfigName{idC}, 'CONFIG_AUX_', length('CONFIG_AUX_')))
-            inputAuxStaticConfigName = [inputAuxStaticConfigName; staticConfigName(idC)];
-            inputAuxStaticConfigId = [inputAuxStaticConfigId; staticConfigId(idC)];
-            inputAuxStaticConfigValue = [inputAuxStaticConfigValue; staticConfigValue(idC)];
-         elseif (strncmp(staticConfigName{idC}, 'META_AUX_', length('META_AUX_')))
-            inputAuxMetaName = [inputAuxMetaName; staticConfigName(idC)];
-            inputAuxMetaId = [inputAuxMetaId; staticConfigId(idC)];
-            inputAuxMetaValue = [inputAuxMetaValue; staticConfigValue(idC)];
-            inputAuxMetaDescription = [inputAuxMetaDescription; ...
-               g_decArgo_outputNcConfParamDescription(find(strcmp(staticConfigName(idC), g_decArgo_outputNcConfParamLabel), 1))];
-         elseif (strncmp(staticConfigName{idC}, 'META_', length('META_')))
-            % not used
-         else
-            inputStaticConfigName = [inputStaticConfigName; staticConfigName(idC)];
-            inputStaticConfigId = [inputStaticConfigId; staticConfigId(idC)];
-            inputStaticConfigValue = [inputStaticConfigValue; staticConfigValue(idC)];
-         end
-      end
-      
-      % we create the dynamic configurations including AUX parameters (they will
-      % be selected later)
-      inputDynamicConfigName = a_structConfig.DYNAMIC_NC.NAMES;
-      inputDynamicConfigId = a_structConfig.DYNAMIC_NC.IDS;
-      inputDynamicConfigValue = a_structConfig.DYNAMIC_NC.VALUES;
-      
-      % retrieve mandatory configuration names for this decoder
-      [mandatoryConfigName] = get_config_param_mandatory(a_decoderId);
-                  
-      % concat the input configuration information      
-      configName = [inputStaticConfigName; inputDynamicConfigName];
-      configId = [inputStaticConfigId; inputDynamicConfigId];
-      
-      mandatoryList = [];
-      for idL = 1:length(mandatoryConfigName)
-         for idC = 1:length(configName)
-            if (~isempty(strfind(configName{idC}, mandatoryConfigName{idL})))
-               mandatoryList = [mandatoryList; idC];
-               if (idL < length(mandatoryConfigName))
-                  break
-               end
-            end
-         end
-      end
-      
-      if (~isempty(inputStaticConfigValue))
-         staticConfigValue = nan(size(inputStaticConfigValue, 1), size(inputDynamicConfigValue, 2));
-         staticConfigValue(:, 1) = str2num(char(inputStaticConfigValue));
-         
-         configValue = cat(1, staticConfigValue, inputDynamicConfigValue);
-      else
-         configValue = inputDynamicConfigValue;
-      end
-
-      % create the launch configuration
-      launchConfigName = configName;
-      launchConfigId = configId;
-      launchConfigValue = configValue(:, 1);
-
-      % clean AUX parameters from output Argo launch configuration
-      launchAuxConfigName = [];
-      launchAuxConfigId = [];
-      launchAuxConfigValue = [];
-      idDel = [];
-      for idC = 1:length(launchConfigName)
-         if (strncmp(launchConfigName{idC}, 'CONFIG_AUX_', length('CONFIG_AUX_')))
-            launchAuxConfigName = [launchAuxConfigName; launchConfigName(idC)];
-            launchAuxConfigId = [launchAuxConfigId; launchConfigId(idC)];
-            launchAuxConfigValue = [launchAuxConfigValue; launchConfigValue(idC, :)];
-            idDel = [idDel; idC];
-         end
-      end
-      launchConfigName(idDel) = [];
-      launchConfigId(idDel) = [];
-      launchConfigValue(idDel, :) = [];
-      
-      nbLaunchConfigParam = length(launchConfigName);
-
-      % create the mission configuration
-      missionConfigName = configName;
-      missionConfigId = configId;
-      missionConfigValue = configValue;
-      
-      if (size(configValue, 2) > 1)
-         idDel = [];
-         for idL = 1:size(missionConfigValue, 1)
-            if (sum(isnan(missionConfigValue(idL, 2:end))) == size(missionConfigValue, 2)-1)
-               idDel = [idDel; idL];
-            elseif ((length(unique(missionConfigValue(idL, 2:end))) == 1) && ...
-                  (unique(missionConfigValue(idL, 2:end)) == missionConfigValue(idL, 1)))
-               idDel = [idDel; idL];
-            end
-         end
-         idDel = setdiff(idDel, mandatoryList);
-         missionConfigName(idDel) = [];
-         missionConfigId(idDel) = [];
-         missionConfigValue(idDel, :) = [];
-         % don't keep launch mission
-         missionConfigValue(:, 1) = [];
-         configMissionNumber = a_structConfig.DYNAMIC_NC.NUMBER(2:end);
-      else
-         missionConfigName = configName(mandatoryList);
-         missionConfigId = configId(mandatoryList);
-         missionConfigValue = configValue(mandatoryList, 1);
-         configMissionNumber = 1;
-      end
-            
-      % clean AUX parameters from output Argo configuration
-      missionAuxConfigName = [];
-      missionAuxConfigId = [];
-      missionAuxConfigValue = [];
-      idDel = [];
-      for idC = 1:length(missionConfigName)
-         if (strncmp(missionConfigName{idC}, 'CONFIG_AUX_', length('CONFIG_AUX_')))
-            missionAuxConfigName = [missionAuxConfigName; missionConfigName(idC)];
-            missionAuxConfigId = [missionAuxConfigId; missionConfigId(idC)];
-            missionAuxConfigValue = [missionAuxConfigValue; missionConfigValue(idC, :)];
-            idDel = [idDel; idC];
-         end
-      end
-      missionConfigName(idDel) = [];
-      missionConfigId(idDel) = [];
-      missionConfigValue(idDel, :) = [];
-
-      % create/update NetCDF META_AUX file
-      create_nc_meta_aux_file( ...
-         inputAuxMetaName, inputAuxMetaId, inputAuxMetaValue, inputAuxMetaDescription, ...
-         inputAuxStaticConfigName, inputAuxStaticConfigId, inputAuxStaticConfigValue, ...
-         launchAuxConfigName, launchAuxConfigId, launchAuxConfigValue, ...
-         missionAuxConfigName, missionAuxConfigId, missionAuxConfigValue, configMissionNumber, ...
-         metaDataAux);
-      
-      nbConfigParam = length(missionConfigName);
-
-      %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-   case {121, 122, 123, 124, 125, 126, 127, 128, 129}
-      
-      % CTS5 floats
-      
-      % select Argo and Auxiliary configuration information
-      staticConfigName = a_structConfig.STATIC_NC.NAMES;
-      staticConfigId = a_structConfig.STATIC_NC.IDS;
-      staticConfigValue = a_structConfig.STATIC_NC.VALUES;
-
-      inputStaticConfigName = [];
-      inputStaticConfigId = [];
-      inputStaticConfigValue = [];
-      inputAuxStaticConfigName = [];
-      inputAuxStaticConfigId = [];
-      inputAuxStaticConfigValue = [];
-      inputAuxMetaName = [];
-      inputAuxMetaId = [];
-      inputAuxMetaValue = [];
-      inputAuxMetaDescription = [];
-      for idC = 1:length(staticConfigName)
-         if (strncmp(staticConfigName{idC}, 'CONFIG_AUX_', length('CONFIG_AUX_')))
-            inputAuxStaticConfigName = [inputAuxStaticConfigName; staticConfigName(idC)];
-            inputAuxStaticConfigId = [inputAuxStaticConfigId; staticConfigId(idC)];
-            inputAuxStaticConfigValue = [inputAuxStaticConfigValue; staticConfigValue(idC)];
-         elseif (strncmp(staticConfigName{idC}, 'META_AUX_', length('META_AUX_')))
-            inputAuxMetaName = [inputAuxMetaName; staticConfigName(idC)];
-            inputAuxMetaId = [inputAuxMetaId; staticConfigId(idC)];
-            inputAuxMetaValue = [inputAuxMetaValue; staticConfigValue(idC)];
-            inputAuxMetaDescription = [inputAuxMetaDescription; ...
-               g_decArgo_outputNcConfParamDescription(find(strcmp(staticConfigName(idC), g_decArgo_outputNcConfParamLabel), 1))];
-         elseif (strncmp(staticConfigName{idC}, 'META_', length('META_')))
-            % not used
-         else
-            inputStaticConfigName = [inputStaticConfigName; staticConfigName(idC)];
-            inputStaticConfigId = [inputStaticConfigId; staticConfigId(idC)];
-            inputStaticConfigValue = [inputStaticConfigValue; staticConfigValue(idC)];
-         end
-      end
-      
-      % CTS5-USEA
-      if (ismember(a_decoderId, g_decArgo_decoderIdListNkeCts5Usea))
-         metaAuxLabelList = [ ...
-            {'META_AUX_FLOAT_SIM_CARD_NUMBER'} ...
-            {'META_AUX_FIRMWARE_VERSION_SECONDARY'} ...
-            {'META_AUX_OPUS_FIRMWARE_VERSION'} ...
-            {'META_AUX_OPUS_SENSOR_LAMP_SERIAL_NO'} ...
-            {'META_AUX_OPUS_WATERBASE_LENGTH'} ...
-            {'META_AUX_OPUS_WATERBASE_INTENSITIES'} ...
-            {'META_AUX_MPE_ACQUISITION_AVERAGE'} ...
-            {'META_AUX_MPE_ACQUISITION_RATE'} ...
-            {'META_AUX_MPE_PHOTODETECTOR_RESPONSIVITY_W'} ...
-            {'META_AUX_MPE_PHOTODETECTOR_RESPONSIVITY_A'} ...
-            {'META_AUX_MPE_MICRORADIOMETER_GAIN_HM'} ...
-            {'META_AUX_MPE_MICRORADIOMETER_GAIN_ML'} ...
-            {'META_AUX_MPE_MICRORADIOMETER_OFFSET_H'} ...
-            {'META_AUX_MPE_MICRORADIOMETER_OFFSET_M'} ...
-            {'META_AUX_MPE_MICRORADIOMETER_OFFSET_L'} ...
-            {'META_AUX_HYDROC_SERIAL_NO'} ...
-            {'META_AUX_HYDROC_FIRMWARE_VERSION'} ...
-            {'META_AUX_HYDROC_HARDWARE_VERSION'} ...
-            {'META_AUX_BATTERY_PACK1_TYPE'} ...
-            {'META_AUX_BATTERY_PACK1_VOLTAGE'} ...
-            {'META_AUX_BATTERY_PACK1_CAPACITY'} ...
-            {'META_AUX_BATTERY_PACK2_TYPE'} ...
-            {'META_AUX_BATTERY_PACK2_VOLTAGE'} ...
-            {'META_AUX_BATTERY_PACK2_CAPACITY'} ...
-            {'META_AUX_CROVER_PATH_LENGTH'} ...
-            {'META_AUX_CROVER_CALIBRATION_VALUE'} ...
-            {'META_AUX_RAMSES_ACC_FIRMWARE_VERSION'} ...
-            {'META_AUX_RAMSES_ACC_SPECTRUM_LENGTH'} ...
-            {'META_AUX_RAMSES_ACC_SPECTRUM_WAVELENGTHS'} ...
-            {'META_AUX_RAMSES_ARC_FIRMWARE_VERSION'} ...
-            {'META_AUX_RAMSES_ARC_SPECTRUM_LENGTH'} ...
-            {'META_AUX_RAMSES_ARC_SPECTRUM_WAVELENGTHS'} ...
-            {'META_AUX_IMU_ORIENTATION'} ...
-            {'META_AUX_IMU_MODE'} ...
-            {'META_AUX_IMU_TEMPERATURE_COR_OFFSET'} ...
-            {'META_AUX_IMU_ACCELEROMETER_X_COR_OFFSET'} ...
-            {'META_AUX_IMU_ACCELEROMETER_Y_COR_OFFSET'} ...
-            {'META_AUX_IMU_ACCELEROMETER_Z_COR_OFFSET'} ...
-            {'META_AUX_IMU_ACCELEROMETER_X_COR_GAIN'} ...
-            {'META_AUX_IMU_ACCELEROMETER_Y_COR_GAIN'} ...
-            {'META_AUX_IMU_ACCELEROMETER_Z_COR_GAIN'} ...
-            {'META_AUX_IMU_GYROSCOPE_X_COR_OFFSET'} ...
-            {'META_AUX_IMU_GYROSCOPE_Y_COR_OFFSET'} ...
-            {'META_AUX_IMU_GYROSCOPE_Z_COR_OFFSET'} ...
-            {'META_AUX_IMU_MAGNETOMETER_X_COR_OFFSET'} ...
-            {'META_AUX_IMU_MAGNETOMETER_Y_COR_OFFSET'} ...
-            {'META_AUX_IMU_MAGNETOMETER_Z_COR_OFFSET'} ...
-            {'META_AUX_IMU_COMPASS_HARD_IRON_COR_OFFSET1'} ...
-            {'META_AUX_IMU_COMPASS_HARD_IRON_COR_OFFSET2'} ...
-            {'META_AUX_IMU_COMPASS_SOFT_IRON_COR_MATRIX11'} ...
-            {'META_AUX_IMU_COMPASS_SOFT_IRON_COR_MATRIX12'} ...
-            {'META_AUX_IMU_COMPASS_SOFT_IRON_COR_MATRIX21'} ...
-            {'META_AUX_IMU_COMPASS_SOFT_IRON_COR_MATRIX22'} ...
-            {'META_AUX_SBE41_FIRMWARE_VERSION'} ...
-            {'META_AUX_SUNA_FIRMWARE_VERSION'} ...
-            {'META_AUX_SUNA_SPECTROMETER_INTEGRATION_TIME'} ...
-            ];
-         for idMA = 1:length(metaAuxLabelList)
-            if (isfield(metaData, metaAuxLabelList{idMA}))
-               inputAuxMetaName = [inputAuxMetaName; metaAuxLabelList{idMA}];
-               idF = find(strcmp(metaAuxLabelList{idMA}, g_decArgo_outputNcConfParamLabel), 1);
-               inputAuxMetaId = [inputAuxMetaId; g_decArgo_outputNcConfParamId(idF)];
-               inputAuxMetaValue = [inputAuxMetaValue; metaData.(metaAuxLabelList{idMA})];
-               inputAuxMetaDescription = [inputAuxMetaDescription; ...
-                  g_decArgo_outputNcConfParamDescription(find(strcmp(metaAuxLabelList{idMA}, g_decArgo_outputNcConfParamLabel), 1))];
-            end
-         end
-
-         if (isfield(metaData, 'META_AUX_UVP_CONFIG_NAMES'))
-            fieldNames1 = fields(metaData.META_AUX_UVP_CONFIG_NAMES);
-            fieldNames2 = fields(metaData.META_AUX_UVP_CONFIG_PARAMETERS);
-            acqNum = 0;
-            taxoNum = 0;
-            for idConf = 1:length(fieldNames1)
-               confName = metaData.META_AUX_UVP_CONFIG_NAMES.(fieldNames1{idConf});
-               if (strncmp(confName, 'ACQ_', length('ACQ_')))
-                  confLabel = sprintf('META_AUX_UVP_ACQ_CONF_%d_PARAMETERS', acqNum);
-                  acqNum = acqNum + 1;
-               elseif (strncmp(confName, 'TAXO_', length('TAXO_')))
-                  confLabel = sprintf('META_AUX_UVP_TAXO_CONF_%d_PARAMETERS', taxoNum);
-                  taxoNum = taxoNum + 1;
-               else
-                  confLabel = 'META_AUX_UVP_HW_CONF_PARAMETERS';
-               end
-               inputAuxMetaName = [inputAuxMetaName; confLabel];
-               idF = find(strcmp(confLabel, g_decArgo_outputNcConfParamLabel), 1);
-               inputAuxMetaId = [inputAuxMetaId; g_decArgo_outputNcConfParamId(idF)];
-               inputAuxMetaValue = [inputAuxMetaValue; metaData.META_AUX_UVP_CONFIG_PARAMETERS.(fieldNames2{idConf})];
-               inputAuxMetaDescription = [inputAuxMetaDescription; ...
-                  g_decArgo_outputNcConfParamDescription(find(strcmp(confLabel, g_decArgo_outputNcConfParamLabel), 1))];
-            end
-         end
-      end
-      
-      % retrieve meta-data from APMT tech files
-      if (~isempty(g_decArgo_apmtMetaFromTech))
-         
-         % delete duplicates
-         metaStructList = [g_decArgo_apmtMetaFromTech{:}];
-         idList = [metaStructList.techId];
-         if (~isempty(idList))
-            uIdList = unique(idList);
-            if (length(uIdList) == 1)
-               g_decArgo_apmtMetaFromTech(2:end) = [];
-            else
-               nbElts = hist(idList, uIdList);
-               idDel = [];
-               idToDel = uIdList(find(nbElts > 1));
-               for id = idToDel
-                  idF = find(idList == id);
-                  idDel = [idDel idF(2:end)];
-               end
-               g_decArgo_apmtMetaFromTech(idDel) = [];
-            end
-         end
-         
-         for idM = 1:length(g_decArgo_apmtMetaFromTech)
-            metaStruct = g_decArgo_apmtMetaFromTech{idM};
-            idMetaName = find(g_decArgo_outputNcParamId == metaStruct.techId);
-            metaName = char(g_decArgo_outputNcParamLabel{idMetaName});
-            metaDescription = char(g_decArgo_outputNcParamDescription{idMetaName});
-            
-            if (strncmp(metaName, 'META_AUX_', length('META_AUX_')))
-               inputAuxMetaName = [inputAuxMetaName; metaName];
-               inputAuxMetaId = [inputAuxMetaId; g_decArgo_outputNcConfParamId(idMetaName)];
-               inputAuxMetaValue = [inputAuxMetaValue; metaStruct.value];
-               inputAuxMetaDescription = [inputAuxMetaDescription; metaDescription];
-            elseif (strncmp(staticConfigName{idC}, 'META_', length('META_')))
-               % not used
-            end
-         end
-      end
-      
-      %       dynamicConfigName = a_structConfig.DYNAMIC_NC.NAMES;
-      %       dynamicConfigValue = a_structConfig.DYNAMIC_NC.VALUES;
-      %
-      %       inputDynamicConfigName = [];
-      %       inputDynamicConfigValue = [];
-      %       inputAuxDynamicConfigName = [];
-      %       inputAuxDynamicConfigValue = [];
-      %       for idC = 1:length(dynamicConfigName)
-      %          if (strncmp(dynamicConfigName{idC}, 'CONFIG_AUX_', length('CONFIG_AUX_')))
-      %             inputAuxDynamicConfigName = [inputAuxDynamicConfigName; dynamicConfigName(idC)];
-      %             inputAuxDynamicConfigValue = [inputAuxDynamicConfigValue; dynamicConfigValue(idC, :)];
-      %          elseif (strncmp(dynamicConfigName{idC}, 'META_AUX_', length('META_AUX_')))
-      %             inputAuxMetaName = [inputAuxMetaName; dynamicConfigName(idC)];
-      %             inputAuxMetaValue = [inputAuxMetaValue; dynamicConfigValue(idC, :)];
-      %          elseif (strncmp(dynamicConfigName{idC}, 'META_', length('META_')))
-      %             % not used
-      %          else
-      %             inputDynamicConfigName = [inputDynamicConfigName; dynamicConfigName(idC)];
-      %             inputDynamicConfigValue = [inputDynamicConfigValue; dynamicConfigValue(idC, :)];
-      %          end
-      %       end
-      
-      % we create the dynamic configurations including AUX parameters (they will
-      % be selected later)
-      inputDynamicConfigName = a_structConfig.DYNAMIC_NC.NAMES;
-      inputDynamicConfigId = a_structConfig.DYNAMIC_NC.IDS;
-      inputDynamicConfigValue = a_structConfig.DYNAMIC_NC.VALUES;
-      
-      % retrieve mandatory configuration names for this decoder
-      [mandatoryConfigName] = get_config_param_mandatory(a_decoderId);
-      
-      % concat the input configuration information      
-      configName = [inputStaticConfigName; inputDynamicConfigName];
-      configId = [inputStaticConfigId; inputDynamicConfigId];
-      
-      mandatoryList = [];
-      for idL = 1:length(mandatoryConfigName)
-         for idC = 1:length(configName)
-            if (~isempty(strfind(configName{idC}, mandatoryConfigName{idL})))
-               mandatoryList = [mandatoryList; idC];
-               if (idL < length(mandatoryConfigName))
-                  break
-               end
-            end
-         end
-      end
-      
-      if (~isempty(inputStaticConfigValue))
-         staticConfigValue = nan(size(inputStaticConfigValue, 1), size(inputDynamicConfigValue, 2));
-         inputStaticConfigValue = regexprep(inputStaticConfigValue, 'True', '1');
-         inputStaticConfigValue = regexprep(inputStaticConfigValue, 'False', '0');
-         inputStaticConfigValue = regexprep(inputStaticConfigValue, 'yes', '1');
-         inputStaticConfigValue = regexprep(inputStaticConfigValue, 'no', '0');
-         staticConfigValue(:, 1) = cellfun(@str2num, inputStaticConfigValue);
-         
-         configValue = cat(1, staticConfigValue, inputDynamicConfigValue);
-      else
-         configValue = inputDynamicConfigValue;
-      end
-      
-      % create the launch configuration
-      launchConfigName = configName;
-      launchConfigId = configId;
-      launchConfigValue = configValue(:, 1);
-
-      % clean AUX parameters from output Argo launch configuration
-      launchAuxConfigName = [];
-      launchAuxConfigId = [];
-      launchAuxConfigValue = [];
-      idDel = [];
-      for idC = 1:length(launchConfigName)
-         if (strncmp(launchConfigName{idC}, 'CONFIG_AUX_', length('CONFIG_AUX_')))
-            launchAuxConfigName = [launchAuxConfigName; launchConfigName(idC)];
-            launchAuxConfigId = [launchAuxConfigId; launchConfigId(idC)];
-            launchAuxConfigValue = [launchAuxConfigValue; launchConfigValue(idC, :)];
-            idDel = [idDel; idC];
-         end
-      end
-      launchConfigName(idDel) = [];
-      launchConfigId(idDel) = [];
-      launchConfigValue(idDel, :) = [];
-      
-      nbLaunchConfigParam = length(launchConfigName);
-      
-      % create the mission configuration
-      missionConfigName = configName;
-      missionConfigId = configId;
-      missionConfigValue = configValue;
-      
-      if (size(configValue, 2) > 1)
-         idDel = [];
-         for idL = 1:size(missionConfigValue, 1)
-            if (sum(isnan(missionConfigValue(idL, 2:end))) == size(missionConfigValue, 2)-1)
-               idDel = [idDel; idL];
-            elseif ((length(unique(missionConfigValue(idL, 2:end))) == 1) && ...
-                  (unique(missionConfigValue(idL, 2:end)) == missionConfigValue(idL, 1)))
-               idDel = [idDel; idL];
-            end
-         end
-         idDel = setdiff(idDel, mandatoryList);
-         missionConfigName(idDel) = [];
-         missionConfigId(idDel) = [];
-         missionConfigValue(idDel, :) = [];
-         % don't keep launch mission
-         missionConfigValue(:, 1) = [];
-         configMissionNumber = a_structConfig.DYNAMIC_NC.NUMBER(2:end);
-      else
-         missionConfigName = configName(mandatoryList);
-         missionConfigId = configId(mandatoryList);
-         missionConfigValue = configValue(mandatoryList, 1);
-         configMissionNumber = 1;
-      end
-      
-      % clean AUX parameters from output Argo configuration
-      missionAuxConfigName = [];
-      missionAuxConfigId = [];
-      missionAuxConfigValue = [];
-      idDel = [];
-      for idC = 1:length(missionConfigName)
-         if (strncmp(missionConfigName{idC}, 'CONFIG_AUX_', length('CONFIG_AUX_')))
-            missionAuxConfigName = [missionAuxConfigName; missionConfigName(idC)];
-            missionAuxConfigId = [missionAuxConfigId; missionConfigId(idC)];
-            missionAuxConfigValue = [missionAuxConfigValue; missionConfigValue(idC, :)];
-            idDel = [idDel; idC];
-         end
-      end
-      missionConfigName(idDel) = [];
-      missionConfigId(idDel) = [];
-      missionConfigValue(idDel, :) = [];
-      
-      % CTS5-USEA
-      if (ismember(a_decoderId, g_decArgo_decoderIdListNkeCts5Usea))
-         if (ismember(a_decoderId, [129]) && any(strcmp(g_decArgo_sensorMountedOnFloat, 'UVP')))
-            % dispatch each configuration parameter on the UVP sensor in the
-            % configuration
-            [launchAuxConfigName, launchAuxConfigId, launchAuxConfigValue, ...
-               missionAuxConfigName, missionAuxConfigId, missionAuxConfigValue] = ...
-               dispatch_uvp_detailed_configuration_parameters( ...
-               inputAuxMetaName, inputAuxMetaValue, ...
-               launchAuxConfigName, launchAuxConfigId, launchAuxConfigValue, ...
-               missionAuxConfigName, missionAuxConfigId, missionAuxConfigValue);
-         end
-      end
-
-      % create/update NetCDF META_AUX file
-      create_nc_meta_aux_file( ...
-         inputAuxMetaName, inputAuxMetaId, inputAuxMetaValue, inputAuxMetaDescription, ...
-         inputAuxStaticConfigName, inputAuxStaticConfigId, inputAuxStaticConfigValue, ...
-         launchAuxConfigName, launchAuxConfigId, launchAuxConfigValue, ...
-         missionAuxConfigName, missionAuxConfigId, missionAuxConfigValue, configMissionNumber, ...
-         metaDataAux);
       
       nbConfigParam = length(missionConfigName);
       
-      %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-   case {201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, ...
-         214, 215, 216, 217, 218}
+   case {201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 211}
       
       % Arvor deep 4000
       % Arvor deep 3500
       % Arvor iridium
       % Provor-DO Iridium
       % Arvor-2DO Iridium
-      % Arvor-ARN Iridium
-      % Arvor-ARN-Ice Iridium 5.45
-      % Provor-ARN-DO Iridium
-      % Provor-ARN-DO-Ice Iridium
-      % Arvor deep 4000 with "Near Surface" & "In Air" measurements
-      % Arvor-Deep-Ice Iridium 5.65
-      % Arvor-ARN-DO-Ice Iridium 5.46
-      % Arvor-Deep-Ice Iridium 5.66
       
       % retrieve mandatory configuration names for this decoder
       [mandatoryConfigName] = get_config_param_mandatory(a_decoderId);
@@ -1103,9 +435,9 @@ switch (a_decoderId)
       for idL = 1:length(mandatoryConfigName)
          for idC = 1:length(configName)
             if (~isempty(strfind(configName{idC}, mandatoryConfigName{idL})))
-               mandatoryList = [mandatoryList; idC];
+               mandatoryList = [mandatoryList idC];
                if (idL < length(mandatoryConfigName))
-                  break
+                  break;
                end
             end
          end
@@ -1172,315 +504,11 @@ switch (a_decoderId)
       end
       
       nbConfigParam = length(missionConfigName);
-
-      %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-   case {219, 220}
-      
-      % Arvor-C Iridium 5.3 & 5.301
-
-      % retrieve mandatory configuration names for this decoder
-      [mandatoryConfigName] = get_config_param_mandatory(a_decoderId);
-      
-      % concat the input configuration information
-      inputStaticConfigName = a_structConfig.STATIC_NC.NAMES;
-      inputStaticConfigValue = a_structConfig.STATIC_NC.VALUES;
-      
-      inputDynamicConfigName = a_structConfig.DYNAMIC_NC.NAMES;
-      inputDynamicConfigValue = a_structConfig.DYNAMIC_NC.VALUES;
-      
-      configName = [inputStaticConfigName; inputDynamicConfigName];
-      
-      mandatoryList = [];
-      for idL = 1:length(mandatoryConfigName)
-         for idC = 1:length(configName)
-            if (~isempty(strfind(configName{idC}, mandatoryConfigName{idL})))
-               mandatoryList = [mandatoryList; idC];
-               if (idL < length(mandatoryConfigName))
-                  break
-               end
-            end
-         end
-      end
-      
-      configValue = inputDynamicConfigValue;
-      if (~isempty(inputStaticConfigName))
-         staticConfigValue = nan(size(inputStaticConfigName, 1), size(inputDynamicConfigValue, 2));
-         if (~isempty(inputStaticConfigValue))
-            staticConfigValue(:, 1) = str2num(char(inputStaticConfigValue));
-         end
-         configValue = cat(1, staticConfigValue, inputDynamicConfigValue);
-      end
-      
-      % create the launch configuration
-      launchConfigName = configName;
-      launchConfigValue = configValue(:, 1);
-      nbLaunchConfigParam = length(configName);
-      
-      % create the mission configuration
-      % no management of configuration => the launch configuration is duplicated
-      % in mission configuration #1 (otherwise the checker rject the file for
-      % unknown reason !
-      missionConfigName = configName;
-      missionConfigValue = configValue;
-      configMissionNumber = 1;
-      nbConfigParam = length(missionConfigName);
       
       %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-   case {221}
+      % APEX floats
       
-      % Arvor-Deep-Ice Iridium 5.67
-      
-      % select Argo and Auxiliary configuration information
-      staticConfigName = a_structConfig.STATIC_NC.NAMES;
-      staticConfigValue = a_structConfig.STATIC_NC.VALUES;
-      
-      inputAuxStaticConfigName = [];
-      inputAuxStaticConfigValue = [];
-      for idC = 1:length(staticConfigName)
-         if (strncmp(staticConfigName{idC}, 'CONFIG_AUX_', length('CONFIG_AUX_')))
-            inputAuxStaticConfigName = [inputAuxStaticConfigName; staticConfigName(idC)];
-            inputAuxStaticConfigValue = [inputAuxStaticConfigValue; staticConfigValue(idC)];
-         end
-      end
-      
-      % we create the dynamic configurations including AUX parameters (they will
-      % be selected later)
-
-      % concat the input configuration information
-      inputStaticConfigName = a_structConfig.STATIC_NC.NAMES;
-      inputStaticConfigValue = a_structConfig.STATIC_NC.VALUES;
-      
-      inputDynamicConfigName = a_structConfig.DYNAMIC_NC.NAMES;
-      inputDynamicConfigValue = a_structConfig.DYNAMIC_NC.VALUES;
-      
-      configName = [inputStaticConfigName; inputDynamicConfigName];
-      
-      % retrieve mandatory configuration names for this decoder
-      [mandatoryConfigName] = get_config_param_mandatory(a_decoderId);
-
-      mandatoryList = [];
-      for idL = 1:length(mandatoryConfigName)
-         for idC = 1:length(configName)
-            if (~isempty(strfind(configName{idC}, mandatoryConfigName{idL})))
-               mandatoryList = [mandatoryList; idC];
-               if (idL < length(mandatoryConfigName))
-                  break
-               end
-            end
-         end
-      end
-      
-      configValue = inputDynamicConfigValue;
-      if (~isempty(inputStaticConfigName))
-         staticConfigValue = nan(size(inputStaticConfigName, 1), size(inputDynamicConfigValue, 2));
-         if (~isempty(inputStaticConfigValue))
-            staticConfigValue(:, 1) = str2num(char(inputStaticConfigValue));
-         end
-         configValue = cat(1, staticConfigValue, inputDynamicConfigValue);
-      end
-            
-      % create the launch configuration
-      launchConfigName = configName;
-      launchConfigValue = configValue(:, 1);
-
-      % clean AUX parameters from output Argo launch configuration
-      launchAuxConfigName = [];
-      launchAuxConfigValue = [];
-      idDel = [];
-      for idC = 1:length(launchConfigName)
-         if (strncmp(launchConfigName{idC}, 'CONFIG_AUX_', length('CONFIG_AUX_')))
-            launchAuxConfigName = [launchAuxConfigName; launchConfigName(idC)];
-            launchAuxConfigValue = [launchAuxConfigValue; launchConfigValue(idC, :)];
-            idDel = [idDel; idC];
-         end
-      end
-      launchConfigName(idDel) = [];
-      launchConfigValue(idDel, :) = [];
-      
-      nbLaunchConfigParam = length(launchConfigName);
-
-      % create the mission configuration
-      missionConfigName = configName;
-      missionConfigValue = configValue;
-      
-      if (size(configValue, 2) > 1)
-         idDel = [];
-         for idL = 1:size(missionConfigValue, 1)
-            if (sum(isnan(missionConfigValue(idL, 2:end))) == size(missionConfigValue, 2)-1)
-               idDel = [idDel; idL];
-            elseif ((length(unique(missionConfigValue(idL, 2:end))) == 1) && ...
-                  (unique(missionConfigValue(idL, 2:end)) == missionConfigValue(idL, 1)))
-               idDel = [idDel; idL];
-            end
-         end
-         idDel = setdiff(idDel, mandatoryList);
-         missionConfigName(idDel) = [];
-         missionConfigValue(idDel, :) = [];
-         % don't keep launch mission
-         missionConfigValue(:, 1) = [];
-         configMissionNumber = a_structConfig.DYNAMIC_NC.NUMBER(2:end);
-      else
-         missionConfigName = configName(mandatoryList);
-         missionConfigValue = configValue(mandatoryList, 1);
-         configMissionNumber = 1;
-      end
-            
-      % clean AUX parameters from output Argo configuration
-      missionAuxConfigName = [];
-      missionAuxConfigValue = [];
-      idDel = [];
-      for idC = 1:length(missionConfigName)
-         if (strncmp(missionConfigName{idC}, 'CONFIG_AUX_', length('CONFIG_AUX_')))
-            missionAuxConfigName = [missionAuxConfigName; missionConfigName(idC)];
-            missionAuxConfigValue = [missionAuxConfigValue; missionConfigValue(idC, :)];
-            idDel = [idDel; idC];
-         end
-      end
-      missionConfigName(idDel) = [];
-      missionConfigValue(idDel, :) = [];      
-      
-      nbConfigParam = length(missionConfigName);      
-
-      % create/update NetCDF META_AUX file
-      create_nc_meta_aux_file( ...
-         [], [], [], [], ...
-         inputAuxStaticConfigName, [], inputAuxStaticConfigValue, ...
-         launchAuxConfigName, [], launchAuxConfigValue, ...
-         missionAuxConfigName, [], missionAuxConfigValue, configMissionNumber, ...
-         metaDataAux);
-      
-      %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-   case {222, 223, 224, 225}
-      
-      % Arvor-ARN-Ice Iridium 5.47
-      % Arvor-ARN-DO-Ice Iridium 5.48
-      % Arvor-ARN-Ice RBR Iridium 5.49
-      % Provor-ARN-DO-Ice Iridium 5.76
-
-      % select Argo and Auxiliary configuration information
-      staticConfigName = a_structConfig.STATIC_NC.NAMES;
-      staticConfigValue = a_structConfig.STATIC_NC.VALUES;
-      
-      inputAuxStaticConfigName = [];
-      inputAuxStaticConfigValue = [];
-      for idC = 1:length(staticConfigName)
-         if (strncmp(staticConfigName{idC}, 'CONFIG_AUX_', length('CONFIG_AUX_')))
-            inputAuxStaticConfigName = [inputAuxStaticConfigName; staticConfigName(idC)];
-            inputAuxStaticConfigValue = [inputAuxStaticConfigValue; staticConfigValue(idC)];
-         end
-      end
-      
-      % we create the dynamic configurations including AUX parameters (they will
-      % be selected later)
-
-      % concat the input configuration information
-      inputStaticConfigName = a_structConfig.STATIC_NC.NAMES;
-      inputStaticConfigValue = a_structConfig.STATIC_NC.VALUES;
-      
-      inputDynamicConfigName = a_structConfig.DYNAMIC_NC.NAMES;
-      inputDynamicConfigValue = a_structConfig.DYNAMIC_NC.VALUES;
-      
-      configName = [inputStaticConfigName; inputDynamicConfigName];
-
-      % retrieve mandatory configuration names for this decoder
-      [mandatoryConfigName] = get_config_param_mandatory(a_decoderId);
-      
-      mandatoryList = [];
-      for idL = 1:length(mandatoryConfigName)
-         for idC = 1:length(configName)
-            if (~isempty(strfind(configName{idC}, mandatoryConfigName{idL})))
-               mandatoryList = [mandatoryList; idC];
-               if (idL < length(mandatoryConfigName))
-                  break
-               end
-            end
-         end
-      end
-      
-      configValue = inputDynamicConfigValue;
-      if (~isempty(inputStaticConfigName))
-         staticConfigValue = nan(size(inputStaticConfigName, 1), size(inputDynamicConfigValue, 2));
-         if (~isempty(inputStaticConfigValue))
-            staticConfigValue(:, 1) = str2num(char(inputStaticConfigValue));
-         end
-         configValue = cat(1, staticConfigValue, inputDynamicConfigValue);
-      end
-            
-      % create the launch configuration
-      launchConfigName = configName;
-      launchConfigValue = configValue(:, 1);
-      
-      % clean AUX parameters from output Argo launch configuration
-      launchAuxConfigName = [];
-      launchAuxConfigValue = [];
-      idDel = [];
-      for idC = 1:length(launchConfigName)
-         if (strncmp(launchConfigName{idC}, 'CONFIG_AUX_', length('CONFIG_AUX_')))
-            launchAuxConfigName = [launchAuxConfigName; launchConfigName(idC)];
-            launchAuxConfigValue = [launchAuxConfigValue; launchConfigValue(idC, :)];
-            idDel = [idDel; idC];
-         end
-      end
-      launchConfigName(idDel) = [];
-      launchConfigValue(idDel, :) = [];
-      
-      nbLaunchConfigParam = length(launchConfigName);
-
-      % create the mission configuration
-      missionConfigName = configName;
-      missionConfigValue = configValue;
-      
-      if (size(configValue, 2) > 1)
-         idDel = [];
-         for idL = 1:size(missionConfigValue, 1)
-            if (sum(isnan(missionConfigValue(idL, 2:end))) == size(missionConfigValue, 2)-1)
-               idDel = [idDel; idL];
-            elseif ((length(unique(missionConfigValue(idL, 2:end))) == 1) && ...
-                  (unique(missionConfigValue(idL, 2:end)) == missionConfigValue(idL, 1)))
-               idDel = [idDel; idL];
-            end
-         end
-         idDel = setdiff(idDel, mandatoryList);
-         missionConfigName(idDel) = [];
-         missionConfigValue(idDel, :) = [];
-         % don't keep launch mission
-         missionConfigValue(:, 1) = [];
-         configMissionNumber = a_structConfig.DYNAMIC_NC.NUMBER(2:end);
-      else
-         missionConfigName = configName(mandatoryList);
-         missionConfigValue = configValue(mandatoryList, 1);
-         configMissionNumber = 1;
-      end
-      
-      % clean AUX parameters from output Argo configuration
-      missionAuxConfigName = [];
-      missionAuxConfigValue = [];
-      idDel = [];
-      for idC = 1:length(missionConfigName)
-         if (strncmp(missionConfigName{idC}, 'CONFIG_AUX_', length('CONFIG_AUX_')))
-            missionAuxConfigName = [missionAuxConfigName; missionConfigName(idC)];
-            missionAuxConfigValue = [missionAuxConfigValue; missionConfigValue(idC, :)];
-            idDel = [idDel; idC];
-         end
-      end
-      missionConfigName(idDel) = [];
-      missionConfigValue(idDel, :) = [];      
-
-      nbConfigParam = length(missionConfigName);      
-      
-      % create/update NetCDF META_AUX file
-      create_nc_meta_aux_file( ...
-         [], [], [], [], ...
-         inputAuxStaticConfigName, [], inputAuxStaticConfigValue, ...
-         launchAuxConfigName, [], launchAuxConfigValue, ...
-         missionAuxConfigName, [], missionAuxConfigValue, configMissionNumber, ...
-         metaDataAux);
-      
-      %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-      % APEX Argos floats
-      
-   case {1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008, 1009, 1010, 1011, ...
-         1012, 1013, 1014, 1015, 1016}
+   case {1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008, 1009, 1010, 1011, 1012}
             
       % retrieve mandatory configuration names for this decoder
       [mandatoryConfigName] = get_config_param_mandatory(a_decoderId);
@@ -1495,7 +523,7 @@ switch (a_decoderId)
          [decArgoConfParamNames, ncConfParamNames] = create_config_param_names_apx_argos(a_decoderId);
          
          % create output float configuration
-         [a_structConfig] = create_output_float_config_argos(decArgoConfParamNames, ncConfParamNames, a_decoderId);
+         [a_structConfig] = create_output_float_config_argos(decArgoConfParamNames, ncConfParamNames);
       end
       
       configName = a_structConfig.NAMES;
@@ -1505,9 +533,9 @@ switch (a_decoderId)
       for idL = 1:length(mandatoryConfigName)
          for idC = 1:length(configName)
             if (~isempty(strfind(configName{idC}, mandatoryConfigName{idL})))
-               mandatoryList = [mandatoryList; idC];
+               mandatoryList = [mandatoryList idC];
                if (idL < length(mandatoryConfigName))
-                  break
+                  break;
                end
             end
          end
@@ -1543,376 +571,11 @@ switch (a_decoderId)
       end
       
       nbConfigParam = length(missionConfigName);
-      
-      %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-      % APEX Argos APF11
-      
-   case {1021, 1022}
-            
-      % AUX meta-data
-      inputStaticConfigName = a_structConfig.STATIC_NC.NAMES;
-      inputStaticConfigValue = a_structConfig.STATIC_NC.VALUES;
-
-      inputAuxMetaName = [];
-      inputAuxMetaValue = [];
-      inputAuxMetaDescription = [];
-      for idC = 1:length(inputStaticConfigName)
-         if (strncmp(inputStaticConfigName{idC}, 'META_AUX_', length('META_AUX_')))
-            inputAuxMetaName = [inputAuxMetaName; inputStaticConfigName(idC)];
-            inputAuxMetaValue = [inputAuxMetaValue; inputStaticConfigValue(idC)];
-            inputAuxMetaDescription = [inputAuxMetaDescription; ...
-               g_decArgo_outputNcConfParamDescription(find(strcmp(inputStaticConfigName(idC), g_decArgo_outputNcConfParamLabel), 1))];
-         end
-      end
-      
-      % retrieve mandatory configuration names for this decoder
-      [mandatoryConfigName] = get_config_param_mandatory(a_decoderId);
-      
-      % if no data has been received create the configuration at launch
-      if (isempty(a_structConfig.NAMES))
-         
-         % create and initialize the launch configuration
-         create_float_config_apx_argos([], a_decoderId);
-         
-         % create the configuration parameter names for the META NetCDF file
-         [decArgoConfParamNames, ncConfParamNames] = create_config_param_names_apx_argos(a_decoderId);
-         
-         % create output float configuration
-         [a_structConfig] = create_output_float_config_argos(decArgoConfParamNames, ncConfParamNames, a_decoderId);
-      end
-      
-      configName = a_structConfig.NAMES;
-      configValue = a_structConfig.VALUES;
-      
-      mandatoryList = [];
-      for idL = 1:length(mandatoryConfigName)
-         for idC = 1:length(configName)
-            if (~isempty(strfind(configName{idC}, mandatoryConfigName{idL})))
-               mandatoryList = [mandatoryList; idC];
-               if (idL < length(mandatoryConfigName))
-                  break
-               end
-            end
-         end
-      end
-      
-      % select Auxiliary configuration information
-      inputAuxConfigName = [];
-      inputAuxConfigValue = [];
-      for idC = 1:length(configName)
-         if (strncmp(configName{idC}, 'CONFIG_AUX_', length('CONFIG_AUX_')))
-            inputAuxConfigName = [inputAuxConfigName; configName(idC)];
-            inputAuxConfigValue = [inputAuxConfigValue; configValue(idC)];
-         end
-      end      
-      
-      % create the launch configuration
-      launchConfigName = configName;
-      launchConfigValue = configValue(:, 1);
-      
-      % clean AUX parameters from output Argo launch configuration
-      launchAuxConfigName = [];
-%       launchAuxConfigId = [];
-      launchAuxConfigValue = [];
-      idDel = [];
-      for idC = 1:length(launchConfigName)
-         if (strncmp(launchConfigName{idC}, 'CONFIG_AUX_', length('CONFIG_AUX_')))
-            launchAuxConfigName = [launchAuxConfigName; launchConfigName(idC)];
-%             launchAuxConfigId = [launchAuxConfigId; launchConfigId(idC)];
-            launchAuxConfigValue = [launchAuxConfigValue; launchConfigValue(idC, :)];
-            idDel = [idDel; idC];
-         end
-      end
-      launchConfigName(idDel) = [];
-%       launchConfigId(idDel) = [];
-      launchConfigValue(idDel, :) = [];
-      
-      nbLaunchConfigParam = length(launchConfigName);
-
-      % create the mission configuration
-      missionConfigName = configName;
-      missionConfigValue = configValue;
-      
-      if (size(configValue, 2) > 1)
-         idDel = [];
-         for idL = 1:size(missionConfigValue, 1)
-            if (sum(isnan(missionConfigValue(idL, 2:end))) == size(missionConfigValue, 2)-1)
-               idDel = [idDel; idL];
-            elseif ((length(unique(missionConfigValue(idL, 2:end))) == 1) && ...
-                  (unique(missionConfigValue(idL, 2:end)) == missionConfigValue(idL, 1)))
-               idDel = [idDel; idL];
-            end
-         end
-         idDel = setdiff(idDel, mandatoryList);
-         missionConfigName(idDel) = [];
-         missionConfigValue(idDel, :) = [];
-         configMissionNumber = a_structConfig.NUMBER(2:end);
-      else
-         missionConfigName = configName(mandatoryList);
-         missionConfigValue = configValue(mandatoryList, 1);
-         configMissionNumber = 1;
-      end
-      
-      % clean AUX parameters from output Argo configuration
-      missionAuxConfigName = [];
-      missionAuxConfigValue = [];
-      idDel = [];
-      for idC = 1:length(missionConfigName)
-         if (strncmp(missionConfigName{idC}, 'CONFIG_AUX_', length('CONFIG_AUX_')))
-            missionAuxConfigName = [missionAuxConfigName; missionConfigName(idC)];
-            missionAuxConfigValue = [missionAuxConfigValue; missionConfigValue(idC, :)];
-            idDel = [idDel; idC];
-         end
-      end
-      missionConfigName(idDel) = [];
-      missionConfigValue(idDel, :) = [];
-      
-      nbConfigParam = length(missionConfigName);      
-      
-      % create/update NetCDF META_AUX file
-      create_nc_meta_aux_file( ...
-         inputAuxMetaName, [], inputAuxMetaValue, inputAuxMetaDescription, ...
-         [], [], [], ...
-         launchAuxConfigName, [], launchAuxConfigValue, ...
-         missionAuxConfigName, [], missionAuxConfigValue, configMissionNumber, ...
-         metaDataAux);
-      
-      %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-      % APEX APF11 Iridium
-      
-   case {1121, 1122, 1123, 1124, 1125, 1126, 1127, 1128, 1321, 1322, 1323}
-                  
-      % retrieve mandatory configuration names for this decoder
-      mandatoryConfigName = get_config_param_mandatory(a_decoderId);
-            
-      configName = a_structConfig.NAMES;
-      configId = a_structConfig.IDS;
-      configValue = a_structConfig.VALUES;
-      
-      mandatoryList = [];
-      for idL = 1:length(mandatoryConfigName)
-         for idC = 1:length(configName)
-            if (~isempty(strfind(configName{idC}, mandatoryConfigName{idL})))
-               mandatoryList = [mandatoryList; idC];
-               if (idL < length(mandatoryConfigName))
-                  break
-               end
-            end
-         end
-      end
-      
-      % select Auxiliary configuration information
-      inputAuxConfigName = [];
-      inputAuxConfigId = [];
-      inputAuxConfigValue = [];
-      for idC = 1:length(configName)
-         if (strncmp(configName{idC}, 'CONFIG_AUX_', length('CONFIG_AUX_')))
-            inputAuxConfigName = [inputAuxConfigName; configName(idC)];
-            inputAuxConfigId = [inputAuxConfigId; configId(idC)];
-            inputAuxConfigValue = [inputAuxConfigValue; configValue(idC)];
-         end
-      end      
-      
-      % create the launch configuration
-      launchConfigName = configName;
-      launchConfigId = configId;
-      launchConfigValue = configValue(:, 1);
-      
-      % clean AUX parameters from output Argo launch configuration
-      launchAuxConfigName = [];
-      launchAuxConfigId = [];
-      launchAuxConfigValue = [];
-      idDel = [];
-      for idC = 1:length(launchConfigName)
-         if (strncmp(launchConfigName{idC}, 'CONFIG_AUX_', length('CONFIG_AUX_')))
-            launchAuxConfigName = [launchAuxConfigName; launchConfigName(idC)];
-            launchAuxConfigId = [launchAuxConfigId; launchConfigId(idC)];
-            launchAuxConfigValue = [launchAuxConfigValue; launchConfigValue(idC, :)];
-            idDel = [idDel; idC];
-         end
-      end
-      launchConfigName(idDel) = [];
-      launchConfigId(idDel) = [];
-      launchConfigValue(idDel, :) = [];
-      
-      nbLaunchConfigParam = length(launchConfigName);
-
-      % create the mission configuration
-      missionConfigName = configName;
-      missionConfigId = configId;
-      missionConfigValue = configValue;
-      
-      if (size(configValue, 2) > 1)
-         idDel = [];
-         for idL = 1:size(missionConfigValue, 1)
-            if (sum(isnan(missionConfigValue(idL, 2:end))) == size(missionConfigValue, 2)-1)
-               idDel = [idDel; idL];
-            elseif ((length(unique(missionConfigValue(idL, 2:end))) == 1) && ...
-                  (unique(missionConfigValue(idL, 2:end)) == missionConfigValue(idL, 1)))
-               idDel = [idDel; idL];
-            end
-         end
-         idDel = setdiff(idDel, mandatoryList);
-         missionConfigName(idDel) = [];
-         missionConfigId(idDel) = [];
-         missionConfigValue(idDel, :) = [];
-         % don't keep launch mission
-         missionConfigValue(:, 1) = [];
-         configMissionNumber = a_structConfig.NUMBER(2:end);
-      else
-         missionConfigName = configName(mandatoryList);
-         missionConfigId = configId(mandatoryList);
-         missionConfigValue = configValue(mandatoryList, 1);
-         configMissionNumber = 1;
-      end
-      
-      % clean AUX parameters from output Argo configuration
-      missionAuxConfigName = [];
-      missionAuxConfigId = [];
-      missionAuxConfigValue = [];
-      idDel = [];
-      for idC = 1:length(missionConfigName)
-         if (strncmp(missionConfigName{idC}, 'CONFIG_AUX_', length('CONFIG_AUX_')))
-            missionAuxConfigName = [missionAuxConfigName; missionConfigName(idC)];
-            missionAuxConfigId = [missionAuxConfigId; missionConfigId(idC)];
-            missionAuxConfigValue = [missionAuxConfigValue; missionConfigValue(idC, :)];
-            idDel = [idDel; idC];
-         end
-      end
-      missionConfigName(idDel) = [];
-      missionConfigId(idDel) = [];
-      missionConfigValue(idDel, :) = [];
-      
-      % clean piston configuration parameters from output Argo configuration
-      configNameToRemove = [{'CONFIG_PistonPark_COUNT'} {'CONFIG_PistonProfile_COUNT'}];
-      idDel = [];
-      for idC = 1:length(missionConfigName)
-         if (~isempty(find(strcmp(missionConfigName{idC}, configNameToRemove) == 1, 1)))
-            idDel = [idDel; idC];
-         end
-      end
-      missionConfigName(idDel) = [];
-      missionConfigId(idDel) = [];
-      missionConfigValue(idDel, :) = [];
-      
-      nbConfigParam = length(missionConfigName);      
-      
-      % create/update NetCDF META_AUX file
-         create_nc_meta_aux_file( ...
-         [], [], [], [], ...
-         [], [], [], ...
-         launchAuxConfigName, launchAuxConfigId, launchAuxConfigValue, ...
-         missionAuxConfigName, missionAuxConfigId, missionAuxConfigValue, configMissionNumber, ...
-         metaDataAux);
-      
-      %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-      % APEX Iridium Rudics & Navis floats
-      
-   case {1101, 1102, 1103, 1104, 1105, 1106, 1107, 1108, 1109, 1110, 1111, 1112, 1113, 1114, ...
-         1201, 1314}
-            
-      % retrieve mandatory configuration names for this decoder
-      [mandatoryConfigName] = get_config_param_mandatory(a_decoderId);
-      
-      configName = a_structConfig.NAMES;
-      configValue = a_structConfig.VALUES;
-      
-      mandatoryList = [];
-      for idL = 1:length(mandatoryConfigName)
-         for idC = 1:length(configName)
-            if (~isempty(strfind(configName{idC}, mandatoryConfigName{idL})))
-               mandatoryList = [mandatoryList; idC];
-               if (idL < length(mandatoryConfigName))
-                  break
-               end
-            end
-         end
-      end
-      
-      % select Auxiliary configuration information
-      inputAuxConfigName = [];
-      inputAuxConfigValue = [];
-      for idC = 1:length(configName)
-         if (strncmp(configName{idC}, 'CONFIG_AUX_', length('CONFIG_AUX_')))
-            inputAuxConfigName = [inputAuxConfigName; configName(idC)];
-            inputAuxConfigValue = [inputAuxConfigValue; configValue(idC)];
-         end
-      end      
-      
-      % create the launch configuration
-      launchConfigName = configName;
-      launchConfigValue = configValue(:, 1);
-      
-      % clean AUX parameters from output Argo launch configuration
-      launchAuxConfigName = [];
-      launchAuxConfigValue = [];
-      idDel = [];
-      for idC = 1:length(launchConfigName)
-         if (strncmp(launchConfigName{idC}, 'CONFIG_AUX_', length('CONFIG_AUX_')))
-            launchAuxConfigName = [launchAuxConfigName; launchConfigName(idC)];
-            launchAuxConfigValue = [launchAuxConfigValue; launchConfigValue(idC, :)];
-            idDel = [idDel; idC];
-         end
-      end
-      launchConfigName(idDel) = [];
-      launchConfigValue(idDel, :) = [];
-      
-      nbLaunchConfigParam = length(launchConfigName);
-      
-      % create the mission configuration
-      missionConfigName = configName;
-      missionConfigValue = configValue;
-      
-      if (size(configValue, 2) > 1)
-         idDel = [];
-         for idL = 1:size(missionConfigValue, 1)
-            if (sum(isnan(missionConfigValue(idL, 2:end))) == size(missionConfigValue, 2)-1)
-               idDel = [idDel; idL];
-            elseif ((length(unique(missionConfigValue(idL, 2:end))) == 1) && ...
-                  (unique(missionConfigValue(idL, 2:end)) == missionConfigValue(idL, 1)))
-               idDel = [idDel; idL];
-            end
-         end
-         idDel = setdiff(idDel, mandatoryList);
-         missionConfigName(idDel) = [];
-         missionConfigValue(idDel, :) = [];
-         % don't keep launch mission
-         missionConfigValue(:, 1) = [];
-         configMissionNumber = a_structConfig.NUMBER(2:end);
-      else
-         missionConfigName = configName(mandatoryList);
-         missionConfigValue = configValue(mandatoryList, 1);
-         configMissionNumber = 1;
-      end
-      
-      % clean AUX parameters from output Argo configuration
-      missionAuxConfigName = [];
-      missionAuxConfigValue = [];
-      idDel = [];
-      for idC = 1:length(missionConfigName)
-         if (strncmp(missionConfigName{idC}, 'CONFIG_AUX_', length('CONFIG_AUX_')))
-            missionAuxConfigName = [missionAuxConfigName; missionConfigName(idC)];
-            missionAuxConfigValue = [missionAuxConfigValue; missionConfigValue(idC, :)];
-            idDel = [idDel; idC];
-         end
-      end
-      missionConfigName(idDel) = [];
-      missionConfigValue(idDel, :) = [];
-      
-      nbConfigParam = length(missionConfigName);  
-      
-      % create/update NetCDF META_AUX file
-      create_nc_meta_aux_file( ...
-         [], [], [], [], ...
-         [], [], [], ...
-         launchAuxConfigName, [], launchAuxConfigValue, ...
-         missionAuxConfigName, [], missionAuxConfigValue, configMissionNumber, ...
-         metaDataAux);
       
       %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
       % NOVA, DOVA floats
 
-   case {2001, 2002, 2003} % Nova, Dova
+   case {2001, 2002} % Nova, Dova
       
       % retrieve mandatory configuration names for this decoder
       [mandatoryConfigName] = get_config_param_mandatory(a_decoderId);
@@ -1943,9 +606,9 @@ switch (a_decoderId)
       for idL = 1:length(mandatoryConfigName)
          for idC = 1:length(configName)
             if (~isempty(strfind(configName{idC}, mandatoryConfigName{idL})))
-               mandatoryList = [mandatoryList; idC];
+               mandatoryList = [mandatoryList idC];
                if (idL < length(mandatoryConfigName))
-                  break
+                  break;
                end
             end
          end
@@ -1992,107 +655,6 @@ switch (a_decoderId)
       
       nbConfigParam = length(missionConfigName);      
 
-      %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-      % NEMO floats
-      
-   case {3001}
-            
-      % retrieve mandatory configuration names for this decoder
-      [mandatoryConfigName] = get_config_param_mandatory(a_decoderId);
-      
-      configName = a_structConfig.NAMES;
-      configValue = a_structConfig.VALUES;
-      
-      mandatoryList = [];
-      for idL = 1:length(mandatoryConfigName)
-         for idC = 1:length(configName)
-            if (~isempty(strfind(configName{idC}, mandatoryConfigName{idL})))
-               mandatoryList = [mandatoryList; idC];
-               if (idL < length(mandatoryConfigName))
-                  break
-               end
-            end
-         end
-      end
-      
-      % select Auxiliary configuration information
-      inputAuxConfigName = [];
-      inputAuxConfigValue = [];
-      for idC = 1:length(configName)
-         if (strncmp(configName{idC}, 'CONFIG_AUX_', length('CONFIG_AUX_')))
-            inputAuxConfigName = [inputAuxConfigName; configName(idC)];
-            inputAuxConfigValue = [inputAuxConfigValue; configValue(idC)];
-         end
-      end      
-      
-      % create the launch configuration
-      launchConfigName = configName;
-      launchConfigValue = configValue(:, 1);
-      
-      % clean AUX parameters from output Argo launch configuration
-      launchAuxConfigName = [];
-      launchAuxConfigValue = [];
-      idDel = [];
-      for idC = 1:length(launchConfigName)
-         if (strncmp(launchConfigName{idC}, 'CONFIG_AUX_', length('CONFIG_AUX_')))
-            launchAuxConfigName = [launchAuxConfigName; launchConfigName(idC)];
-            launchAuxConfigValue = [launchAuxConfigValue; launchConfigValue(idC, :)];
-            idDel = [idDel; idC];
-         end
-      end
-      launchConfigName(idDel) = [];
-      launchConfigValue(idDel, :) = [];
-      
-      nbLaunchConfigParam = length(launchConfigName);
-      
-      % create the mission configuration
-      missionConfigName = configName;
-      missionConfigValue = configValue;
-      
-      if (size(configValue, 2) > 1)
-         idDel = [];
-         for idL = 1:size(missionConfigValue, 1)
-            if (sum(isnan(missionConfigValue(idL, 2:end))) == size(missionConfigValue, 2)-1)
-               idDel = [idDel; idL];
-            elseif ((length(unique(missionConfigValue(idL, 2:end))) == 1) && ...
-                  (unique(missionConfigValue(idL, 2:end)) == missionConfigValue(idL, 1)))
-               idDel = [idDel; idL];
-            end
-         end
-         idDel = setdiff(idDel, mandatoryList);
-         missionConfigName(idDel) = [];
-         missionConfigValue(idDel, :) = [];
-         configMissionNumber = a_structConfig.NUMBER;
-      else
-         missionConfigName = configName(mandatoryList);
-         missionConfigValue = configValue(mandatoryList, 1);
-         configMissionNumber = 1;
-      end
-      
-      % clean AUX parameters from output Argo configuration
-      missionAuxConfigName = [];
-      missionAuxConfigValue = [];
-      idDel = [];
-      for idC = 1:length(missionConfigName)
-         if (strncmp(missionConfigName{idC}, 'CONFIG_AUX_', length('CONFIG_AUX_')))
-            missionAuxConfigName = [missionAuxConfigName; missionConfigName(idC)];
-            missionAuxConfigValue = [missionAuxConfigValue; missionConfigValue(idC, :)];
-            idDel = [idDel; idC];
-         end
-      end
-      missionConfigName(idDel) = [];
-      missionConfigValue(idDel, :) = [];
-      
-      nbConfigParam = length(missionConfigName);  
-      
-      % create/update NetCDF META_AUX file
-      create_nc_meta_aux_file( ...
-         [], [], [], [], ...
-         [], [], [], ...
-         launchAuxConfigName, [], launchAuxConfigValue, ...
-         missionAuxConfigName, [], missionAuxConfigValue, configMissionNumber, ...
-         metaDataAux);
-      
    otherwise
       fprintf('WARNING: Float #%d: Nothing done yet in launch and mission configurations processing for decoderId #%d\n', ...
          g_decArgo_floatNum, ...
@@ -2151,7 +713,7 @@ currentDate = datestr(now_utc, 'yyyymmddHHMMSS');
 fCdf = netcdf.create(ncPathFileName, 'NC_CLOBBER');
 if (isempty(fCdf))
    fprintf('ERROR: Unable to create NetCDF output file: %s\n', ncPathFileName);
-   return
+   return;
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -2210,6 +772,7 @@ if (VERBOSE_MODE == 2)
    fprintf('N_SENSOR = %d\n', nbSensor);
    fprintf('N_CONFIG_PARAM = %d\n', nbConfigParam);
    fprintf('N_LAUNCH_CONFIG_PARAM = %d\n', nbLaunchConfigParam);
+   fprintf('N_MISSIONS = %d\n', nbMission);
    fprintf('N_POSITIONING_SYSTEM = %d\n', nbPositioningSystem);
    fprintf('N_TRANS_SYSTEM = %d\n', length(nbTransSystem));
 end
@@ -2222,7 +785,7 @@ institution = 'CORIOLIS';
 inputElt = getfield(metaData, 'DATA_CENTRE');
 if (~isempty(inputElt))
    dataCentre = getfield(metaData, 'DATA_CENTRE');
-   [institution] = get_institution_from_data_centre(dataCentre, 1);
+   [institution] = get_institution_from_data_centre(dataCentre);
 end
 netcdf.putAtt(fCdf, globalVarId, 'institution', institution);
 netcdf.putAtt(fCdf, globalVarId, 'source', 'Argo float');
@@ -2237,7 +800,6 @@ netcdf.putAtt(fCdf, globalVarId, 'history', globalHistoryText);
 netcdf.putAtt(fCdf, globalVarId, 'references', 'http://www.argodatamgt.org/Documentation');
 netcdf.putAtt(fCdf, globalVarId, 'user_manual_version', '3.1');
 netcdf.putAtt(fCdf, globalVarId, 'Conventions', 'Argo-3.1 CF-1.6');
-netcdf.putAtt(fCdf, globalVarId, 'decoder_version', sprintf('CODA_%s', g_decArgo_decoderVersion));
 
 % general information on the meta-data file
 dataTypeVarId = netcdf.defVar(fCdf, 'DATA_TYPE', 'NC_CHAR', string16DimId);
@@ -2701,7 +1263,7 @@ for idField = 1:length(metaFieldNames)
    % corresponding nc varId
    idMeta = find(strcmp(floatNcVarName, fieldName) == 1);
    if (isempty(idMeta))
-      continue
+      continue;
    end
    
    % CONFIG_* information have been used in the configuration processing
@@ -2710,7 +1272,7 @@ for idField = 1:length(metaFieldNames)
          (strcmp(fieldName, 'CONFIG_PARAMETER_VALUE') == 1) || ...
          (strcmp(fieldName, 'CONFIG_MISSION_NUMBER') == 1) || ...
          (strcmp(fieldName, 'CONFIG_MISSION_COMMENT') == 1))
-      continue
+      continue;
    end
    
    % TEMPORARY START
@@ -2727,7 +1289,7 @@ for idField = 1:length(metaFieldNames)
    %          for id = nbSensor+1:length(fNames)
    %             metaData.(fieldName) = rmfield(metaData.(fieldName), fNames{id});
    %          end
-   %          fprintf('INFO: %s file generation: too many fields for the %s structure in the Json meta-data file - considering only the %d first ones\n', ...
+   %          fprintf('INFO: %s file generation: too many fields for the %s structure in the Json meta-data file => considering only the %d first ones\n', ...
    %             ncFileName, fieldName, nbSensor);
    %       end
    %    end
@@ -2740,14 +1302,14 @@ for idField = 1:length(metaFieldNames)
    %          for id = nbParam+1:length(fNames)
    %             metaData.(fieldName) = rmfield(metaData.(fieldName), fNames{id});
    %          end
-   %          fprintf('INFO: %s file generation: too many fields for the %s structure in the Json meta-data file - considering only the %d first ones\n', ...
+   %          fprintf('INFO: %s file generation: too many fields for the %s structure in the Json meta-data file => considering only the %d first ones\n', ...
    %             ncFileName, fieldName, nbParam);
    %       end
    %    end
    % TEMPORARY END
    
    % field values are to be stored in the nc META file
-   inputElt = metaData.(fieldName);
+   inputElt = getfield(metaData, fieldName);
    if (~isempty(inputElt))
       
       if (isa(inputElt, 'char'))
@@ -2759,14 +1321,8 @@ for idField = 1:length(metaFieldNames)
                (strcmp(fieldName, 'END_MISSION_DATE') == 1))
             
             % format dates according to convention
-            if (length(inputElt) == 14)
-               % input format is 'yyyymmddHHMMSS'
-               netcdf.putVar(fCdf, floatNcVarId(idMeta), inputElt);
-            else
-               % input format is 'dd/mm/yyyy HH:MM:SS'
-               netcdf.putVar(fCdf, floatNcVarId(idMeta), ...
-                  datestr(datenum(inputElt, 'dd/mm/yyyy HH:MM:SS'), 'yyyymmddHHMMSS'));
-            end
+            netcdf.putVar(fCdf, floatNcVarId(idMeta), ...
+               datestr(datenum(inputElt, 'dd/mm/yyyy HH:MM'), 'yyyymmddHHMMSS'));
             
          elseif ((strcmp(fieldName, 'LAUNCH_LATITUDE') == 1) || ...
                (strcmp(fieldName, 'LAUNCH_LONGITUDE') == 1))
@@ -2791,7 +1347,7 @@ for idField = 1:length(metaFieldNames)
          % meta-data with one dimension
          fieldNames = fieldnames(inputElt);
          for id = 1:length(fieldNames)
-            valueStr = inputElt.(fieldNames{id});
+            valueStr = getfield(inputElt, fieldNames{id});
             if (~isempty(valueStr))
                [varName, xType, dimIds, nAtts] = netcdf.inqVar(fCdf, floatNcVarId(idMeta));
                if (xType == netcdf.getConstant('NC_CHAR'))
@@ -2819,7 +1375,7 @@ for idField = 1:length(metaFieldNames)
          %             inputSubElt = inputElt{id1};
          %             fieldNames = fieldnames(inputSubElt);
          %             for id2 = 1:length(fieldNames)
-         %                valueStr = inputSubElt.(fieldNames{id2});
+         %                valueStr = getfield(inputSubElt, fieldNames{id2});
          %                if (~isempty(valueStr))
          %                   % we only manage values of type double because only
          %                   % CONFIG_PARAMETER_VALUE variable has two dimensions
@@ -2876,4 +1432,4 @@ end
 
 fprintf('... NetCDF META-DATA file created\n');
 
-return
+return;
